@@ -602,6 +602,26 @@ main{
   }
 }
 
+
+.media-preview-wrap{margin-top:12px;display:none}
+.media-preview-wrap.show{display:block}
+.media-preview{
+  border-radius:16px;overflow:hidden;border:1px solid var(--glass-border);
+  background:rgba(255,255,255,.5);box-shadow:var(--shadow-sm)
+}
+.media-preview img{width:100%;max-height:360px;object-fit:cover;display:block}
+.media-preview audio{width:100%;display:block;padding:12px}
+.media-preview-head{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:1px solid var(--line)}
+.media-preview-head strong{font-size:12px}
+.remove-media{border:0;background:rgba(255,255,255,.65);border-radius:9px;padding:6px 9px;font-weight:800;color:#7a4050}
+.upload-progress{display:none;margin-top:10px}
+.upload-progress.show{display:block}
+.progress-track{height:8px;background:rgba(255,255,255,.56);border-radius:999px;overflow:hidden;border:1px solid rgba(255,255,255,.72)}
+.progress-bar{height:100%;width:0;background:linear-gradient(90deg,var(--purple),var(--cyan));transition:width .15s}
+.progress-text{margin-top:6px;color:var(--muted);font-size:11px}
+.post-image{width:100%;display:block;max-height:520px;object-fit:cover;border-radius:17px;margin-top:12px}
+.post-audio{width:100%;margin-top:12px}
+
 </style>
 </head>
 <body>
@@ -677,11 +697,23 @@ main{
           <div class="composer-line"><div class="avatar" id="composerAvatar">N</div><textarea id="postText" placeholder="Comparte algo que pueda aportar a otros..."></textarea></div>
           <div class="composer-foot">
             <div class="tools">
-              <button class="tool"><svg class="icon icon-sm" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9" r="1.5"/><path d="m21 15-5-5L5 20"/></svg>Foto</button>
-              <button class="tool"><svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M9 18V5l10-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="16" cy="16" r="3"/></svg>Audio</button>
+              <input type="file" id="photoInput" accept="image/*" hidden>
+              <input type="file" id="audioInput" accept="audio/*" hidden>
+              <button class="tool" id="photoBtn"><svg class="icon icon-sm" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9" r="1.5"/><path d="m21 15-5-5L5 20"/></svg>Foto</button>
+              <button class="tool" id="audioBtn"><svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M9 18V5l10-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="16" cy="16" r="3"/></svg>Audio</button>
               <button class="tool"><svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M4 19h16"/><path d="M7 16V8"/><path d="M12 16V5"/><path d="M17 16v-4"/></svg>Encuesta</button>
             </div>
             <button class="publish" id="publishBtn">Publicar</button>
+          </div>
+          <div class="media-preview-wrap" id="mediaPreviewWrap">
+            <div class="media-preview">
+              <div class="media-preview-head"><strong id="mediaPreviewName">Archivo</strong><button class="remove-media" id="removeMedia">Quitar</button></div>
+              <div id="mediaPreviewContent"></div>
+            </div>
+          </div>
+          <div class="upload-progress" id="uploadProgress">
+            <div class="progress-track"><div class="progress-bar" id="progressBar"></div></div>
+            <div class="progress-text" id="progressText">Preparando archivo...</div>
           </div>
         </div>
 
@@ -749,6 +781,7 @@ main{
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, updateProfile, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
 import { getFirestore, collection, doc, setDoc, addDoc, updateDoc, getDoc, onSnapshot, query, orderBy, serverTimestamp, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
+import { getStorage, ref as storageRef, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-storage.js";
 
 /* ============================================================
    FIREBASE — PEGA AQUÍ LA CONFIGURACIÓN DE TU APP WEB
@@ -765,13 +798,14 @@ const firebaseConfig = {
 };
 
 const FIREBASE_READY = !Object.values(firebaseConfig).some(v => String(v).startsWith("PEGAR_"));
-let app=null, auth=null, db=null, unsubscribePosts=null;
+let app=null, auth=null, db=null, storage=null, unsubscribePosts=null;
 
 let googleProvider=null;
 if(FIREBASE_READY){
   app=initializeApp(firebaseConfig);
   auth=getAuth(app);
   db=getFirestore(app);
+  storage=getStorage(app);
   googleProvider=new GoogleAuthProvider();
   googleProvider.setCustomParameters({ prompt: "select_account" });
 }
@@ -796,7 +830,8 @@ let state={
   profile:JSON.parse(localStorage.getItem("nuvia_profile")||"null")||{name:"Santiago",user:"@santiago",bio:"Explorando ideas, comunidades y contenido que aporta."},
   posts:JSON.parse(localStorage.getItem("nuvia_posts_v4")||"null")||demoPosts,
   joined:JSON.parse(localStorage.getItem("nuvia_joined_v4")||"[]"),
-  activePost:null
+  activePost:null,
+  selectedMedia:null
 };
 
 function toast(t){const e=$("#toast");e.textContent=t;e.classList.add("show");clearTimeout(window.__t);window.__t=setTimeout(()=>e.classList.remove("show"),1700)}
@@ -973,7 +1008,7 @@ function postHTML(p){
  return `<article class="card post" data-id="${esc(p.id)}">
    <div class="post-head"><div class="avatar">${esc(p.initial||((p.author||"N")[0]))}</div><div class="post-user"><strong>${esc(p.author||"Usuario")}</strong><small>${esc(p.user||"@usuario")} · ${p.createdAt?.toDate?"ahora":"hace poco"}</small><div class="community-tag">${esc(p.community||"Comunidad general")}</div></div><button class="post-menu">···</button></div>
    <div class="post-text">${esc(p.text).replace(/\n/g,"<br>")}</div>
-   ${p.media?`<div class="post-media"><div><h3>Descubrir también es mirar distinto.</h3><p>El contenido útil puede encontrar a personas nuevas.</p></div></div>`:""}
+   ${p.mediaType==="image" && p.mediaURL ? `<img class="post-image" src="${esc(p.mediaURL)}" alt="Imagen publicada en Nuvia">` : ""}${p.mediaType==="audio" && p.mediaURL ? `<audio class="post-audio" controls src="${esc(p.mediaURL)}"></audio>` : ""}${p.media && !p.mediaURL ? `<div class="post-media"><div><h3>Descubrir también es mirar distinto.</h3><p>El contenido útil puede encontrar a personas nuevas.</p></div></div>` : ""}
    <div class="post-meta"><span>♡ ${p.likes||0}</span><span>💡 ${p.value||0} Me aportó</span><span>🤝 ${p.help||0} Me ayudó</span><span>◌ ${comments.length} comentarios</span></div>
    <div class="post-actions"><button class="reaction" data-r="likes">♡ Me gusta</button><button class="reaction" data-r="value">💡 Me aportó</button><button class="reaction" data-r="help">🤝 Me ayudó</button></div>
    <button class="comment-btn">Ver comentarios</button>
@@ -997,11 +1032,120 @@ async function react(id,key){
  else{p[key]=(p[key]||0)+1;saveLocal();renderFeed();}
  toast(key==="likes"?"Te gusta":key==="value"?"Marcado como aporte":"Marcado como útil");
 }
+
+function clearSelectedMedia(){
+  state.selectedMedia=null;
+  $("#photoInput").value="";
+  $("#audioInput").value="";
+  $("#mediaPreviewWrap").classList.remove("show");
+  $("#mediaPreviewContent").innerHTML="";
+  $("#uploadProgress").classList.remove("show");
+  $("#progressBar").style.width="0%";
+  $("#progressText").textContent="";
+}
+
+function previewMedia(file,type){
+  if(!file)return;
+  state.selectedMedia={file,type};
+  $("#mediaPreviewName").textContent=file.name;
+  const url=URL.createObjectURL(file);
+  $("#mediaPreviewContent").innerHTML=type==="image"
+    ? `<img src="${url}" alt="Vista previa">`
+    : `<audio controls src="${url}"></audio>`;
+  $("#mediaPreviewWrap").classList.add("show");
+}
+
+$("#photoBtn").onclick=()=>$("#photoInput").click();
+$("#audioBtn").onclick=()=>$("#audioInput").click();
+$("#photoInput").addEventListener("change",e=>{
+  const file=e.target.files?.[0];
+  if(!file)return;
+  if(file.size>15*1024*1024){toast("La imagen supera el límite de 15 MB.");e.target.value="";return;}
+  previewMedia(file,"image");
+});
+$("#audioInput").addEventListener("change",e=>{
+  const file=e.target.files?.[0];
+  if(!file)return;
+  if(file.size>15*1024*1024){toast("El audio supera el límite de 15 MB.");e.target.value="";return;}
+  previewMedia(file,"audio");
+});
+$("#removeMedia").onclick=clearSelectedMedia;
+
+async function uploadSelectedMedia(){
+  if(!state.selectedMedia)return {mediaURL:"",mediaType:""};
+  if(!FIREBASE_READY || !state.user) throw new Error("Debes iniciar sesión para subir archivos.");
+
+  const {file,type}=state.selectedMedia;
+  const ext=file.name.includes(".")?file.name.split(".").pop():"bin";
+  const safeName=(file.name||"archivo").replace(/[^a-z0-9._-]/gi,"_");
+  const path=`users/${state.user.uid}/posts/${Date.now()}_${safeName}`;
+  const ref=storageRef(storage,path);
+  const task=uploadBytesResumable(ref,file,{contentType:file.type});
+
+  $("#uploadProgress").classList.add("show");
+
+  return await new Promise((resolve,reject)=>{
+    task.on("state_changed",
+      snap=>{
+        const pct=Math.round((snap.bytesTransferred/snap.totalBytes)*100);
+        $("#progressBar").style.width=pct+"%";
+        $("#progressText").textContent=`Subiendo ${pct}%`;
+      },
+      reject,
+      async()=>{
+        const mediaURL=await getDownloadURL(task.snapshot.ref);
+        resolve({mediaURL,mediaType:type,storagePath:path});
+      }
+    );
+  });
+}
+
 async function publish(){
- const text=$("#postText").value.trim();if(!text)return toast("Escribe algo antes de publicar.");
- const data={text,author:state.profile.name,user:state.profile.user,initial:initial(),community:state.joined[0]||"Comunidad general",likes:0,value:0,help:0,comments:[],authorId:state.user?.uid||"demo",createdAt:FIREBASE_READY?serverTimestamp():Date.now()};
- if(FIREBASE_READY)await addDoc(collection(db,"posts"),data);else{state.posts.unshift({id:"p"+Date.now(),...data,mine:true});saveLocal();renderFeed();}
- $("#postText").value="";toast("Publicación creada");
+ const text=$("#postText").value.trim();
+ if(!text && !state.selectedMedia)return toast("Escribe algo o añade una foto/audio.");
+
+ try{
+   $("#publishBtn").disabled=true;
+   $("#publishBtn").textContent="Publicando...";
+
+   let mediaData={mediaURL:"",mediaType:"",storagePath:""};
+   if(state.selectedMedia){
+     mediaData=await uploadSelectedMedia();
+   }
+
+   const data={
+     text,
+     author:state.profile.name,
+     user:state.profile.user,
+     initial:initial(),
+     community:state.joined[0]||"Comunidad general",
+     likes:0,
+     value:0,
+     help:0,
+     comments:[],
+     authorId:state.user?.uid||"demo",
+     createdAt:FIREBASE_READY?serverTimestamp():Date.now(),
+     ...mediaData
+   };
+
+   if(FIREBASE_READY){
+     await addDoc(collection(db,"posts"),data);
+   }else{
+     state.posts.unshift({id:"p"+Date.now(),...data,mine:true});
+     saveLocal();
+     renderFeed();
+   }
+
+   $("#postText").value="";
+   clearSelectedMedia();
+   toast("Publicación creada");
+ }catch(err){
+   console.error("publish error",err);
+   toast("No se pudo publicar: "+(err?.message||"error"));
+ }finally{
+   $("#publishBtn").disabled=false;
+   $("#publishBtn").textContent="Publicar";
+ }
 }
 $("#publishBtn").onclick=publish;
 
