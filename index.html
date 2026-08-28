@@ -481,7 +481,7 @@ body:after{
         <span class="google-g">G</span>
         Continuar con Google
       </button>
-      <div class="auth-note" id="authModeNote">Si Firebase aún no está configurado, Nuvia abrirá en modo demo local.</div>
+      <div class="auth-note" id="authModeNote">Si ocurre un problema de acceso, Nuvia mostrará aquí el detalle.</div><div id="authDiagnostic" style="display:none;margin-top:12px;padding:10px 12px;border-radius:12px;background:#fff3f5;border:1px solid #ffd4dc;color:#8f2940;font-size:12px;line-height:1.45"></div>
     </div>
   </div>
 </section>
@@ -495,7 +495,7 @@ body:after{
     </div>
     <div class="top-actions">
       <button class="icon-btn" id="notificationsTop" title="Notificaciones"><svg class="icon" viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg></button>
-      <button class="icon-btn" id="profileTop" title="Perfil"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></button>
+      <button class="icon-btn" id="profileTop" title="Perfil"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></button><button class="icon-btn" id="signOutTop" title="Cerrar sesión"><svg class="icon" viewBox="0 0 24 24"><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/><path d="M13 3h7v18h-7"/></svg></button>
       <div class="avatar" id="topAvatar">N</div>
     </div>
   </header>
@@ -681,36 +681,79 @@ $("#authSubmit").onclick=doAuth;
 
 $("#googleSignIn").onclick=async()=>{
   if(!FIREBASE_READY){
-    toast("Firebase aún no está configurado.");
+    showAuthError("Firebase aún no está configurado.");
     return;
   }
+
+  $("#authDiagnostic").style.display="none";
+
   try{
     const result=await signInWithPopup(auth,googleProvider);
     const user=result.user;
-    const userRef=doc(db,"users",user.uid);
-    const snap=await getDoc(userRef);
 
-    if(!snap.exists()){
-      const raw=(user.email||"usuario").split("@")[0];
-      const handle="@"+raw.replace(/[^a-z0-9_]/gi,"").toLowerCase();
-      await setDoc(userRef,{
-        name:user.displayName||"Usuario Nuvia",
-        handle,
-        bio:"Explorando Nuvia.",
-        photoURL:user.photoURL||"",
-        email:user.email||"",
-        createdAt:serverTimestamp(),
-        joinedCommunities:[]
-      });
+    // Entrar a Nuvia inmediatamente después de autenticar.
+    state.user=user;
+    state.profile={
+      name:user.displayName||"Usuario Nuvia",
+      user:"@"+(user.email||"usuario").split("@")[0].replace(/[^a-z0-9_]/gi,"").toLowerCase(),
+      bio:"Explorando Nuvia.",
+      photoURL:user.photoURL||""
+    };
+    openApp();
+    renderAll();
+
+    // Firestore se sincroniza después; no bloquea el acceso.
+    try{
+      const userRef=doc(db,"users",user.uid);
+      const snap=await getDoc(userRef);
+
+      if(snap.exists()){
+        const d=snap.data();
+        state.profile={
+          name:d.name||user.displayName||"Usuario Nuvia",
+          user:d.handle||state.profile.user,
+          bio:d.bio||"Explorando Nuvia.",
+          photoURL:d.photoURL||user.photoURL||""
+        };
+        state.joined=d.joinedCommunities||[];
+        renderAll();
+      }else{
+        await setDoc(userRef,{
+          name:state.profile.name,
+          handle:state.profile.user,
+          bio:state.profile.bio,
+          photoURL:user.photoURL||"",
+          email:user.email||"",
+          createdAt:serverTimestamp(),
+          joinedCommunities:[]
+        });
+      }
+    }catch(dbErr){
+      console.error("Firestore profile sync error:",dbErr);
+      toast("Entraste a Nuvia. El perfil se sincronizará después.");
     }
+
+    listenPosts();
+
   }catch(err){
+    console.error("Google sign-in error:",err);
     const code=err?.code||"";
-    if(code==="auth/popup-closed-by-user") toast("Cerraste la ventana de Google.");
-    else if(code==="auth/popup-blocked") toast("El navegador bloqueó la ventana de Google.");
-    else if(code==="auth/account-exists-with-different-credential") toast("Ese correo ya está asociado a otro método de acceso.");
-    else toast("No se pudo iniciar sesión con Google.");
+    const details=err?.message||"Error desconocido";
+
+    if(code==="auth/popup-closed-by-user") showAuthError("Cerraste la ventana de Google antes de completar el acceso.");
+    else if(code==="auth/popup-blocked") showAuthError("El navegador bloqueó la ventana de Google. Permite ventanas emergentes para este sitio.");
+    else if(code==="auth/unauthorized-domain") showAuthError("Firebase no autoriza este dominio. Revisa Authentication → Settings → Authorized domains.");
+    else if(code==="auth/operation-not-allowed") showAuthError("El proveedor Google no está habilitado en Firebase Authentication.");
+    else if(code==="auth/account-exists-with-different-credential") showAuthError("Ese correo ya existe con otro método de inicio de sesión.");
+    else showAuthError("Google no pudo iniciar sesión. Código: "+code+" · "+details);
   }
 };
+
+function showAuthError(message){
+  const box=$("#authDiagnostic");
+  box.textContent=message;
+  box.style.display="block";
+}
 
 function friendlyAuthError(c){return ({"auth/invalid-credential":"Correo o contraseña incorrectos.","auth/email-already-in-use":"Ese correo ya está registrado.","auth/weak-password":"La contraseña debe tener al menos 6 caracteres.","auth/invalid-email":"Correo no válido."}[c]||"No se pudo completar el acceso.")}
 
@@ -724,8 +767,36 @@ async function loadProfile(user){
 function openApp(){$("#authView").classList.add("hidden");$("#appView").classList.remove("hidden");renderAll();}
 if(FIREBASE_READY){
  onAuthStateChanged(auth,async user=>{
-   if(user){state.user=user;await loadProfile(user);openApp();listenPosts();}
-   else{state.user=null;$("#authView").classList.remove("hidden");$("#appView").classList.add("hidden");}
+   if(user){
+     state.user=user;
+
+     // Nunca bloquear la entrada esperando a Firestore.
+     state.profile={
+       name:user.displayName||state.profile.name||"Usuario Nuvia",
+       user:state.profile.user||("@"+(user.email||"usuario").split("@")[0]),
+       bio:state.profile.bio||"Explorando Nuvia.",
+       photoURL:user.photoURL||""
+     };
+     openApp();
+     renderAll();
+
+     try{
+       await loadProfile(user);
+     }catch(err){
+       console.error("loadProfile:",err);
+       toast("Sesión iniciada. No se pudo cargar el perfil todavía.");
+     }
+
+     try{
+       listenPosts();
+     }catch(err){
+       console.error("listenPosts:",err);
+     }
+   }else{
+     state.user=null;
+     $("#authView").classList.remove("hidden");
+     $("#appView").classList.add("hidden");
+   }
  });
 }
 
@@ -817,7 +888,20 @@ function renderNotifications(){
 }
 
 function nav(page){$$(".page").forEach(x=>x.classList.remove("active"));$("#page-"+page).classList.add("active");$$("[data-page]").forEach(x=>x.classList.toggle("active",x.dataset.page===page));if(page==="discover")renderDiscover($("#globalSearch").value);window.scrollTo({top:0,behavior:"smooth"})}
-$$("[data-page]").forEach(b=>b.onclick=()=>nav(b.dataset.page));$("#notificationsTop").onclick=()=>nav("notifications");$("#profileTop").onclick=()=>nav("profile");$("#createMain").onclick=()=>{nav("home");$("#postText").focus()};$("#mobileCreate").onclick=()=>{nav("home");$("#postText").focus()};
+$$("[data-page]").forEach(b=>b.onclick=()=>nav(b.dataset.page));$("#notificationsTop").onclick=()=>nav("notifications");$("#profileTop").onclick=()=>nav("profile");
+$("#signOutTop").onclick=async()=>{
+  try{
+    if(FIREBASE_READY) await signOut(auth);
+    else{
+      $("#appView").classList.add("hidden");
+      $("#authView").classList.remove("hidden");
+    }
+    toast("Sesión cerrada");
+  }catch(err){
+    console.error(err);
+    toast("No se pudo cerrar la sesión");
+  }
+};$("#createMain").onclick=()=>{nav("home");$("#postText").focus()};$("#mobileCreate").onclick=()=>{nav("home");$("#postText").focus()};
 $("#globalSearch").addEventListener("input",e=>{nav("discover");renderDiscover(e.target.value)});$("#discoverPhoto").onclick=()=>nav("communities");$("#discoverOther").onclick=()=>toast("Prueba explorar Cine");
 
 $("#editProfile").onclick=()=>{$("#editName").value=state.profile.name;$("#editUser").value=state.profile.user;$("#editBio").value=state.profile.bio||"";$("#profileModal").classList.add("show")};
