@@ -154,9 +154,308 @@ svg{display:block}
 .auth-divider{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:11px;margin:14px 0}
 .auth-divider:before,.auth-divider:after{content:"";height:1px;background:var(--line);flex:1}
 
+
+/* ============================================================
+   NUVIA — LIQUID GLASS FLOATING THEME
+   ============================================================ */
+:root{
+  --glass:rgba(255,255,255,.54);
+  --glass-strong:rgba(255,255,255,.70);
+  --glass-soft:rgba(255,255,255,.34);
+  --glass-border:rgba(255,255,255,.68);
+  --glass-line:rgba(103,92,175,.12);
+  --blur:26px;
+  --blur-strong:34px;
+  --purple:#6d5dfc;
+  --purple-dark:#4f3ad8;
+  --cyan:#4bd7e8;
+  --pink:#c88cff;
+  --text:#161724;
+  --muted:#73778a;
+  --shadow:0 24px 70px rgba(56,48,114,.13);
+  --shadow-float:0 18px 55px rgba(73,61,151,.16), inset 0 1px 0 rgba(255,255,255,.75);
+}
+
+body{
+  background:
+    radial-gradient(circle at 12% 12%,rgba(116,88,255,.18),transparent 26%),
+    radial-gradient(circle at 88% 14%,rgba(74,210,230,.16),transparent 24%),
+    radial-gradient(circle at 76% 82%,rgba(200,140,255,.13),transparent 28%),
+    linear-gradient(180deg,#f8f9ff 0%,#f4f6fb 48%,#f7f8fc 100%);
+  min-height:100vh;
+}
+
+body:before,
+body:after{
+  content:"";
+  position:fixed;
+  width:360px;
+  height:360px;
+  border-radius:50%;
+  filter:blur(25px);
+  pointer-events:none;
+  z-index:-1;
+  opacity:.45;
+}
+body:before{
+  left:-120px;top:22%;
+  background:radial-gradient(circle,rgba(111,93,252,.32),transparent 68%);
+}
+body:after{
+  right:-120px;bottom:8%;
+  background:radial-gradient(circle,rgba(75,215,232,.28),transparent 68%);
+}
+
+.topbar{
+  top:14px;
+  margin:0 18px;
+  height:68px;
+  border:1px solid var(--glass-border);
+  background:linear-gradient(180deg,rgba(255,255,255,.68),rgba(255,255,255,.46));
+  backdrop-filter:blur(var(--blur-strong)) saturate(145%);
+  -webkit-backdrop-filter:blur(var(--blur-strong)) saturate(145%);
+  border-radius:22px;
+  box-shadow:var(--shadow-float);
+}
+
+.app-layout{
+  padding-top:38px;
+}
+
+.sidebar{
+  background:linear-gradient(180deg,rgba(255,255,255,.46),rgba(255,255,255,.26));
+  border:1px solid var(--glass-border);
+  backdrop-filter:blur(var(--blur)) saturate(150%);
+  -webkit-backdrop-filter:blur(var(--blur)) saturate(150%);
+  border-radius:26px;
+  padding:14px;
+  box-shadow:var(--shadow-float);
+}
+
+.rightbar{
+  padding:0;
+}
+
+.nav button{
+  transition:.24s ease;
+  color:#65697c;
+}
+.nav button:hover{
+  transform:translateY(-1px);
+  background:rgba(255,255,255,.56);
+}
+.nav button.active{
+  background:linear-gradient(135deg,rgba(255,255,255,.84),rgba(241,238,255,.62));
+  border:1px solid rgba(255,255,255,.78);
+  box-shadow:0 10px 25px rgba(84,70,166,.10), inset 0 1px 0 rgba(255,255,255,.85);
+}
+
+.create-main{
+  position:relative;
+  overflow:hidden;
+  box-shadow:0 16px 32px rgba(91,61,245,.26), inset 0 1px 0 rgba(255,255,255,.22);
+}
+.create-main:before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(115deg,transparent 10%,rgba(255,255,255,.24) 40%,transparent 70%);
+  transform:translateX(-110%);
+  transition:.5s ease;
+}
+.create-main:hover:before{transform:translateX(110%)}
+.create-main:hover{transform:translateY(-2px)}
+
+.card,
+.auth-card,
+.profile-card,
+.community-card,
+.result,
+.notif,
+.modal{
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.72),rgba(255,255,255,.46));
+  border:1px solid var(--glass-border);
+  backdrop-filter:blur(var(--blur)) saturate(150%);
+  -webkit-backdrop-filter:blur(var(--blur)) saturate(150%);
+  box-shadow:var(--shadow-float);
+}
+
+.card{
+  border-radius:24px;
+}
+
+.feed-tabs{
+  background:rgba(255,255,255,.44);
+  border:1px solid var(--glass-border);
+  backdrop-filter:blur(24px) saturate(145%);
+  -webkit-backdrop-filter:blur(24px) saturate(145%);
+  box-shadow:0 16px 38px rgba(66,56,137,.10), inset 0 1px 0 rgba(255,255,255,.82);
+}
+.feed-tabs button{
+  transition:.22s ease;
+}
+.feed-tabs button.active{
+  background:linear-gradient(135deg,rgba(255,255,255,.92),rgba(228,242,255,.72));
+  border:1px solid rgba(255,255,255,.85);
+  box-shadow:0 10px 20px rgba(67,55,145,.08), inset 0 1px 0 rgba(255,255,255,.95);
+}
+
+.composer{
+  position:relative;
+  overflow:hidden;
+}
+.composer:after{
+  content:"";
+  position:absolute;
+  right:-60px;top:-80px;
+  width:180px;height:180px;border-radius:50%;
+  background:radial-gradient(circle,rgba(109,93,252,.12),transparent 68%);
+  pointer-events:none;
+}
+
+.tool,
+.soft-btn,
+.secondary,
+.join,
+.comment-btn,
+.icon-btn{
+  background:rgba(255,255,255,.55);
+  border:1px solid rgba(255,255,255,.68);
+  backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
+  box-shadow:0 8px 20px rgba(56,48,114,.06), inset 0 1px 0 rgba(255,255,255,.78);
+  transition:.2s ease;
+}
+.tool:hover,
+.soft-btn:hover,
+.secondary:hover,
+.join:hover,
+.comment-btn:hover,
+.icon-btn:hover{
+  transform:translateY(-1px);
+  background:rgba(255,255,255,.76);
+  box-shadow:0 12px 28px rgba(56,48,114,.10), inset 0 1px 0 rgba(255,255,255,.9);
+}
+
+.discovery{
+  background:
+    radial-gradient(circle at 15% 15%,rgba(109,93,252,.12),transparent 30%),
+    radial-gradient(circle at 90% 20%,rgba(75,215,232,.12),transparent 32%),
+    linear-gradient(180deg,rgba(255,255,255,.66),rgba(255,255,255,.38));
+}
+
+.post{
+  transition:.24s ease;
+}
+.post:hover{
+  transform:translateY(-2px);
+  box-shadow:0 26px 70px rgba(58,49,126,.14), inset 0 1px 0 rgba(255,255,255,.85);
+}
+
+.post-media{
+  position:relative;
+  overflow:hidden;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 18px 40px rgba(83,62,179,.16);
+}
+.post-media:before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(115deg,rgba(255,255,255,.14),transparent 30%,rgba(255,255,255,.08) 65%,transparent 80%);
+  pointer-events:none;
+}
+
+.statement{
+  background:
+    radial-gradient(circle at 18% 15%,rgba(255,255,255,.22),transparent 22%),
+    linear-gradient(145deg,rgba(79,58,216,.95),rgba(111,93,252,.92) 52%,rgba(75,215,232,.85));
+  box-shadow:0 24px 60px rgba(79,58,216,.23), inset 0 1px 0 rgba(255,255,255,.22);
+}
+
+.community-tag,
+.badge{
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.45);
+}
+
+.avatar,
+.avatar-lg{
+  box-shadow:0 10px 25px rgba(88,74,176,.18), inset 0 1px 0 rgba(255,255,255,.35);
+}
+
+.search{
+  background:rgba(255,255,255,.48);
+  border:1px solid rgba(255,255,255,.7);
+  backdrop-filter:blur(18px);
+  -webkit-backdrop-filter:blur(18px);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.85);
+}
+.search:focus-within{
+  background:rgba(255,255,255,.72);
+  border-color:rgba(255,255,255,.9);
+  box-shadow:0 10px 25px rgba(58,49,126,.08), inset 0 1px 0 rgba(255,255,255,.92);
+}
+
+.auth-panel{
+  background:
+    radial-gradient(circle at 25% 25%,rgba(109,93,252,.09),transparent 24%),
+    radial-gradient(circle at 80% 70%,rgba(75,215,232,.08),transparent 24%);
+}
+.auth-card{
+  box-shadow:0 28px 80px rgba(56,48,114,.14), inset 0 1px 0 rgba(255,255,255,.92);
+}
+
+.google-btn{
+  background:rgba(255,255,255,.62);
+  border:1px solid rgba(255,255,255,.78);
+  backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
+  box-shadow:0 10px 24px rgba(56,48,114,.07), inset 0 1px 0 rgba(255,255,255,.9);
+}
+
+.modal-bg{
+  background:rgba(48,43,88,.22);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+}
+
+.mobile-nav{
+  background:rgba(255,255,255,.58)!important;
+  border:1px solid rgba(255,255,255,.78)!important;
+  backdrop-filter:blur(28px) saturate(160%)!important;
+  -webkit-backdrop-filter:blur(28px) saturate(160%)!important;
+  box-shadow:0 18px 50px rgba(58,49,126,.18), inset 0 1px 0 rgba(255,255,255,.9)!important;
+}
+
+.firebase-banner{
+  background:rgba(255,248,232,.62);
+  backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
+  border:1px solid rgba(255,240,198,.8);
+  box-shadow:0 10px 25px rgba(122,98,39,.05);
+}
+
+@media(max-width:1060px){
+  .sidebar{
+    padding:10px;
+  }
+}
+
+@media(max-width:860px){
+  .topbar{
+    margin:0 10px;
+    top:10px;
+  }
+}
+
 </style>
 </head>
 <body>
+<div aria-hidden="true" style="position:fixed;inset:0;pointer-events:none;z-index:-1;overflow:hidden">
+  <div style="position:absolute;width:240px;height:240px;border-radius:50%;left:8%;top:12%;background:radial-gradient(circle,rgba(108,92,252,.16),transparent 70%);filter:blur(2px)"></div>
+  <div style="position:absolute;width:280px;height:280px;border-radius:50%;right:7%;top:18%;background:radial-gradient(circle,rgba(75,215,232,.14),transparent 70%);filter:blur(2px)"></div>
+  <div style="position:absolute;width:220px;height:220px;border-radius:50%;right:18%;bottom:7%;background:radial-gradient(circle,rgba(200,140,255,.12),transparent 70%);filter:blur(4px)"></div>
+</div>
 
 <section id="authView" class="auth">
   <div class="auth-brand">
