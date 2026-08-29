@@ -3573,6 +3573,20 @@ select:focus-visible,
   }
 }
 
+/* Mantiene la navegación lateral visible mientras se recorre el feed. */
+@media(min-width:861px){
+  .sidebar{
+    position:sticky!important;
+    top:104px!important;
+    align-self:start!important;
+    max-height:calc(100dvh - 120px);
+    overflow-y:auto;
+    overscroll-behavior:contain;
+    scrollbar-width:thin;
+    scrollbar-gutter:stable;
+  }
+}
+
 @media(prefers-reduced-motion:reduce){
   *,
   *::before,
@@ -4808,8 +4822,54 @@ function postAudienceLabel(p){
 function postTimestampValue(p){
   if(p?.createdAt?.toMillis)return p.createdAt.toMillis();
   if(p?.createdAt?.toDate)return p.createdAt.toDate().getTime();
+  if(Number.isFinite(Number(p?.createdAt?.seconds)))return Number(p.createdAt.seconds)*1000;
   const raw=Number(p?.createdAt||0);
   return Number.isFinite(raw)?raw:0;
+}
+
+function relativePostTime(timestamp,now=Date.now()){
+  const value=Number(timestamp||0);
+  if(!Number.isFinite(value) || value<=0)return "ahora";
+
+  const elapsed=Math.max(0,now-value);
+  const seconds=Math.floor(elapsed/1000);
+  if(seconds<45)return "ahora";
+
+  const minutes=Math.floor(seconds/60);
+  if(minutes<60)return `hace ${minutes} min`;
+
+  const hours=Math.floor(minutes/60);
+  if(hours<24)return `hace ${hours} h`;
+
+  const days=Math.floor(hours/24);
+  if(days<7)return `hace ${days} d`;
+
+  return new Intl.DateTimeFormat("es-CL",{
+    day:"numeric",
+    month:"short",
+    year:new Date(value).getFullYear()===new Date(now).getFullYear()?undefined:"numeric",
+    hour:"2-digit",
+    minute:"2-digit"
+  }).format(new Date(value));
+}
+
+function postTimeHTML(p){
+  const timestamp=postTimestampValue(p);
+  if(!timestamp)return '<time class="post-time" data-timestamp="0">ahora</time>';
+  const date=new Date(timestamp);
+  const full=new Intl.DateTimeFormat("es-CL",{
+    dateStyle:"long",
+    timeStyle:"short"
+  }).format(date);
+  return `<time class="post-time" data-timestamp="${timestamp}" datetime="${date.toISOString()}" title="${esc(full)}">${esc(relativePostTime(timestamp))}</time>`;
+}
+
+function updateRelativePostTimes(){
+  const now=Date.now();
+  document.querySelectorAll(".post-time[data-timestamp]").forEach(el=>{
+    const timestamp=Number(el.dataset.timestamp||0);
+    el.textContent=relativePostTime(timestamp,now);
+  });
 }
 
 function dedupeAndSortPosts(groups){
@@ -5008,7 +5068,7 @@ function postHTML(p){
      <div class="avatar">${avatarHTML(p.authorPhotoURL||"",p.author||"Usuario")}</div>
      <div class="post-user">
        <strong class="profile-link" data-author-id="${esc(p.authorId||"")}">${esc(p.author||"Usuario")}</strong>
-       <small>${esc(normalizeBrandText(p.user||"@usuario"))} · ${p.createdAt?.toDate?"ahora":"hace poco"} <span class="post-visibility">${esc(postAudienceLabel(p))}</span></small>
+       <small>${esc(normalizeBrandText(p.user||"@usuario"))} · ${postTimeHTML(p)} <span class="post-visibility">${esc(postAudienceLabel(p))}</span></small>
        <button class="community-tag community-link" data-community-key="${esc(communityKey)}">${esc(communityName)}</button>
      </div>
      <div class="post-menu-wrap">
@@ -7983,6 +8043,12 @@ communityPostButtonObserver.observe(document.body,{childList:true,subtree:true})
 
 updateConnectionState(false);
 updateInstallAppButton();
+updateRelativePostTimes();
+
+window.setInterval(updateRelativePostTimes,30000);
+document.addEventListener("visibilitychange",()=>{
+  if(!document.hidden)updateRelativePostTimes();
+});
 
 
 document.addEventListener("keydown",event=>{
