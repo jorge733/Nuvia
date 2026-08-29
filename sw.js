@@ -1,4 +1,4 @@
-const CACHE_NAME = "uniluva-v11-1";
+const CACHE_NAME = "uniluva-v11-2";
 
 const CORE = [
   "/",
@@ -58,13 +58,15 @@ self.addEventListener("fetch", event => {
   event.respondWith(
     fetch(request)
       .then(response => {
+        if (!response || response.status !== 200 || response.type === "opaque") {
+          return response;
+        }
+
         const responseClone = response.clone();
 
         caches
           .open(CACHE_NAME)
-          .then(cache => {
-            cache.put(request, responseClone);
-          })
+          .then(cache => cache.put(request, responseClone))
           .catch(error => {
             console.error("Error guardando en caché:", error);
           });
