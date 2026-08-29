@@ -1,4 +1,4 @@
-const CACHE_NAME = "uniluva-v18-3";
+const CACHE_NAME = "uniluva-v21-3";
 
 const CORE = [
   "/",
