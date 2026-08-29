@@ -1,11 +1,11 @@
-const CACHE_NAME = "nuvia-v10";
+const CACHE_NAME = "uniluva-v1";
 
 const CORE = [
   "/",
   "/index.html",
   "/manifest.json",
-  "/icon-192.png",
-  "/icon-512.png"
+  "/uniluva-icon-192.png",
+  "/uniluva-icon-512.png"
 ];
 
 self.addEventListener("install", event => {
@@ -16,7 +16,7 @@ self.addEventListener("install", event => {
       .open(CACHE_NAME)
       .then(cache => cache.addAll(CORE))
       .catch(error => {
-        console.error("Error al precargar archivos de Nuvia:", error);
+        console.error("Error precargando Uniluva:", error);
       })
   );
 });
