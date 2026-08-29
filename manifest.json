@@ -6,6 +6,7 @@
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
+  "gcm_sender_id": "103953800507",
   "display_override": [
     "window-controls-overlay",
     "standalone"

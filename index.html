@@ -9,9 +9,9 @@
 <link rel="icon" type="image/svg+xml" href="/icon-192.svg">
 <link rel="apple-touch-icon" href="/icon-192.svg">
 <title>Uniluva — Conecta. Descubre. Aporta.</title>
-<meta name="app-version" content="24.1">
+<meta name="app-version" content="24.2">
 
-<link rel="manifest" href="/manifest.json?v=24.1">
+<link rel="manifest" href="/manifest.json?v=24.2">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Uniluva">
@@ -142,6 +142,9 @@ svg{display:block}
 .results{display:grid;gap:10px}
 .result{display:flex;align-items:center;gap:11px;padding:13px 14px}.result-info{flex:1}.result-info strong{display:block;font-size:13px}.result-info small{color:var(--muted)}
 .notif{display:flex;gap:11px;padding:14px 15px;margin-bottom:9px}.notif.unread{border-color:#d8d1ff;background:linear-gradient(135deg,rgba(91,61,245,.04),white)}.dot{width:8px;height:8px;border-radius:50%;background:var(--purple);margin-top:6px;flex:0 0 auto}.notif p{margin:0;font-size:13px;line-height:1.48}.notif small{color:var(--muted)}
+.notification-settings{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 18px;margin-bottom:14px}
+.notification-settings-copy{min-width:0}.notification-settings-copy strong{display:block;font-size:14px}.notification-settings-copy p{margin:5px 0 0;color:var(--muted);font-size:12px;line-height:1.45}
+.notification-settings-action{flex:0 0 auto}.notification-settings-action.enabled{color:var(--danger)}
 .profile-card{overflow:hidden}.cover{height:155px;background:linear-gradient(135deg,#4b2bc9,#7657f4,#2fc1d6)}.profile-body{padding:0 20px 20px}.profile-top{display:flex;align-items:end;justify-content:space-between;margin-top:-35px}.avatar-lg{width:84px;height:84px;border-radius:50%;border:5px solid white;display:grid;place-items:center;color:white;font-weight:900;font-size:27px;background:linear-gradient(135deg,var(--cyan),var(--purple))}.profile-info h2{margin:13px 0 0;font-size:23px}.profile-info small{color:var(--muted)}.profile-info p{color:#555b6d;line-height:1.5}.profile-stats{display:flex;gap:17px;color:var(--muted);font-size:11px}.profile-stats strong{color:var(--text)}
 .modal-bg{position:fixed;inset:0;background:rgba(20,21,34,.47);display:none;align-items:center;justify-content:center;padding:18px;z-index:100}.modal-bg.show{display:flex}.modal{width:min(560px,100%);max-height:82vh;overflow:auto;background:white;border:1px solid var(--line);border-radius:22px;padding:20px;box-shadow:var(--shadow)}.modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:13px}.modal-head h3{margin:0}.close{border:0;background:var(--surface-soft);border-radius:10px;width:35px;height:35px}
 .comment{padding:11px 0;border-bottom:1px solid var(--line)}.comment strong{font-size:12px}.comment p{margin:4px 0 0;font-size:13px;line-height:1.45}
@@ -153,6 +156,7 @@ svg{display:block}
 @media(max-width:1060px){.app-layout{grid-template-columns:82px minmax(0,660px) 280px}.nav-label,.mini-profile>div:not(.avatar){display:none}.sidebar{display:flex;flex-direction:column;align-items:center}.nav button{width:52px;justify-content:center}.create-main{width:52px;font-size:0}.create-main:after{content:"+";font-size:23px}}
 @media(max-width:860px){.auth{grid-template-columns:1fr}.auth-brand{display:none}.topbar{grid-template-columns:1fr auto;padding:0 16px}.topbar .search{display:none}.logo{width:124px}.app-layout{grid-template-columns:minmax(0,680px);justify-content:center;padding:18px 12px 92px}.sidebar,.rightbar{display:none}.mobile-nav{position:fixed;z-index:60;left:10px;right:10px;bottom:10px;height:62px;display:grid;grid-template-columns:repeat(5,1fr);background:rgba(255,255,255,.94);backdrop-filter:blur(18px);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow)}.mobile-nav button{border:0;background:transparent;color:#707487;display:grid;place-items:center}.mobile-nav button.active{color:var(--purple)}.mobile-nav .create-fab{width:44px;height:44px;place-self:center;border-radius:14px;background:linear-gradient(135deg,var(--purple),#7557f3);color:white}}
 @media(max-width:560px){.auth-panel{padding:16px}.auth-card{padding:24px 19px}.grid2{grid-template-columns:1fr}.post{padding:15px}.post-media{min-height:220px}.reaction{font-size:10px}}
+@media(max-width:560px){.notification-settings{align-items:stretch;flex-direction:column}.notification-settings-action{width:100%}}
 
 .google-btn{
   width:100%;margin-top:10px;border:1px solid var(--line);background:white;color:#3f4352;
@@ -3684,7 +3688,7 @@ select:focus-visible,
         <button class="active" data-page="home"><svg class="icon" viewBox="0 0 24 24"><path d="m3 11 9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M9 20v-6h6v6"/></svg><span class="nav-label">Inicio</span></button>
         <button data-page="discover"><svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><span class="nav-label">Descubrir</span></button>
         <button data-page="communities"><svg class="icon" viewBox="0 0 24 24"><circle cx="8" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M2.5 20a5.5 5.5 0 0 1 11 0"/><path d="M14 20a4 4 0 0 1 7.5-2"/></svg><span class="nav-label">Comunidades</span></button>
-        <button data-page="notifications"><svg class="icon" viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg><span class="nav-label">Notificaciones</span><span class="badge" id="notifBadge">2</span></button>
+        <button data-page="notifications"><svg class="icon" viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg><span class="nav-label">Notificaciones</span><span class="badge" id="notifBadge" style="display:none">0</span></button>
         <button data-page="profile"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span class="nav-label">Perfil</span></button>
       </nav>
       <button class="create-main" id="createMain">＋ Crear</button>
@@ -3844,6 +3848,13 @@ select:focus-visible,
 
       <section class="page" id="page-notifications">
         <div class="section-head"><div><h2>Notificaciones</h2><p>Interacciones relevantes, sin ruido innecesario.</p></div><button class="secondary" id="markRead">Marcar leídas</button></div>
+        <div class="card notification-settings" id="pushNotificationSettings">
+          <div class="notification-settings-copy">
+            <strong>Avisos en este dispositivo</strong>
+            <p id="pushNotificationStatus">Comprobando compatibilidad…</p>
+          </div>
+          <button class="primary notification-settings-action" id="pushNotificationBtn" type="button">Activar avisos</button>
+        </div>
         <div id="notificationsList"></div>
       </section>
 
@@ -4169,6 +4180,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/fireba
 import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, updateProfile, GoogleAuthProvider, signInWithPopup, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
 import { getFirestore, collection, doc, getDoc, getDocs, setDoc, updateDoc, addDoc, deleteDoc, onSnapshot, query, orderBy, limit, where, serverTimestamp, runTransaction, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
 import { getStorage, ref as storageRef, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-storage.js";
+import { getMessaging, getToken, deleteToken, onMessage, isSupported as isMessagingSupported } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-messaging.js";
 
 /* ============================================================
    FIREBASE — PEGA AQUÍ LA CONFIGURACIÓN DE TU APP WEB
@@ -4183,9 +4195,10 @@ const firebaseConfig = {
   appId: "1:147115063936:web:d8501e839eecad07cf8465",
   measurementId: "G-9F9N01E96C"
 };
+const PUSH_VAPID_KEY = "BLuXbaMV_m-P3UguK0cNPwwJSP1bXP77ueNf2_jUB9HmLMRlhsXrPfGUXogjjAt6Elf2vveIu-wvnM9awVvm_UI";
 
 const FIREBASE_READY = !Object.values(firebaseConfig).some(v => String(v).startsWith("PEGAR_"));
-let app=null, auth=null, db=null, storage=null, unsubscribePosts=null;
+let app=null, auth=null, db=null, storage=null, messaging=null, unsubscribePosts=null, unsubscribeNotifications=null;
 
 let googleProvider=null;
 if(FIREBASE_READY){
@@ -4246,7 +4259,9 @@ let state={
   selectedCommunityCover:null,
   previewObjectURL:"",
   blockedIds:[],
-  followCountsLoadedAt:0
+  followCountsLoadedAt:0,
+  notifications:[],
+  notificationsLoaded:false
 };
 
 function toast(t){const e=$("#toast");e.textContent=t;e.classList.add("show");clearTimeout(window.__t);window.__t=setTimeout(()=>e.classList.remove("show"),1700)}
@@ -4579,8 +4594,22 @@ if(FIREBASE_READY){
      }catch(err){
        console.error("listenPosts:",err);
      }
+
+     try{
+       listenNotifications();
+       await initializePushNotifications();
+     }catch(err){
+       console.error("initialize notifications:",err);
+       updatePushNotificationUI("No se pudieron iniciar los avisos en este dispositivo.");
+     }
    }else{
+     if(unsubscribeNotifications){
+       try{unsubscribeNotifications();}catch{}
+       unsubscribeNotifications=null;
+     }
      state.user=null;
+     state.notifications=[];
+     state.notificationsLoaded=false;
      $("#authView").classList.remove("hidden");
      $("#appView").classList.add("hidden");
    }
@@ -7504,56 +7533,73 @@ async function renderDiscover(q=""){
  $$("#discoverResults .profile-link").forEach(b=>b.onclick=()=>openUserProfile(b.dataset.uid));
 }
 
-async function renderNotifications(){
+function notificationTimestamp(value){
+  if(value?.toMillis)return value.toMillis();
+  if(value?.toDate)return value.toDate().getTime();
+  if(Number.isFinite(Number(value?.seconds)))return Number(value.seconds)*1000;
+  const raw=Number(value||0);
+  return Number.isFinite(raw)?raw:0;
+}
+
+function renderNotificationItems(items){
   const host=$("#notificationsList");
   if(!host)return;
 
+  const ordered=[...items].sort((a,b)=>notificationTimestamp(b.createdAt)-notificationTimestamp(a.createdAt));
+  const unread=ordered.filter(n=>!n.read).length;
+  const badge=$("#notifBadge");
+  if(badge){
+    badge.textContent=String(unread);
+    badge.style.display=unread?"grid":"none";
+  }
+
+  host.innerHTML=ordered.length
+    ? ordered.map(n=>`
+        <div class="card notif ${n.read?"":"unread"}" data-notification-id="${esc(n.id)}">
+          ${n.read?'<div style="width:8px"></div>':'<div class="dot"></div>'}
+          <div>
+            <p>${esc(n.text||n.message||"Tienes una nueva notificación.")}</p>
+            <small>${formatNotificationTime(n.createdAt)}</small>
+          </div>
+        </div>
+      `).join("")
+    : `<div class="card empty-state"><strong>Todo al día</strong>Cuando tengas nuevas interacciones, aparecerán aquí.</div>`;
+}
+
+function listenNotifications(){
+  if(unsubscribeNotifications){
+    try{unsubscribeNotifications();}catch{}
+    unsubscribeNotifications=null;
+  }
+  if(!FIREBASE_READY || !state.user)return;
+
+  unsubscribeNotifications=onSnapshot(
+    query(collection(db,"notifications"),where("userId","==",state.user.uid),limit(50)),
+    snap=>{
+      state.notifications=snap.docs.map(ds=>({id:ds.id,...ds.data()}));
+      state.notificationsLoaded=true;
+      renderNotificationItems(state.notifications);
+    },
+    err=>{
+      console.error("listenNotifications",err);
+      const host=$("#notificationsList");
+      if(host)host.innerHTML=`<div class="card empty-state"><strong>No se pudieron cargar</strong>Revisa tu conexión e inténtalo nuevamente.</div>`;
+    }
+  );
+}
+
+async function renderNotifications(){
+  const host=$("#notificationsList");
+  if(!host)return;
   if(!FIREBASE_READY || !state.user){
     host.innerHTML=`<div class="card empty-state"><strong>Sin notificaciones</strong>Las novedades de tu cuenta aparecerán aquí.</div>`;
     return;
   }
-
-  host.innerHTML=`<div class="card empty-state"><strong>Cargando notificaciones…</strong></div>`;
-
-  try{
-    const snap=await getDocs(
-      query(
-        collection(db,"notifications"),
-        where("userId","==",state.user.uid),
-        limit(50)
-      )
-    );
-
-    const items=snap.docs
-      .map(ds=>({id:ds.id,...ds.data()}))
-      .sort((a,b)=>{
-        const av=a.createdAt?.toMillis?.()||0;
-        const bv=b.createdAt?.toMillis?.()||0;
-        return bv-av;
-      });
-
-    const unread=items.filter(n=>!n.read).length;
-    const badge=$("#notifBadge");
-    if(badge){
-      badge.textContent=String(unread);
-      badge.style.display=unread?"grid":"none";
-    }
-
-    host.innerHTML=items.length
-      ? items.map(n=>`
-          <div class="card notif ${n.read?"":"unread"}" data-notification-id="${esc(n.id)}">
-            ${n.read?'<div style="width:8px"></div>':'<div class="dot"></div>'}
-            <div>
-              <p>${esc(n.text||n.message||"Tienes una nueva notificación.")}</p>
-              <small>${formatNotificationTime(n.createdAt)}</small>
-            </div>
-          </div>
-        `).join("")
-      : `<div class="card empty-state"><strong>Todo al día</strong>Cuando tengas nuevas interacciones, aparecerán aquí.</div>`;
-  }catch(err){
-    console.error("renderNotifications",err);
-    host.innerHTML=`<div class="card empty-state"><strong>No se pudieron cargar</strong>Revisa tu conexión e inténtalo nuevamente.</div>`;
+  if(state.notificationsLoaded){
+    renderNotificationItems(state.notifications);
+    return;
   }
+  host.innerHTML=`<div class="card empty-state"><strong>Cargando notificaciones…</strong></div>`;
 }
 
 function formatNotificationTime(value){
@@ -7570,6 +7616,216 @@ function formatNotificationTime(value){
     return "Reciente";
   }
 }
+
+let foregroundMessagingBound=false;
+
+function pushPreferenceKey(){
+  return `uniluva:push-enabled:${state.user?.uid||"anonymous"}`;
+}
+
+function pushTokenStorageKey(){
+  return `uniluva:push-token:${state.user?.uid||"anonymous"}`;
+}
+
+function pushIsEnabled(){
+  try{return localStorage.getItem(pushPreferenceKey())==="1";}catch{return false;}
+}
+
+function setPushPreference(enabled,token=""){
+  try{
+    if(enabled)localStorage.setItem(pushPreferenceKey(),"1");
+    else localStorage.removeItem(pushPreferenceKey());
+    if(token)localStorage.setItem(pushTokenStorageKey(),token);
+    else if(!enabled)localStorage.removeItem(pushTokenStorageKey());
+  }catch{}
+}
+
+function isInstalledIOSApp(){
+  return isIOSDevice() && isStandaloneMode();
+}
+
+function updatePushNotificationUI(forcedMessage=""){
+  const btn=$("#pushNotificationBtn");
+  const status=$("#pushNotificationStatus");
+  if(!btn || !status)return;
+
+  const enabled=pushIsEnabled();
+  const hasApi="Notification" in window && "serviceWorker" in navigator;
+  btn.classList.toggle("enabled",enabled);
+
+  if(forcedMessage){
+    status.textContent=forcedMessage;
+    return;
+  }
+  if(!hasApi){
+    status.textContent="Este navegador no admite notificaciones web.";
+    btn.hidden=true;
+    return;
+  }
+  if(isIOSDevice() && !isInstalledIOSApp()){
+    status.textContent="En iPhone o iPad, instala primero Uniluva en la pantalla de inicio.";
+    btn.textContent="Cómo instalar";
+    btn.hidden=false;
+    return;
+  }
+  if(Notification.permission==="denied"){
+    status.textContent="Los avisos están bloqueados. Habilítalos desde la configuración del navegador.";
+    btn.textContent="Avisos bloqueados";
+    btn.disabled=true;
+    btn.hidden=false;
+    return;
+  }
+
+  btn.hidden=false;
+  btn.disabled=false;
+  btn.textContent=enabled?"Desactivar avisos":"Activar avisos";
+  status.textContent=enabled
+    ?"Este dispositivo recibirá avisos aunque la app esté cerrada."
+    :Notification.permission==="granted"
+      ?"El permiso está concedido. Activa este dispositivo para recibir avisos."
+      :"Recibe avisos de interacciones importantes en este dispositivo.";
+}
+
+async function ensurePushServiceWorker(){
+  let registration=await navigator.serviceWorker.getRegistration("/");
+  if(!registration){
+    registration=await navigator.serviceWorker.register("/sw.js?v=24.2");
+  }
+  await navigator.serviceWorker.ready;
+  return registration;
+}
+
+async function pushTokenDocumentId(token){
+  if(crypto?.subtle){
+    const digest=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(token));
+    return [...new Uint8Array(digest)].map(byte=>byte.toString(16).padStart(2,"0")).join("");
+  }
+  return token.replace(/[^a-z0-9_-]/gi,"_").slice(-120);
+}
+
+function pushDeviceLabel(){
+  if(isIOSDevice())return "iPhone/iPad";
+  if(/android/i.test(navigator.userAgent))return "Android";
+  return "Navegador web";
+}
+
+async function savePushToken(token,enabled=true){
+  if(!state.user || !db)return;
+  const tokenId=await pushTokenDocumentId(token);
+  await setDoc(doc(db,"users",state.user.uid,"pushTokens",tokenId),{
+    token,
+    enabled,
+    device:pushDeviceLabel(),
+    platform:navigator.platform||"web",
+    updatedAt:serverTimestamp(),
+    ...(enabled?{createdAt:serverTimestamp()}:{disabledAt:serverTimestamp()})
+  },{merge:true});
+}
+
+async function registerPushDevice(){
+  if(!messaging || !state.user)throw new Error("messaging-not-ready");
+  const registration=await ensurePushServiceWorker();
+  const token=await getToken(messaging,{
+    vapidKey:PUSH_VAPID_KEY,
+    serviceWorkerRegistration:registration
+  });
+  if(!token)throw new Error("missing-push-token");
+  await savePushToken(token,true);
+  setPushPreference(true,token);
+  return token;
+}
+
+async function disablePushDevice(){
+  let storedToken="";
+  try{storedToken=localStorage.getItem(pushTokenStorageKey())||"";}catch{}
+  if(storedToken){
+    try{await savePushToken(storedToken,false);}catch(err){console.warn("disable push token in Firestore",err);}
+  }
+  if(messaging){
+    try{await deleteToken(messaging);}catch(err){console.warn("delete push token",err);}
+  }
+  setPushPreference(false);
+  updatePushNotificationUI();
+  toast("Avisos desactivados en este dispositivo.");
+}
+
+async function initializePushNotifications(){
+  updatePushNotificationUI();
+  if(!FIREBASE_READY || !state.user || !("Notification" in window))return;
+  const supported=await isMessagingSupported();
+  if(!supported){
+    updatePushNotificationUI("Este navegador no admite Firebase Cloud Messaging.");
+    $("#pushNotificationBtn").hidden=true;
+    return;
+  }
+
+  if(!messaging)messaging=getMessaging(app);
+  if(!foregroundMessagingBound){
+    onMessage(messaging,payload=>{
+      const title=payload.notification?.title||payload.data?.title||"Uniluva";
+      const body=payload.notification?.body||payload.data?.body||"Tienes una nueva notificación.";
+      toast(`${title}: ${body}`);
+      renderNotifications();
+    });
+    foregroundMessagingBound=true;
+  }
+
+  if(Notification.permission==="granted" && pushIsEnabled()){
+    try{
+      await registerPushDevice();
+    }catch(err){
+      console.error("refresh push token",err);
+      updatePushNotificationUI("No se pudo renovar la suscripción de este dispositivo.");
+      return;
+    }
+  }
+  updatePushNotificationUI();
+}
+
+async function togglePushNotifications(){
+  const btn=$("#pushNotificationBtn");
+  if(isIOSDevice() && !isInstalledIOSApp()){
+    await uiConfirm(
+      "En Safari, toca Compartir y luego ‘Agregar a pantalla de inicio’. Abre Uniluva desde su icono y vuelve a esta sección.",
+      "Instalar para recibir avisos"
+    );
+    return;
+  }
+  if(pushIsEnabled()){
+    await disablePushDevice();
+    return;
+  }
+
+  try{
+    btn.disabled=true;
+    btn.textContent="Activando…";
+    const permission=Notification.permission==="granted"
+      ?"granted"
+      :await Notification.requestPermission();
+    if(permission!=="granted"){
+      updatePushNotificationUI(permission==="denied"
+        ?"Los avisos fueron bloqueados. Puedes habilitarlos desde la configuración del navegador."
+        :"No se concedió permiso para mostrar avisos.");
+      return;
+    }
+    await initializePushNotifications();
+    await registerPushDevice();
+    updatePushNotificationUI();
+    toast("Avisos activados en este dispositivo.");
+  }catch(err){
+    console.error("enable push notifications",err);
+    updatePushNotificationUI(
+      err?.code==="messaging/permission-blocked"
+        ?"Los avisos están bloqueados en la configuración del navegador."
+        :"No se pudo registrar este dispositivo para recibir avisos."
+    );
+  }finally{
+    btn.disabled=false;
+    if(!pushIsEnabled())btn.textContent="Activar avisos";
+  }
+}
+
+$("#pushNotificationBtn").addEventListener("click",togglePushNotifications);
 
 
 function openCreateHub(){
@@ -8063,7 +8319,7 @@ window.addEventListener("offline",()=>updateConnectionState(true));
 if("serviceWorker" in navigator){
   window.addEventListener("load",async()=>{
     try{
-      const registration=await navigator.serviceWorker.register("/sw.js?v=24.1");
+      const registration=await navigator.serviceWorker.register("/sw.js?v=24.2");
       registration.update().catch(()=>{});
     }catch(err){
       console.error("SW registration:",err);
@@ -8076,7 +8332,8 @@ function runUniluvaHealthCheck(){
   const requiredIds=[
     "feed","communityGrid","rightCommunities","postCommunitySelect",
     "activeCommunityJoin","activeCommunityMembers","profileCommunityCount",
-    "postRichText","publishBtn","installAppBtn","installAppMobileBtn"
+    "postRichText","publishBtn","installAppBtn","installAppMobileBtn",
+    "pushNotificationBtn","pushNotificationStatus"
   ];
 
   for(const id of requiredIds){
@@ -8091,7 +8348,7 @@ function runUniluvaHealthCheck(){
   }
 
   const result={
-    version:"24.1",
+    version:"24.2",
     ok:issues.length===0,
     issues,
     communities:state.communities.length,
