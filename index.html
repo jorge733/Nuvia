@@ -3587,6 +3587,29 @@ select:focus-visible,
   }
 }
 
+.mobile-install-app-btn{
+  display:none!important;
+}
+
+@media(max-width:860px){
+  .mobile-install-app-btn:not([hidden]){
+    position:fixed!important;
+    left:16px!important;
+    right:16px!important;
+    bottom:calc(82px + env(safe-area-inset-bottom))!important;
+    z-index:999!important;
+    display:flex!important;
+    width:auto!important;
+    min-height:48px!important;
+    margin:0!important;
+    box-shadow:0 16px 38px rgba(62,48,156,.28)!important;
+  }
+
+  body.has-mobile-install .app-layout{
+    padding-bottom:calc(158px + env(safe-area-inset-bottom))!important;
+  }
+}
+
 @media(prefers-reduced-motion:reduce){
   *,
   *::before,
@@ -3667,7 +3690,7 @@ select:focus-visible,
       <button class="create-main" id="createMain">＋ Crear</button>
 <button class="install-app-btn" id="installAppBtn">
   <svg class="icon" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
-  Instalar Uniluva
+  <span data-install-label>Instalar Uniluva</span>
 </button>
 
       <div class="mini-profile"><div class="avatar" id="sideAvatar">N</div><div><strong id="sideName">Usuario</strong><small id="sideUser">@usuario</small></div></div>
@@ -3877,6 +3900,11 @@ select:focus-visible,
       <div class="card right-card"><h3>Comunidades para descubrir</h3><div id="rightCommunities"></div></div>
     </aside>
   </div>
+
+  <button class="install-app-btn mobile-install-app-btn" id="installAppMobileBtn" type="button" hidden aria-label="Instalar Uniluva en este celular">
+    <span class="install-app-icon" aria-hidden="true">↓</span>
+    <span data-install-label>Instalar app</span>
+  </button>
 
   <nav class="mobile-nav" aria-label="Navegación principal">
     <button class="active" data-page="home" aria-label="Inicio"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="m3 11 9-8 9 8"/><path d="M5 10v10h14V10"/></svg></button>
@@ -7911,20 +7939,45 @@ function isStandaloneMode(){
     || document.referrer.startsWith("android-app://");
 }
 
-function updateInstallAppButton(){
-  const btn=$("#installAppBtn");
+function isIOSDevice(){
+  return /iphone|ipad|ipod/i.test(navigator.userAgent)
+    || (navigator.platform==="MacIntel" && navigator.maxTouchPoints>1);
+}
+
+function isMobileInstallSurface(){
+  return window.matchMedia("(max-width: 860px)").matches;
+}
+
+function setInstallButtonBusy(btn,busy){
   if(!btn)return;
+  btn.disabled=busy;
+  btn.classList.toggle("installing",busy);
+  const label=btn.querySelector("[data-install-label]");
+  if(label)label.textContent=busy?"Abriendo instalador…":"Instalar app";
+}
 
-  if(isStandaloneMode() || !deferredInstallPrompt){
-    btn.hidden=true;
-    btn.disabled=true;
-    btn.classList.remove("show","ready","installing");
-    return;
+function updateInstallAppButton(){
+  const desktopBtn=$("#installAppBtn");
+  const mobileBtn=$("#installAppMobileBtn");
+  const installed=isStandaloneMode();
+  const mobile=isMobileInstallSurface();
+  const canPrompt=!!deferredInstallPrompt;
+  const showDesktop=!installed && !mobile && canPrompt;
+  const showMobile=!installed && mobile && (canPrompt || isIOSDevice());
+
+  if(desktopBtn){
+    desktopBtn.hidden=!showDesktop;
+    desktopBtn.disabled=!showDesktop;
+    desktopBtn.classList.toggle("show",showDesktop);
+    desktopBtn.classList.toggle("ready",showDesktop);
   }
-
-  btn.hidden=false;
-  btn.disabled=false;
-  btn.classList.add("show","ready");
+  if(mobileBtn){
+    mobileBtn.hidden=!showMobile;
+    mobileBtn.disabled=!showMobile;
+    mobileBtn.classList.toggle("show",showMobile);
+    mobileBtn.classList.toggle("ready",showMobile);
+  }
+  document.body.classList.toggle("has-mobile-install",showMobile);
 }
 
 window.addEventListener("beforeinstallprompt",event=>{
@@ -7939,14 +7992,24 @@ window.addEventListener("appinstalled",()=>{
   toast("Uniluva se instaló correctamente.");
 });
 
-$("#installAppBtn").onclick=async()=>{
-  const btn=$("#installAppBtn");
-  if(!deferredInstallPrompt || !btn)return;
+async function handleInstallApp(event){
+  const btn=event.currentTarget;
+
+  if(!deferredInstallPrompt && isIOSDevice()){
+    await uiConfirm(
+      "En Safari, toca Compartir y luego ‘Agregar a pantalla de inicio’ para instalar Uniluva.",
+      "Instalar Uniluva"
+    );
+    return;
+  }
+
+  if(!deferredInstallPrompt){
+    toast("La instalación todavía no está disponible en este navegador.");
+    return;
+  }
 
   try{
-    btn.disabled=true;
-    btn.classList.add("installing");
-    btn.textContent="Abriendo instalador…";
+    [$("#installAppBtn"),$("#installAppMobileBtn")].forEach(item=>setInstallButtonBusy(item,true));
 
     deferredInstallPrompt.prompt();
     const choice=await deferredInstallPrompt.userChoice;
@@ -7959,10 +8022,16 @@ $("#installAppBtn").onclick=async()=>{
     console.error("PWA install",err);
     toast("No se pudo abrir el instalador.");
   }finally{
-    btn.textContent="Instalar App";
+    [$("#installAppBtn"),$("#installAppMobileBtn")].forEach(item=>setInstallButtonBusy(item,false));
     updateInstallAppButton();
   }
-};
+}
+
+[$("#installAppBtn"),$("#installAppMobileBtn")]
+  .filter(Boolean)
+  .forEach(btn=>btn.addEventListener("click",handleInstallApp));
+
+window.addEventListener("resize",updateInstallAppButton);
 
 function updateConnectionState(showToast=false){
   const online=navigator.onLine;
@@ -8007,7 +8076,7 @@ function runUniluvaHealthCheck(){
   const requiredIds=[
     "feed","communityGrid","rightCommunities","postCommunitySelect",
     "activeCommunityJoin","activeCommunityMembers","profileCommunityCount",
-    "postRichText","publishBtn","installAppBtn"
+    "postRichText","publishBtn","installAppBtn","installAppMobileBtn"
   ];
 
   for(const id of requiredIds){
