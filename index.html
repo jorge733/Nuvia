@@ -7712,14 +7712,26 @@ function pushDeviceLabel(){
 async function savePushToken(token,enabled=true){
   if(!state.user || !db)return;
   const tokenId=await pushTokenDocumentId(token);
-  await setDoc(doc(db,"users",state.user.uid,"pushTokens",tokenId),{
-    token,
-    enabled,
-    device:pushDeviceLabel(),
-    platform:navigator.platform||"web",
-    updatedAt:serverTimestamp(),
-    ...(enabled?{createdAt:serverTimestamp()}:{disabledAt:serverTimestamp()})
-  },{merge:true});
+  try{
+    await setDoc(doc(db,"users",state.user.uid,"pushTokens",tokenId),{
+      token,
+      enabled,
+      device:pushDeviceLabel(),
+      platform:navigator.platform||"web",
+      updatedAt:serverTimestamp(),
+      ...(enabled?{createdAt:serverTimestamp()}:{disabledAt:serverTimestamp()})
+    },{merge:true});
+  }catch(err){
+    if(err?.code!=="permission-denied")throw err;
+
+    // Compatibilidad con reglas que permiten editar el perfil propio,
+    // pero todavía no contemplan la subcolección pushTokens.
+    await setDoc(doc(db,"users",state.user.uid),{
+      pushTokens:enabled?arrayUnion(token):arrayRemove(token),
+      pushNotificationsEnabled:enabled,
+      pushNotificationsUpdatedAt:serverTimestamp()
+    },{merge:true});
+  }
 }
 
 async function registerPushDevice(){
@@ -7814,11 +7826,17 @@ async function togglePushNotifications(){
     toast("Avisos activados en este dispositivo.");
   }catch(err){
     console.error("enable push notifications",err);
-    updatePushNotificationUI(
-      err?.code==="messaging/permission-blocked"
-        ?"Los avisos están bloqueados en la configuración del navegador."
-        :"No se pudo registrar este dispositivo para recibir avisos."
-    );
+    const code=String(err?.code||err?.message||"error-desconocido");
+    const message=code==="messaging/permission-blocked"
+      ?"Los avisos están bloqueados en la configuración del navegador."
+      :code.includes("service-worker")
+        ?"No se pudo iniciar el servicio de notificaciones."
+        :code.includes("permission-denied")
+          ?"Firebase rechazó el guardado del dispositivo. Revisa las reglas de usuarios."
+          :code.includes("vapid")
+            ?"Firebase rechazó la clave web de notificaciones."
+            :"No se pudo registrar este dispositivo para recibir avisos.";
+    updatePushNotificationUI(`${message} · Código: ${code}`);
   }finally{
     btn.disabled=false;
     if(!pushIsEnabled())btn.textContent="Activar avisos";
