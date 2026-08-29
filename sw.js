@@ -1,4 +1,4 @@
-const CACHE_NAME = "uniluva-v15";
+const CACHE_NAME = "uniluva-v16";
 
 const CORE = [
   "/",
@@ -37,7 +37,9 @@ self.addEventListener("activate", event => {
 self.addEventListener("fetch", event => {
   const request = event.request;
 
-  if (request.method !== "GET") return;
+  if (request.method !== "GET") {
+    return;
+  }
 
   const url = new URL(request.url);
 
@@ -47,7 +49,9 @@ self.addEventListener("fetch", event => {
     url.hostname.includes("firebaseapp.com") ||
     url.hostname.includes("gstatic.com");
 
-  if (isFirebaseRequest) return;
+  if (isFirebaseRequest) {
+    return;
+  }
 
   event.respondWith(
     fetch(request)
@@ -74,7 +78,9 @@ self.addEventListener("fetch", event => {
       .catch(async () => {
         const cached = await caches.match(request);
 
-        if (cached) return cached;
+        if (cached) {
+          return cached;
+        }
 
         if (request.mode === "navigate") {
           return caches.match("/index.html");
