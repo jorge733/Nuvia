@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 120">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#D56BFF"/>
+      <stop offset="48%" stop-color="#7A5CFF"/>
+      <stop offset="100%" stop-color="#2F8DFF"/>
+    </linearGradient>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="4" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Isotype -->
+  <g transform="translate(14,8)">
+    <circle cx="56" cy="10" r="6" fill="#C16CFF" filter="url(#glow)"/>
+    <path d="M24 24
+             C24 17 30 12 37 12
+             C44 12 50 17 50 24
+             V62
+             C50 76 59 86 72 86
+             C85 86 94 76 94 62
+             V24
+             C94 17 100 12 107 12
+             C114 12 120 17 120 24
+             V64
+             C120 91 99 108 72 108
+             C45 108 24 91 24 64 Z"
+          fill="url(#g)"/>
+    <path d="M50 66
+             C54 79 62 86 72 86
+             C82 86 90 79 94 66
+             C89 92 80 104 72 108
+             C64 104 55 92 50 66 Z"
+          fill="#5C4CF5" opacity=".45"/>
+  </g>
+
+  <!-- Wordmark -->
+  <text x="156" y="76"
+        font-family="Inter, Poppins, Arial, sans-serif"
+        font-size="49"
+        font-weight="800"
+        letter-spacing="2"
+        fill="url(#g)">UNILUVA</text>
+</svg>

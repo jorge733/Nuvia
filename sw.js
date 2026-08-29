@@ -1,12 +1,28 @@
-const CACHE_NAME = "uniluva-v22-6";
+const CACHE_NAME = "uniluva-v24-1";
+const OFFLINE_URL = "/index.html";
 
 const CORE = [
   "/",
   "/index.html",
   "/manifest.json",
-  "/icon-192.png",
-  "/icon-512.png"
+  "/icon-192.svg",
+  "/icon-512.svg"
 ];
+
+const FIREBASE_HOSTS = [
+  "googleapis.com",
+  "firebaseio.com",
+  "firebaseapp.com",
+  "gstatic.com"
+];
+
+function isFirebaseRequest(url) {
+  return FIREBASE_HOSTS.some(
+    host =>
+      url.hostname === host ||
+      url.hostname.endsWith("." + host)
+  );
+}
 
 self.addEventListener("install", event => {
   self.skipWaiting();
@@ -15,24 +31,26 @@ self.addEventListener("install", event => {
     caches
       .open(CACHE_NAME)
       .then(cache => cache.addAll(CORE))
-      .catch(error => {
-        console.error("Error precargando Uniluva:", error);
-      })
   );
 });
 
 self.addEventListener("activate", event => {
   event.waitUntil(
-    caches
-      .keys()
-      .then(keys =>
+    Promise.all([
+      caches.keys().then(keys =>
         Promise.all(
           keys
-            .filter(key => key !== CACHE_NAME)
+            .filter(
+              key =>
+                key.startsWith("uniluva-") &&
+                key !== CACHE_NAME
+            )
             .map(key => caches.delete(key))
         )
-      )
-      .then(() => self.clients.claim())
+      ),
+
+      self.clients.claim()
+    ])
   );
 });
 
@@ -43,49 +61,55 @@ self.addEventListener("fetch", event => {
 
   const url = new URL(request.url);
 
-  const isFirebaseRequest =
-    url.hostname.includes("googleapis.com") ||
-    url.hostname.includes("firebaseio.com") ||
-    url.hostname.includes("firebaseapp.com") ||
-    url.hostname.includes("gstatic.com");
+  if (isFirebaseRequest(url)) return;
 
-  if (isFirebaseRequest) return;
+  if (request.mode === "navigate") {
+    event.respondWith(
+      fetch(request)
+        .then(response => {
+          const copy = response.clone();
+
+          caches
+            .open(CACHE_NAME)
+            .then(cache =>
+              cache.put(OFFLINE_URL, copy)
+            )
+            .catch(() => {});
+
+          return response;
+        })
+        .catch(() =>
+          caches.match(OFFLINE_URL)
+        )
+    );
+
+    return;
+  }
 
   event.respondWith(
-    fetch(request)
-      .then(response => {
-        if (
-          !response ||
-          response.status !== 200 ||
-          response.type === "opaque"
-        ) {
+    caches.match(request).then(cached => {
+      const network = fetch(request)
+        .then(response => {
+          if (
+            response &&
+            response.status === 200 &&
+            response.type !== "opaque"
+          ) {
+            const copy = response.clone();
+
+            caches
+              .open(CACHE_NAME)
+              .then(cache =>
+                cache.put(request, copy)
+              )
+              .catch(() => {});
+          }
+
           return response;
-        }
+        })
+        .catch(() => cached);
 
-        const clone = response.clone();
-
-        caches
-          .open(CACHE_NAME)
-          .then(cache => cache.put(request, clone))
-          .catch(error => {
-            console.error("Error guardando en caché:", error);
-          });
-
-        return response;
-      })
-      .catch(async () => {
-        const cached = await caches.match(request);
-
-        if (cached) return cached;
-
-        if (request.mode === "navigate") {
-          return caches.match("/index.html");
-        }
-
-        return new Response("Sin conexión", {
-          status: 503,
-          statusText: "Offline"
-        });
-      })
+      return cached || network;
+    })
   );
 });
