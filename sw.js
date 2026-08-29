@@ -1,4 +1,4 @@
-const CACHE_NAME = "uniluva-v11-2";
+const CACHE_NAME = "uniluva-v12";
 
 const CORE = [
   "/",
@@ -58,7 +58,11 @@ self.addEventListener("fetch", event => {
   event.respondWith(
     fetch(request)
       .then(response => {
-        if (!response || response.status !== 200 || response.type === "opaque") {
+        if (
+          !response ||
+          response.status !== 200 ||
+          response.type === "opaque"
+        ) {
           return response;
         }
 
