@@ -1,4 +1,4 @@
-const CACHE_NAME = "uniluva-v12-2";
+const CACHE_NAME = "uniluva-v12-3";
 
 const CORE = [
   "/",
@@ -25,13 +25,11 @@ self.addEventListener("activate", event => {
   event.waitUntil(
     caches
       .keys()
-      .then(keys => {
-        return Promise.all(
-          keys
-            .filter(key => key !== CACHE_NAME)
-            .map(key => caches.delete(key))
-        );
-      })
+      .then(keys => Promise.all(
+        keys
+          .filter(key => key !== CACHE_NAME)
+          .map(key => caches.delete(key))
+      ))
       .then(() => self.clients.claim())
   );
 });
@@ -39,9 +37,7 @@ self.addEventListener("activate", event => {
 self.addEventListener("fetch", event => {
   const request = event.request;
 
-  if (request.method !== "GET") {
-    return;
-  }
+  if (request.method !== "GET") return;
 
   const url = new URL(request.url);
 
@@ -51,9 +47,7 @@ self.addEventListener("fetch", event => {
     url.hostname.includes("firebaseapp.com") ||
     url.hostname.includes("gstatic.com");
 
-  if (isFirebaseRequest) {
-    return;
-  }
+  if (isFirebaseRequest) return;
 
   event.respondWith(
     fetch(request)
@@ -66,11 +60,11 @@ self.addEventListener("fetch", event => {
           return response;
         }
 
-        const responseClone = response.clone();
+        const clone = response.clone();
 
         caches
           .open(CACHE_NAME)
-          .then(cache => cache.put(request, responseClone))
+          .then(cache => cache.put(request, clone))
           .catch(error => {
             console.error("Error guardando en caché:", error);
           });
@@ -78,11 +72,9 @@ self.addEventListener("fetch", event => {
         return response;
       })
       .catch(async () => {
-        const cachedResponse = await caches.match(request);
+        const cached = await caches.match(request);
 
-        if (cachedResponse) {
-          return cachedResponse;
-        }
+        if (cached) return cached;
 
         if (request.mode === "navigate") {
           return caches.match("/index.html");
