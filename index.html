@@ -9,9 +9,9 @@
 <link rel="icon" type="image/svg+xml" href="/icon-192.svg">
 <link rel="apple-touch-icon" href="/icon-192.svg">
 <title>Uniluva — Conecta. Descubre. Aporta.</title>
-<meta name="app-version" content="24.2">
+<meta name="app-version" content="24.3">
 
-<link rel="manifest" href="/manifest.json?v=24.2">
+<link rel="manifest" href="/manifest.json?v=24.3">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Uniluva">
@@ -7689,7 +7689,7 @@ function updatePushNotificationUI(forcedMessage=""){
 async function ensurePushServiceWorker(){
   let registration=await navigator.serviceWorker.getRegistration("/");
   if(!registration){
-    registration=await navigator.serviceWorker.register("/sw.js?v=24.2");
+    registration=await navigator.serviceWorker.register("/sw.js?v=24.3");
   }
   await navigator.serviceWorker.ready;
   return registration;
@@ -7773,10 +7773,29 @@ async function initializePushNotifications(){
 
   if(!messaging)messaging=getMessaging(app);
   if(!foregroundMessagingBound){
-    onMessage(messaging,payload=>{
+    onMessage(messaging,async payload=>{
       const title=payload.notification?.title||payload.data?.title||"Uniluva";
       const body=payload.notification?.body||payload.data?.body||"Tienes una nueva notificación.";
       toast(`${title}: ${body}`);
+      if(Notification.permission==="granted"){
+        try{
+          const registration=await navigator.serviceWorker.ready;
+          await registration.showNotification(title,{
+            body,
+            icon:"/icon-192.svg",
+            badge:"/icon-192.svg",
+            tag:payload.data?.notificationId||payload.data?.tag||"uniluva-foreground",
+            data:{
+              url:payload.fcmOptions?.link
+                ||payload.data?.url
+                ||payload.data?.link
+                ||"/"
+            }
+          });
+        }catch(err){
+          console.warn("foreground system notification",err);
+        }
+      }
       renderNotifications();
     });
     foregroundMessagingBound=true;
@@ -8337,7 +8356,7 @@ window.addEventListener("offline",()=>updateConnectionState(true));
 if("serviceWorker" in navigator){
   window.addEventListener("load",async()=>{
     try{
-      const registration=await navigator.serviceWorker.register("/sw.js?v=24.2");
+      const registration=await navigator.serviceWorker.register("/sw.js?v=24.3");
       registration.update().catch(()=>{});
     }catch(err){
       console.error("SW registration:",err);
@@ -8366,7 +8385,7 @@ function runUniluvaHealthCheck(){
   }
 
   const result={
-    version:"24.2",
+    version:"24.3",
     ok:issues.length===0,
     issues,
     communities:state.communities.length,
