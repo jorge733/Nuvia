@@ -9,9 +9,9 @@
 <link rel="icon" type="image/svg+xml" href="/icon-192.svg">
 <link rel="apple-touch-icon" href="/icon-192.svg">
 <title>Uniluva — Conecta. Descubre. Aporta.</title>
-<meta name="app-version" content="24.3">
+<meta name="app-version" content="24.4">
 
-<link rel="manifest" href="/manifest.json?v=24.3">
+<link rel="manifest" href="/manifest.json?v=24.4">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Uniluva">
@@ -3625,14 +3625,260 @@ select:focus-visible,
   }
 }
 
+/* Refinamiento de interfaz v24.4 */
+.ambient-bg{
+  position:fixed;
+  inset:0;
+  z-index:-1;
+  overflow:hidden;
+  pointer-events:none;
+}
+
+.ambient-orb{
+  position:absolute;
+  border-radius:50%;
+}
+
+.ambient-orb-one{
+  width:240px;
+  height:240px;
+  left:8%;
+  top:12%;
+  background:radial-gradient(circle,rgba(108,92,252,.16),transparent 70%);
+  filter:blur(2px);
+}
+
+.ambient-orb-two{
+  width:280px;
+  height:280px;
+  right:7%;
+  top:18%;
+  background:radial-gradient(circle,rgba(75,215,232,.14),transparent 70%);
+  filter:blur(2px);
+}
+
+.ambient-orb-three{
+  width:220px;
+  height:220px;
+  right:18%;
+  bottom:7%;
+  background:radial-gradient(circle,rgba(200,140,255,.12),transparent 70%);
+  filter:blur(4px);
+}
+
+#nameField,
+#authDiagnostic,
+#notifBadge{
+  display:none;
+}
+
+#authDiagnostic{
+  margin-top:12px;
+  padding:10px 12px;
+  border:1px solid #ffd4dc;
+  border-radius:12px;
+  color:#8f2940;
+  background:#fff3f5;
+  font-size:12px;
+  line-height:1.45;
+}
+
+.profile-feed-spacer{height:18px}
+.profile-feed-title{font-size:18px}
+.file-hint{display:block;margin-top:5px;color:var(--muted)}
+
+.post-actions{
+  gap:7px;
+  margin-top:2px;
+  padding:6px;
+  border:1px solid rgba(106,91,205,.10);
+  border-radius:16px;
+  background:linear-gradient(135deg,rgba(248,248,255,.88),rgba(242,248,255,.74));
+}
+
+.reaction{
+  position:relative;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  min-width:0;
+  padding:8px 9px;
+  border:1px solid transparent;
+  border-radius:12px;
+  color:#63687a;
+  background:transparent;
+  font-size:11.5px;
+  font-weight:750;
+  line-height:1.1;
+  transition:color .18s ease,background .18s ease,border-color .18s ease,box-shadow .18s ease,transform .18s ease;
+}
+
+.reaction:hover{
+  border-color:rgba(102,88,210,.14);
+  background:rgba(255,255,255,.82);
+  transform:translateY(-1px);
+}
+
+.reaction:focus-visible{
+  outline:3px solid rgba(109,93,252,.25);
+  outline-offset:2px;
+}
+
+.reaction-icon{
+  display:grid;
+  place-items:center;
+  width:24px;
+  height:24px;
+  flex:0 0 24px;
+  border-radius:9px;
+  background:rgba(105,97,170,.08);
+  font-size:16px;
+  transition:transform .18s ease,background .18s ease;
+}
+
+.reaction-icon svg{
+  width:18px;
+  height:18px;
+  fill:none;
+  stroke:currentColor;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+  stroke-width:1.9;
+}
+
+.reaction[aria-pressed="true"]{
+  border-color:currentColor;
+  box-shadow:0 7px 18px rgba(76,61,160,.10);
+}
+
+.reaction.active-like{
+  color:#d94367;
+  border-color:rgba(217,67,103,.25);
+  background:linear-gradient(135deg,rgba(255,239,244,.96),rgba(255,247,250,.88));
+}
+
+.reaction.active-like .reaction-icon{
+  background:rgba(217,67,103,.12);
+  animation:heart-pop .28s ease-out;
+}
+
+.reaction.active-like .reaction-icon svg{fill:currentColor}
+
+.reaction.active-value{
+  color:#6548db;
+  border-color:rgba(101,72,219,.23);
+  background:rgba(241,238,255,.92);
+}
+
+.reaction.active-help{
+  color:#168563;
+  border-color:rgba(22,133,99,.22);
+  background:rgba(235,250,245,.92);
+}
+
+.reaction:disabled{cursor:wait;opacity:.62;transform:none}
+
+@keyframes heart-pop{
+  0%{transform:scale(.72)}
+  60%{transform:scale(1.18)}
+  100%{transform:scale(1)}
+}
+
+@media(min-width:1181px){
+  :root{--nu-shell:min(1400px,calc(100% - 40px))}
+  .topbar{grid-template-columns:230px minmax(0,720px) 320px}
+  .app-layout{grid-template-columns:230px minmax(0,720px) 320px}
+}
+
+@media(min-width:861px) and (max-width:1100px){
+  .topbar{grid-template-columns:82px minmax(0,720px) auto!important;max-width:930px}
+  .app-layout{grid-template-columns:82px minmax(0,720px)!important;max-width:840px}
+  .rightbar{display:none!important}
+}
+
+@media(max-width:860px){
+  body:not(.app-open){padding-bottom:0!important}
+
+  .auth{
+    display:block;
+    min-height:100dvh;
+  }
+
+  .auth-panel{
+    min-height:100dvh;
+    padding:max(18px,env(safe-area-inset-top)) 16px max(18px,env(safe-area-inset-bottom));
+  }
+
+  .auth-card{
+    width:min(100%,460px);
+    padding:clamp(21px,6vw,30px);
+    border-radius:24px;
+  }
+
+  .composer-actions{
+    display:grid!important;
+    grid-template-columns:1fr 1.25fr;
+    width:100%;
+  }
+
+  .composer-actions button{width:100%}
+
+  .post-actions{
+    gap:4px!important;
+    padding:5px!important;
+    border-radius:14px!important;
+  }
+
+  .reaction{
+    gap:5px!important;
+    padding:7px 4px!important;
+    font-size:10.5px!important;
+  }
+
+  .reaction-icon{
+    width:22px;
+    height:22px;
+    flex-basis:22px;
+    font-size:14px;
+  }
+}
+
+@media(max-width:430px){
+  .auth-panel{padding-left:12px;padding-right:12px}
+  .auth-card{padding:21px 18px}
+  .reaction-label{overflow:hidden;text-overflow:ellipsis}
+}
+
+@media(max-width:360px){
+  .reaction{gap:3px!important;font-size:9px!important}
+  .reaction-icon{width:20px;height:20px;flex-basis:20px}
+}
+
+@media(max-width:430px) and (max-height:760px){
+  .auth-panel{align-items:flex-start;padding-top:12px;padding-bottom:12px}
+  .auth-card{padding-top:18px;padding-bottom:18px}
+  .auth-card>p{margin-bottom:14px}
+  .auth-tabs{margin-bottom:14px}
+  .field{margin-bottom:10px}
+}
+
+@media(hover:none){
+  .post:hover,
+  .community-card:hover,
+  .user-card:hover,
+  .result:hover,
+  .reaction:hover{transform:none}
+}
+
 </style>
 </head>
 <body>
 <a class="skip-link" href="#mainContent">Saltar al contenido principal</a>
-<div aria-hidden="true" style="position:fixed;inset:0;pointer-events:none;z-index:-1;overflow:hidden">
-  <div style="position:absolute;width:240px;height:240px;border-radius:50%;left:8%;top:12%;background:radial-gradient(circle,rgba(108,92,252,.16),transparent 70%);filter:blur(2px)"></div>
-  <div style="position:absolute;width:280px;height:280px;border-radius:50%;right:7%;top:18%;background:radial-gradient(circle,rgba(75,215,232,.14),transparent 70%);filter:blur(2px)"></div>
-  <div style="position:absolute;width:220px;height:220px;border-radius:50%;right:18%;bottom:7%;background:radial-gradient(circle,rgba(200,140,255,.12),transparent 70%);filter:blur(4px)"></div>
+<div class="ambient-bg" aria-hidden="true">
+  <div class="ambient-orb ambient-orb-one"></div>
+  <div class="ambient-orb ambient-orb-two"></div>
+  <div class="ambient-orb ambient-orb-three"></div>
 </div>
 
 <section id="authView" class="auth">
@@ -3649,25 +3895,25 @@ select:focus-visible,
     <div class="auth-card">
       <h2>Bienvenido a Uniluva</h2>
       <p id="authSubtitle">Ingresa a tu cuenta.</p>
-      <div class="auth-tabs"><button class="active" id="tabLogin">Entrar</button><button id="tabRegister">Crear cuenta</button></div>
-      <div class="field" id="nameField" style="display:none"><label for="authName">Nombre</label><input id="authName" autocomplete="name" placeholder="Tu nombre"></div>
+      <div class="auth-tabs"><button type="button" class="active" id="tabLogin">Entrar</button><button type="button" id="tabRegister">Crear cuenta</button></div>
+      <div class="field" id="nameField"><label for="authName">Nombre</label><input type="text" id="authName" autocomplete="name" placeholder="Tu nombre"></div>
       <div class="field"><label for="authEmail">Correo</label><input id="authEmail" type="email" inputmode="email" autocomplete="email" placeholder="tu@correo.com" required></div>
       <div class="field"><label for="authPassword">Contraseña</label><input id="authPassword" type="password" autocomplete="current-password" placeholder="Mínimo 6 caracteres" minlength="6" required></div>
-      <button class="primary full" id="authSubmit">Entrar a Uniluva</button>
+      <button type="button" class="primary full" id="authSubmit">Entrar a Uniluva</button>
       <button class="auth-reset-link" id="forgotPasswordBtn" type="button">¿Olvidaste tu contraseña?</button>
       <div class="auth-divider">o</div>
-      <button class="google-btn" id="googleSignIn">
+      <button type="button" class="google-btn" id="googleSignIn">
         <span class="google-g">G</span>
         Continuar con Google
       </button>
-      <div class="auth-note" id="authModeNote">Si ocurre un problema de acceso, Uniluva mostrará aquí el detalle.</div><div id="authDiagnostic" role="alert" aria-live="assertive" style="display:none;margin-top:12px;padding:10px 12px;border-radius:12px;background:#fff3f5;border:1px solid #ffd4dc;color:#8f2940;font-size:12px;line-height:1.45"></div>
+      <div class="auth-note" id="authModeNote">Si ocurre un problema de acceso, Uniluva mostrará aquí el detalle.</div><div id="authDiagnostic" role="alert" aria-live="assertive"></div>
     </div>
   </div>
 </section>
 
 <section id="appView" class="hidden">
   <header class="topbar">
-    <div class="top-brand" aria-label="Uniluva">
+    <div class="top-brand">
       <img class="top-brand-icon" alt="" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNDQgMTQ0Ij4KICA8ZGVmcz4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0iZyIgeDE9IjAiIHkxPSIwIiB4Mj0iMSIgeTI9IjEiPgogICAgICA8c3RvcCBvZmZzZXQ9IjAlIiBzdG9wLWNvbG9yPSIjRDU2QkZGIi8+CiAgICAgIDxzdG9wIG9mZnNldD0iNDglIiBzdG9wLWNvbG9yPSIjN0E1Q0ZGIi8+CiAgICAgIDxzdG9wIG9mZnNldD0iMTAwJSIgc3RvcC1jb2xvcj0iIzJGOERGRiIvPgogICAgPC9saW5lYXJHcmFkaWVudD4KICA8L2RlZnM+CiAgPHJlY3Qgd2lkdGg9IjE0NCIgaGVpZ2h0PSIxNDQiIHJ4PSIzNCIgZmlsbD0iIzBBMEYxRCIvPgogIDxjaXJjbGUgY3g9IjcyIiBjeT0iMjQiIHI9IjYiIGZpbGw9IiNENTZCRkYiLz4KICA8cGF0aCBkPSJNMzIgMzYKICAgICAgICAgICBDMzIgMjggMzggMjIgNDYgMjIKICAgICAgICAgICBDNTQgMjIgNjAgMjggNjAgMzYKICAgICAgICAgICBWNzcKICAgICAgICAgICBDNjAgOTAgNjUgOTggNzIgOTgKICAgICAgICAgICBDNzkgOTggODQgOTAgODQgNzcKICAgICAgICAgICBWMzYKICAgICAgICAgICBDODQgMjggOTAgMjIgOTggMjIKICAgICAgICAgICBDMTA2IDIyIDExMiAyOCAxMTIgMzYKICAgICAgICAgICBWNzgKICAgICAgICAgICBDMTEyIDEwNiA5NCAxMjIgNzIgMTIyCiAgICAgICAgICAgQzUwIDEyMiAzMiAxMDYgMzIgNzggWiIKICAgICAgICBmaWxsPSJ1cmwoI2cpIi8+Cjwvc3ZnPg==">
       <span class="top-brand-name">UNILUVA</span>
     </div>
@@ -3676,23 +3922,23 @@ select:focus-visible,
       <input id="globalSearch" type="search" aria-label="Buscar en Uniluva" autocomplete="off" placeholder="Busca personas, comunidades o ideas">
     </div>
     <div class="top-actions">
-      <button class="icon-btn" id="notificationsTop" title="Notificaciones" aria-label="Abrir notificaciones"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg></button>
-      <button class="icon-btn" id="profileTop" title="Perfil" aria-label="Abrir perfil"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></button><button class="icon-btn" id="signOutTop" title="Cerrar sesión" aria-label="Cerrar sesión"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/><path d="M13 3h7v18h-7"/></svg></button>
+      <button type="button" class="icon-btn" id="notificationsTop" title="Notificaciones" aria-label="Abrir notificaciones"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg></button>
+      <button type="button" class="icon-btn" id="profileTop" title="Perfil" aria-label="Abrir perfil"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></button><button type="button" class="icon-btn" id="signOutTop" title="Cerrar sesión" aria-label="Cerrar sesión"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/><path d="M13 3h7v18h-7"/></svg></button>
       <div class="avatar" id="topAvatar">N</div>
     </div>
   </header>
 
   <div class="app-layout">
-    <aside class="sidebar">
-      <nav class="nav">
-        <button class="active" data-page="home"><svg class="icon" viewBox="0 0 24 24"><path d="m3 11 9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M9 20v-6h6v6"/></svg><span class="nav-label">Inicio</span></button>
-        <button data-page="discover"><svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><span class="nav-label">Descubrir</span></button>
-        <button data-page="communities"><svg class="icon" viewBox="0 0 24 24"><circle cx="8" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M2.5 20a5.5 5.5 0 0 1 11 0"/><path d="M14 20a4 4 0 0 1 7.5-2"/></svg><span class="nav-label">Comunidades</span></button>
-        <button data-page="notifications"><svg class="icon" viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg><span class="nav-label">Notificaciones</span><span class="badge" id="notifBadge" style="display:none">0</span></button>
-        <button data-page="profile"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span class="nav-label">Perfil</span></button>
+    <aside class="sidebar" aria-label="Barra lateral principal">
+      <nav class="nav" aria-label="Secciones de Uniluva">
+        <button type="button" class="active" data-page="home"><svg class="icon" viewBox="0 0 24 24"><path d="m3 11 9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M9 20v-6h6v6"/></svg><span class="nav-label">Inicio</span></button>
+        <button type="button" data-page="discover"><svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><span class="nav-label">Descubrir</span></button>
+        <button type="button" data-page="communities"><svg class="icon" viewBox="0 0 24 24"><circle cx="8" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M2.5 20a5.5 5.5 0 0 1 11 0"/><path d="M14 20a4 4 0 0 1 7.5-2"/></svg><span class="nav-label">Comunidades</span></button>
+        <button type="button" data-page="notifications"><svg class="icon" viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg><span class="nav-label">Notificaciones</span><span class="badge" id="notifBadge">0</span></button>
+        <button type="button" data-page="profile"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span class="nav-label">Perfil</span></button>
       </nav>
-      <button class="create-main" id="createMain">＋ Crear</button>
-<button class="install-app-btn" id="installAppBtn">
+      <button type="button" class="create-main" id="createMain">＋ Crear</button>
+<button type="button" class="install-app-btn" id="installAppBtn">
   <svg class="icon" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
   <span data-install-label>Instalar Uniluva</span>
 </button>
@@ -3704,11 +3950,11 @@ select:focus-visible,
       <div class="firebase-banner" id="firebaseBanner"><strong>Modo demo.</strong> Agrega tu configuración de Firebase en el bloque <code>firebaseConfig</code> para activar cuentas y publicaciones en tiempo real.</div>
 
       <section class="page active" id="page-home"><div class="connection-pill" id="connectionPill"><span class="connection-dot"></span><span id="connectionText">Conectado</span></div>
-        <div class="feed-tabs"><button class="active" data-feed="forYou">Para ti</button><button data-feed="following">Siguiendo</button><button data-feed="recent">Reciente</button></div>
+        <div class="feed-tabs"><button type="button" class="active" data-feed="forYou">Para ti</button><button type="button" data-feed="following">Siguiendo</button><button type="button" data-feed="recent">Reciente</button></div>
 
         <div class="card composer">
           <div class="composer-line"><div class="avatar" id="composerAvatar">N</div>
-<div class="text-format-toolbar" id="textFormatToolbar" aria-label="Formato de texto">
+<div class="text-format-toolbar" id="textFormatToolbar" role="toolbar" aria-label="Formato de texto">
   <button type="button" class="format-btn" data-format="bold" title="Negrita" aria-label="Negrita"><strong>B</strong></button>
   <button type="button" class="format-btn" data-format="italic" title="Cursiva" aria-label="Cursiva"><em>I</em></button>
   <button type="button" class="format-btn" data-format="underline" title="Subrayado" aria-label="Subrayado"><u>U</u></button>
@@ -3717,11 +3963,12 @@ select:focus-visible,
   <button type="button" class="format-btn quote-format-btn" data-format="quote" title="Cita" aria-label="Cita">❝</button>
 </div>
 
-
+<!-- [html-validate-disable-next prefer-native-element -- El editor enriquecido requiere contenteditable] -->
 <div id="postRichText"
      class="post-rich-editor"
      contenteditable="true"
      role="textbox"
+     aria-label="Contenido de la publicación"
      aria-multiline="true"
      data-placeholder="Comparte algo que pueda aportar a otros..."></div>
 <textarea id="postText" hidden aria-hidden="true"></textarea></div>
@@ -3729,13 +3976,13 @@ select:focus-visible,
             <div class="tools">
               <input type="file" id="photoInput" accept="image/*" hidden>
               <input type="file" id="audioInput" accept="audio/*" hidden>
-              <button class="tool" id="photoBtn"><svg class="icon icon-sm" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9" r="1.5"/><path d="m21 15-5-5L5 20"/></svg>Foto</button>
-              <button class="tool" id="audioBtn"><svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M9 18V5l10-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="16" cy="16" r="3"/></svg>Audio</button>
-              <button class="tool" id="pollBtn"><svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M4 19h16"/><path d="M7 16V8"/><path d="M12 16V5"/><path d="M17 16v-4"/></svg>Encuesta</button>
+              <button type="button" class="tool" id="photoBtn"><svg class="icon icon-sm" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9" r="1.5"/><path d="m21 15-5-5L5 20"/></svg>Foto</button>
+              <button type="button" class="tool" id="audioBtn"><svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M9 18V5l10-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="16" cy="16" r="3"/></svg>Audio</button>
+              <button type="button" class="tool" id="pollBtn"><svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M4 19h16"/><path d="M7 16V8"/><path d="M12 16V5"/><path d="M17 16v-4"/></svg>Encuesta</button>
             </div>
-            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-              <button class="preview-btn" id="previewPostBtn">Vista previa</button>
-              <button class="publish" id="publishBtn">Publicar</button>
+            <div class="composer-actions">
+              <button type="button" class="preview-btn" id="previewPostBtn">Vista previa</button>
+              <button type="button" class="publish" id="publishBtn">Publicar</button>
             </div>
           </div>
 
@@ -3752,7 +3999,7 @@ select:focus-visible,
 
           <div class="media-preview-wrap" id="mediaPreviewWrap">
             <div class="media-preview">
-              <div class="media-preview-head"><strong id="mediaPreviewName">Archivo</strong><button class="remove-media" id="removeMedia">Quitar</button></div>
+              <div class="media-preview-head"><strong id="mediaPreviewName">Archivo</strong><button type="button" class="remove-media" id="removeMedia">Quitar</button></div>
               <div id="mediaPreviewContent"></div>
             </div>
           </div>
@@ -3763,15 +4010,15 @@ select:focus-visible,
           <div class="poll-builder" id="pollBuilder">
             <div class="poll-builder-head">
               <strong>Crear encuesta</strong>
-              <button class="remove-media" id="removePoll">Quitar</button>
+              <button type="button" class="remove-media" id="removePoll">Quitar</button>
             </div>
             <div class="field">
               <label>Pregunta</label>
-              <input id="pollQuestion" maxlength="160" placeholder="¿Qué quieres preguntar?">
+              <input type="text" id="pollQuestion" maxlength="160" placeholder="¿Qué quieres preguntar?">
             </div>
             <div class="poll-builder-options" id="pollOptions"></div>
             <div class="poll-builder-actions">
-              <button class="poll-add-option" id="addPollOption">+ Añadir opción</button>
+              <button type="button" class="poll-add-option" id="addPollOption">+ Añadir opción</button>
               <small>Entre 2 y 6 opciones.</small>
             </div>
           </div>
@@ -3782,7 +4029,7 @@ select:focus-visible,
           <div class="eyebrow">Descubrimiento Uniluva</div>
           <h3>Normalmente exploras tecnología. Hoy descubre fotografía urbana.</h3>
           <p>Uniluva reserva espacio para mostrarte ideas fuera de tu burbuja habitual.</p>
-          <div class="discovery-actions"><button class="soft-btn" id="discoverPhoto">Explorar fotografía</button><button class="soft-btn" id="discoverOther">Muéstrame otra cosa</button></div>
+          <div class="discovery-actions"><button type="button" class="soft-btn" id="discoverPhoto">Explorar fotografía</button><button type="button" class="soft-btn" id="discoverOther">Muéstrame otra cosa</button></div>
         </div>
 
         <div id="feed"></div>
@@ -3799,12 +4046,12 @@ select:focus-visible,
             <h2>Comunidades</h2>
             <p>Encuentra personas, ideas y conversaciones alrededor de intereses compartidos.</p>
           </div>
-          <button class="primary create-community-btn" id="createCommunityBtn">+ Crear comunidad</button>
+          <button type="button" class="primary create-community-btn" id="createCommunityBtn">+ Crear comunidad</button>
         </div>
         <div class="community-filter-row">
-          <button class="community-filter active" data-community-filter="all">Todas</button>
-          <button class="community-filter" data-community-filter="joined">Mis comunidades</button>
-          <button class="community-filter" data-community-filter="discover">Descubrir</button>
+          <button type="button" class="community-filter active" data-community-filter="all">Todas</button>
+          <button type="button" class="community-filter" data-community-filter="joined">Mis comunidades</button>
+          <button type="button" class="community-filter" data-community-filter="discover">Descubrir</button>
         </div>
         <div class="grid2" id="communityGrid"></div>
       </section>
@@ -3820,14 +4067,14 @@ select:focus-visible,
                 <p id="activeCommunityDesc"></p>
               </div>
               <div class="community-hero-actions">
-                <button class="community-manage-btn" id="manageCommunityBtn" hidden>Administrar</button>
-                <button class="join" id="activeCommunityJoin">Unirme</button>
+                <button type="button" class="community-manage-btn" id="manageCommunityBtn" hidden>Administrar</button>
+                <button type="button" class="join" id="activeCommunityJoin">Unirme</button>
               </div>
             </div>
           </div>
           <div class="community-info-bar">
             <div><strong id="activeCommunityMembers">0 miembros</strong><small id="activeCommunityCategory"></small></div>
-            <button class="secondary" id="backCommunities">← Todas las comunidades</button>
+            <button type="button" class="secondary" id="backCommunities">← Todas las comunidades</button>
           </div>
         </div>
 
@@ -3839,7 +4086,7 @@ select:focus-visible,
             </div>
             <div id="activeCommunityFeed"></div>
           </div>
-          <aside class="card community-rules">
+          <aside class="card community-rules" aria-label="Reglas de la comunidad">
             <h3>Reglas de la comunidad</h3>
             <ol id="activeCommunityRules"></ol>
           </aside>
@@ -3847,7 +4094,7 @@ select:focus-visible,
       </section>
 
       <section class="page" id="page-notifications">
-        <div class="section-head"><div><h2>Notificaciones</h2><p>Interacciones relevantes, sin ruido innecesario.</p></div><button class="secondary" id="markRead">Marcar leídas</button></div>
+        <div class="section-head"><div><h2>Notificaciones</h2><p>Interacciones relevantes, sin ruido innecesario.</p></div><button type="button" class="secondary" id="markRead">Marcar leídas</button></div>
         <div class="card notification-settings" id="pushNotificationSettings">
           <div class="notification-settings-copy">
             <strong>Avisos en este dispositivo</strong>
@@ -3866,8 +4113,8 @@ select:focus-visible,
             <div class="profile-top">
               <div class="avatar-lg" id="viewUserAvatar">U</div>
               <div class="profile-actions">
-                <button class="secondary" id="blockUserBtn">Bloquear</button>
-                <button class="follow-btn" id="followUserBtn">Seguir</button>
+                <button type="button" class="secondary" id="blockUserBtn">Bloquear</button>
+                <button type="button" class="follow-btn" id="followUserBtn">Seguir</button>
               </div>
             </div>
             <div class="profile-info">
@@ -3883,9 +4130,9 @@ select:focus-visible,
           </div>
         </div>
         <div class="profile-tabs">
-          <button class="active">Publicaciones</button>
-          <button>Acerca de</button>
-          <button>Comunidades</button>
+          <button type="button" class="active">Publicaciones</button>
+          <button type="button">Acerca de</button>
+          <button type="button">Comunidades</button>
         </div>
         <div id="viewUserFeed"></div>
       </section>
@@ -3894,19 +4141,19 @@ select:focus-visible,
         <div class="card profile-card">
           <div class="cover"></div>
           <div class="profile-body">
-            <div class="profile-top"><div class="avatar-lg" id="profileAvatar">N</div><button class="secondary" id="editProfile">Editar perfil</button></div>
+            <div class="profile-top"><div class="avatar-lg" id="profileAvatar">N</div><button type="button" class="secondary" id="editProfile">Editar perfil</button></div>
             <div class="profile-info"><h2 id="profileName">Usuario</h2><small id="profileUser">@usuario</small><p id="profileBio">Explorando ideas, comunidades y contenido que aporta.</p>
               <div class="profile-stats"><span><strong id="profilePostCount">0</strong> publicaciones</span><span><strong id="profileFollowers">0</strong> seguidores</span><span><strong id="profileFollowing">0</strong> siguiendo</span><span><strong id="profileCommunityCount">0</strong> comunidades</span></div>
             </div>
           </div>
         </div>
-        <div style="height:18px"></div>
-        <div class="section-head"><div><h2 style="font-size:18px">Tus publicaciones</h2></div></div>
+        <div class="profile-feed-spacer"></div>
+        <div class="section-head"><div><h2 class="profile-feed-title">Tus publicaciones</h2></div></div>
         <div id="profileFeed"></div>
       </section>
     </main>
 
-    <aside class="rightbar">
+    <aside class="rightbar" aria-label="Contenido recomendado">
       <div class="card right-card statement"><strong>Una buena publicación debería encontrar a quien realmente necesita verla.</strong><p>En Uniluva, el valor de un aporte importa más que el tamaño de tu audiencia.</p></div>
       <div class="card right-card"><h3>Comunidades para descubrir</h3><div id="rightCommunities"></div></div>
     </aside>
@@ -3918,41 +4165,39 @@ select:focus-visible,
   </button>
 
   <nav class="mobile-nav" aria-label="Navegación principal">
-    <button class="active" data-page="home" aria-label="Inicio"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="m3 11 9-8 9 8"/><path d="M5 10v10h14V10"/></svg></button>
-    <button data-page="discover" aria-label="Descubrir"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button>
-    <button class="create-fab" id="mobileCreate" aria-label="Crear publicación">＋</button>
-    <button data-page="communities" aria-label="Comunidades"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><circle cx="8" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M2.5 20a5.5 5.5 0 0 1 11 0"/></svg></button>
-    <button data-page="profile" aria-label="Perfil"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></button>
+    <button type="button" class="active" data-page="home" aria-label="Inicio"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><path d="m3 11 9-8 9 8"/><path d="M5 10v10h14V10"/></svg></button>
+    <button type="button" data-page="discover" aria-label="Descubrir"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button>
+    <button type="button" class="create-fab" id="mobileCreate" aria-label="Crear publicación">＋</button>
+    <button type="button" data-page="communities" aria-label="Comunidades"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><circle cx="8" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M2.5 20a5.5 5.5 0 0 1 11 0"/></svg></button>
+    <button type="button" data-page="profile" aria-label="Perfil"><svg class="icon" aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></button>
   </nav>
 </section>
-
-</div>
 
 
 <div class="modal-bg" id="communityManageModal">
   <div class="modal">
     <div class="modal-head">
       <h3>Administrar comunidad</h3>
-      <button class="close" data-close="communityManageModal">×</button>
+      <button type="button" class="close" data-close="communityManageModal" aria-label="Cerrar">×</button>
     </div>
 
     <div class="community-cover-editor">
       <div class="community-cover-preview" id="communityCoverPreview">Portada</div>
       <div>
         <input type="file" id="communityCoverInput" accept="image/jpeg,image/png,image/webp" hidden>
-        <button class="secondary" id="chooseCommunityCover">Cambiar portada</button>
-        <small style="display:block;margin-top:5px;color:var(--muted)">JPG, PNG o WebP. Máximo 8 MB.</small>
+        <button type="button" class="secondary" id="chooseCommunityCover">Cambiar portada</button>
+        <small class="file-hint">JPG, PNG o WebP. Máximo 8 MB.</small>
       </div>
     </div>
 
     <div class="community-manage-grid">
       <div class="field">
         <label>Nombre</label>
-        <input id="manageCommunityName" maxlength="60">
+        <input type="text" id="manageCommunityName" maxlength="60">
       </div>
       <div class="field">
         <label>Categoría</label>
-        <input id="manageCommunityCategory" maxlength="40">
+        <input type="text" id="manageCommunityCategory" maxlength="40">
       </div>
     </div>
 
@@ -3966,7 +4211,7 @@ select:focus-visible,
       <textarea id="manageCommunityRules" rows="5"></textarea>
     </div>
 
-    <button class="primary full" id="saveCommunityChanges">Guardar cambios</button>
+    <button type="button" class="primary full" id="saveCommunityChanges">Guardar cambios</button>
 
     <div class="card community-manage-card">
       <strong>Miembros y roles</strong>
@@ -3979,11 +4224,11 @@ select:focus-visible,
   <div class="modal">
     <div class="modal-head">
       <h3>Crear comunidad</h3>
-      <button class="close" data-close="createCommunityModal">×</button>
+      <button type="button" class="close" data-close="createCommunityModal" aria-label="Cerrar">×</button>
     </div>
     <div class="field">
       <label>Nombre</label>
-      <input id="newCommunityName" maxlength="60" placeholder="Ej. Fotografía nocturna">
+      <input type="text" id="newCommunityName" maxlength="60" placeholder="Ej. Fotografía nocturna">
     </div>
     <div class="field">
       <label>Descripción</label>
@@ -3991,13 +4236,13 @@ select:focus-visible,
     </div>
     <div class="field">
       <label>Categoría</label>
-      <input id="newCommunityCategory" maxlength="40" placeholder="Ej. Fotografía">
+      <input type="text" id="newCommunityCategory" maxlength="40" placeholder="Ej. Fotografía">
     </div>
     <div class="field">
       <label>Reglas (una por línea)</label>
       <textarea id="newCommunityRules" rows="5" placeholder="Conversar con respeto&#10;Compartir contenido relacionado&#10;Evitar spam"></textarea>
     </div>
-    <button class="primary full" id="saveCommunityBtn">Crear comunidad</button>
+    <button type="button" class="primary full" id="saveCommunityBtn">Crear comunidad</button>
   </div>
 </div>
 
@@ -4014,7 +4259,7 @@ select:focus-visible,
       <label>Nombre de usuario</label>
       <div class="username-wrap">
         <span class="username-prefix">@</span>
-        <input id="onboardingUsername"
+        <input type="text" id="onboardingUsername"
                maxlength="24"
                autocapitalize="none"
                autocomplete="off"
@@ -4028,7 +4273,7 @@ select:focus-visible,
       Usa entre 3 y 24 caracteres. Se permiten letras minúsculas, números, punto y guion bajo. No puede comenzar ni terminar con punto o guion bajo.
     </div>
 
-    <button class="primary full" id="saveOnboardingUsername" disabled>Continuar</button>
+    <button type="button" class="primary full" id="saveOnboardingUsername" disabled>Continuar</button>
   </div>
 </div>
 
@@ -4036,29 +4281,29 @@ select:focus-visible,
   <div class="modal">
     <div class="modal-head">
       <h3>Editar perfil</h3>
-      <button class="close" data-close="profileModal">×</button>
+      <button type="button" class="close" data-close="profileModal" aria-label="Cerrar">×</button>
     </div>
 
     <div class="profile-photo-editor">
       <div class="profile-photo-preview" id="editPhotoPreview">U</div>
       <div class="profile-photo-actions">
         <input type="file" id="profilePhotoInput" accept="image/jpeg,image/png,image/webp" hidden>
-        <button class="secondary" id="chooseProfilePhoto">Cambiar foto</button>
+        <button type="button" class="secondary" id="chooseProfilePhoto">Cambiar foto</button>
         <small>JPG, PNG o WebP. Máximo 8 MB.</small>
       </div>
     </div>
 
-    <div class="field"><label>Nombre</label><input id="editName" maxlength="70"></div>
+    <div class="field"><label>Nombre</label><input type="text" id="editName" maxlength="70"></div>
     <div class="field">
       <label>Nombre de usuario</label>
       <div class="username-wrap">
         <span class="username-prefix">@</span>
-        <input id="editUser" maxlength="24" autocapitalize="none" autocomplete="off" spellcheck="false">
+        <input type="text" id="editUser" maxlength="24" autocapitalize="none" autocomplete="off" spellcheck="false">
       </div>
       <div class="username-status" id="editUsernameStatus"></div>
     </div>
     <div class="field"><label>Biografía</label><textarea id="editBio" rows="3" maxlength="220"></textarea></div>
-    <button class="primary full" id="saveProfile">Guardar cambios</button>
+    <button type="button" class="primary full" id="saveProfile">Guardar cambios</button>
   </div>
 </div>
 
@@ -4066,13 +4311,13 @@ select:focus-visible,
   <div class="modal ui-dialog-card">
     <div class="modal-head">
       <h3 id="uiDialogTitle">Confirmar</h3>
-      <button class="close" id="uiDialogClose">×</button>
+      <button type="button" class="close" id="uiDialogClose" aria-label="Cerrar">×</button>
     </div>
     <p class="ui-dialog-message" id="uiDialogMessage"></p>
     <textarea class="ui-dialog-input" id="uiDialogInput" hidden></textarea>
     <div class="ui-dialog-actions">
-      <button class="secondary" id="uiDialogCancel">Cancelar</button>
-      <button class="primary" id="uiDialogConfirm">Aceptar</button>
+      <button type="button" class="secondary" id="uiDialogCancel">Cancelar</button>
+      <button type="button" class="primary" id="uiDialogConfirm">Aceptar</button>
     </div>
   </div>
 </div>
@@ -4083,13 +4328,13 @@ select:focus-visible,
   <div class="modal publish-preview">
     <div class="modal-head">
       <h3>Vista previa</h3>
-      <button class="close" data-close="publishPreviewModal">×</button>
+      <button type="button" class="close" data-close="publishPreviewModal" aria-label="Cerrar">×</button>
     </div>
     <div class="preview-shell">
       <div class="preview-post" id="publishPreviewContent"></div>
       <div class="preview-actions">
-        <button class="secondary" data-close="publishPreviewModal">Seguir editando</button>
-        <button class="primary" id="confirmPublishFromPreview">Publicar</button>
+        <button type="button" class="secondary" data-close="publishPreviewModal">Seguir editando</button>
+        <button type="button" class="primary" id="confirmPublishFromPreview">Publicar</button>
       </div>
     </div>
   </div>
@@ -4099,7 +4344,7 @@ select:focus-visible,
   <div class="modal create-hub">
     <div class="modal-head">
       <h3>Crear en Uniluva</h3>
-      <button class="close" data-close="createHubModal">×</button>
+      <button type="button" class="close" data-close="createHubModal" aria-label="Cerrar">×</button>
     </div>
 
     <div class="create-context-card">
@@ -4107,32 +4352,32 @@ select:focus-visible,
       <span>Puedes cambiar la comunidad y la audiencia antes de publicar.</span>
     </div>
     <div class="create-hub-grid">
-      <button class="create-hub-action" data-create-action="post">
-        <div class="create-hub-icon">Aa</div>
+      <button type="button" class="create-hub-action" data-create-action="post">
+        <span class="create-hub-icon" aria-hidden="true">Aa</span>
         <strong>Publicación</strong>
         <span>Comparte una idea, experiencia o aporte con tu comunidad.</span>
       </button>
 
-      <button class="create-hub-action" data-create-action="photo">
-        <div class="create-hub-icon">▧</div>
+      <button type="button" class="create-hub-action" data-create-action="photo">
+        <span class="create-hub-icon" aria-hidden="true">▧</span>
         <strong>Foto</strong>
         <span>Publica una imagen acompañada de texto o contexto.</span>
       </button>
 
-      <button class="create-hub-action" data-create-action="audio">
-        <div class="create-hub-icon">♪</div>
+      <button type="button" class="create-hub-action" data-create-action="audio">
+        <span class="create-hub-icon" aria-hidden="true">♪</span>
         <strong>Audio</strong>
         <span>Sube un archivo o graba directamente desde Uniluva.</span>
       </button>
 
-      <button class="create-hub-action" data-create-action="poll">
-        <div class="create-hub-icon">≋</div>
+      <button type="button" class="create-hub-action" data-create-action="poll">
+        <span class="create-hub-icon" aria-hidden="true">≋</span>
         <strong>Encuesta</strong>
         <span>Haz una pregunta y permite que la comunidad vote.</span>
       </button>
 
-      <button class="create-hub-action" data-create-action="community">
-        <div class="create-hub-icon">◎</div>
+      <button type="button" class="create-hub-action" data-create-action="community">
+        <span class="create-hub-icon" aria-hidden="true">◎</span>
         <strong>Comunidad</strong>
         <span>Crea un nuevo espacio alrededor de un interés compartido.</span>
       </button>
@@ -4144,16 +4389,16 @@ select:focus-visible,
   <div class="modal">
     <div class="modal-head">
       <h3>Agregar audio</h3>
-      <button class="close" data-close="audioModal">×</button>
+      <button type="button" class="close" data-close="audioModal" aria-label="Cerrar">×</button>
     </div>
 
     <div id="audioChoicePanel">
       <div class="audio-choice-grid">
-        <button class="audio-choice" id="chooseAudioFile">
+        <button type="button" class="audio-choice" id="chooseAudioFile">
           <strong>Subir un audio</strong>
           <span>Selecciona un archivo de audio guardado en tu teléfono o computador.</span>
         </button>
-        <button class="audio-choice" id="startAudioRecordingChoice">
+        <button type="button" class="audio-choice" id="startAudioRecordingChoice">
           <strong>Grabar ahora</strong>
           <span>Usa el micrófono del dispositivo y publica la grabación directamente.</span>
         </button>
@@ -4165,9 +4410,9 @@ select:focus-visible,
       <div class="record-time" id="recordTime">00:00</div>
       <div class="record-status" id="recordStatus">Listo para grabar</div>
       <div class="audio-recorder-actions">
-        <button class="primary" id="startRecordingBtn">Iniciar grabación</button>
-        <button class="secondary" id="stopRecordingBtn" disabled>Detener</button>
-        <button class="secondary" id="cancelRecordingBtn">Volver</button>
+        <button type="button" class="primary" id="startRecordingBtn">Iniciar grabación</button>
+        <button type="button" class="secondary" id="stopRecordingBtn" disabled>Detener</button>
+        <button type="button" class="secondary" id="cancelRecordingBtn">Volver</button>
       </div>
     </div>
   </div>
@@ -4261,7 +4506,9 @@ let state={
   blockedIds:[],
   followCountsLoadedAt:0,
   notifications:[],
-  notificationsLoaded:false
+  notificationsLoaded:false,
+  reactionTypes:{},
+  reactionLoads:{}
 };
 
 function toast(t){const e=$("#toast");e.textContent=t;e.classList.add("show");clearTimeout(window.__t);window.__t=setTimeout(()=>e.classList.remove("show"),1700)}
@@ -4547,10 +4794,14 @@ async function loadProfile(user){
  renderAll();
 }
 
-function openApp(){$("#authView").classList.add("hidden");$("#appView").classList.remove("hidden");renderAll();}
+function openApp(){document.body.classList.add("app-open");$("#authView").classList.add("hidden");$("#appView").classList.remove("hidden");renderAll();}
 if(FIREBASE_READY){
  onAuthStateChanged(auth,async user=>{
    if(user){
+     if(state.user?.uid!==user.uid){
+       state.reactionTypes={};
+       state.reactionLoads={};
+     }
      state.user=user;
 
      // Nunca bloquear la entrada esperando a Firestore.
@@ -4608,8 +4859,11 @@ if(FIREBASE_READY){
        unsubscribeNotifications=null;
      }
      state.user=null;
+     state.reactionTypes={};
+     state.reactionLoads={};
      state.notifications=[];
      state.notificationsLoaded=false;
+     document.body.classList.remove("app-open");
      $("#authView").classList.remove("hidden");
      $("#appView").classList.add("hidden");
    }
@@ -4678,11 +4932,11 @@ function renderPollBuilder(){
   $("#pollQuestion").value=state.pollDraft.question||"";
   $("#pollOptions").innerHTML=state.pollDraft.options.map((o,index)=>`
     <div class="poll-option-row">
-      <input class="poll-option-input" data-poll-option="${esc(o.id)}"
+      <input type="text" class="poll-option-input" data-poll-option="${esc(o.id)}"
              maxlength="100"
              placeholder="Opción ${index+1}"
              value="${esc(o.text||"")}">
-      <button class="poll-remove-option" data-remove-poll-option="${esc(o.id)}"
+      <button type="button" class="poll-remove-option" data-remove-poll-option="${esc(o.id)}"
               ${state.pollDraft.options.length<=2?"disabled":""}>×</button>
     </div>`).join("");
 
@@ -4850,7 +5104,7 @@ function pollHTML(p){
         const votes=Number(o.votes||0);
         const pct=total?Math.round((votes/total)*100):0;
         const selected=state.pollVotes[p.id]===o.id;
-        return `<button class="poll-vote ${selected?"selected":""}"
+        return `<button type="button" class="poll-vote ${selected?"selected":""}"
                         data-poll-post="${esc(p.id)}"
                         data-poll-option="${esc(o.id)}">
           <div class="poll-vote-bar" style="width:${pct}%"></div>
@@ -5116,24 +5370,82 @@ async function loadAccessiblePosts(){
   }
 }
 
+const reactionStateObserver="IntersectionObserver" in window
+ ? new IntersectionObserver(entries=>{
+     entries.forEach(entry=>{
+       if(!entry.isIntersecting)return;
+       reactionStateObserver.unobserve(entry.target);
+       syncReactionState(entry.target.dataset.id);
+     });
+   },{rootMargin:"240px 0px"})
+ : null;
+
+function queueReactionState(card){
+  if(!card)return;
+  if(reactionStateObserver)reactionStateObserver.observe(card);
+  else syncReactionState(card.dataset.id);
+}
+
+function applyReactionState(postId,type=""){
+  document.querySelectorAll(".post").forEach(card=>{
+    if(card.dataset.id!==postId)return;
+    card.querySelectorAll(".reaction").forEach(btn=>{
+      const active=btn.dataset.r===type;
+      btn.setAttribute("aria-pressed",String(active));
+      btn.classList.toggle("active-like",active&&type==="likes");
+      btn.classList.toggle("active-value",active&&type==="value");
+      btn.classList.toggle("active-help",active&&type==="help");
+    });
+  });
+}
+
+async function syncReactionState(postId){
+  if(!postId || !FIREBASE_READY || !state.user){
+    applyReactionState(postId,"");
+    return;
+  }
+  if(Object.prototype.hasOwnProperty.call(state.reactionTypes,postId)){
+    applyReactionState(postId,state.reactionTypes[postId]);
+    return;
+  }
+  if(state.reactionLoads[postId])return state.reactionLoads[postId];
+
+  const userId=state.user.uid;
+  state.reactionLoads[postId]=(async()=>{
+    try{
+      const snap=await getDoc(doc(db,"posts",postId,"reactions",userId));
+      if(state.user?.uid!==userId)return;
+      const type=snap.exists()?(snap.data().type||""):"";
+      state.reactionTypes[postId]=type;
+      applyReactionState(postId,type);
+    }catch(err){
+      console.error("sync reaction",err);
+    }finally{
+      delete state.reactionLoads[postId];
+    }
+  })();
+  return state.reactionLoads[postId];
+}
+
 function postHTML(p){
  const commentCount=Array.isArray(p.comments)?p.comments.length:Number(p.comments||0);
  const communityName=p.communityName||p.community||"Comunidad general";
  const communityKey=p.communityId||communityName;
+ const currentReaction=state.reactionTypes[p.id]||"";
  return `<article class="card post" data-id="${esc(p.id)}">
    <div class="post-head">
      <div class="avatar">${avatarHTML(p.authorPhotoURL||"",p.author||"Usuario")}</div>
      <div class="post-user">
        <strong class="profile-link" data-author-id="${esc(p.authorId||"")}">${esc(p.author||"Usuario")}</strong>
        <small>${esc(normalizeBrandText(p.user||"@usuario"))} · ${postTimeHTML(p)} <span class="post-visibility">${esc(postAudienceLabel(p))}</span></small>
-       <button class="community-tag community-link" data-community-key="${esc(communityKey)}">${esc(communityName)}</button>
+       <button type="button" class="community-tag community-link" data-community-key="${esc(communityKey)}">${esc(communityName)}</button>
      </div>
      <div class="post-menu-wrap">
-       <button class="post-menu">···</button>
+       <button type="button" class="post-menu" aria-label="Opciones de la publicación" title="Opciones">···</button>
        <div class="post-menu-panel">
-         <button class="copy-post-link">Copiar enlace</button>
-         <button class="report-post">Reportar publicación</button>
-         <button class="danger delete-post">Eliminar publicación</button>
+         <button type="button" class="copy-post-link">Copiar enlace</button>
+         <button type="button" class="report-post">Reportar publicación</button>
+         <button type="button" class="danger delete-post">Eliminar publicación</button>
        </div>
      </div>
    </div>
@@ -5149,16 +5461,19 @@ function postHTML(p){
      <span>◌ ${commentCount} comentarios</span>
    </div>
    <div class="post-actions">
-     <button class="reaction" data-r="likes">♡ Me gusta</button>
-     <button class="reaction" data-r="value">💡 Me aportó</button>
-     <button class="reaction" data-r="help">🤝 Me ayudó</button>
+     <button type="button" class="reaction reaction-like${currentReaction==="likes"?" active-like":""}" data-r="likes" aria-pressed="${currentReaction==="likes"}">
+       <span class="reaction-icon reaction-heart" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8Z"/></svg></span>
+       <span class="reaction-label">Me gusta</span>
+     </button>
+     <button type="button" class="reaction${currentReaction==="value"?" active-value":""}" data-r="value" aria-pressed="${currentReaction==="value"}"><span class="reaction-icon" aria-hidden="true">💡</span><span class="reaction-label">Me aportó</span></button>
+     <button type="button" class="reaction${currentReaction==="help"?" active-help":""}" data-r="help" aria-pressed="${currentReaction==="help"}"><span class="reaction-icon" aria-hidden="true">🤝</span><span class="reaction-label">Me ayudó</span></button>
    </div>
-   <button class="comment-btn">${commentCount ? `Ver ${commentCount} comentario${commentCount===1?"":"s"}` : "Comentar"}</button>
+   <button type="button" class="comment-btn">${commentCount ? `Ver ${commentCount} comentario${commentCount===1?"":"s"}` : "Comentar"}</button>
    <div class="comments-wrap" id="comments-${esc(p.id)}" hidden>
      <div class="comment-composer">
        <div class="avatar">${avatarHTML(state.profile.photoURL||"",state.profile.name||"Usuario")}</div>
-       <input class="comment-input" data-post-id="${esc(p.id)}" placeholder="Escribe un comentario..." maxlength="600">
-       <button class="comment-send" data-post-id="${esc(p.id)}">Enviar</button>
+       <input type="text" class="comment-input" data-post-id="${esc(p.id)}" placeholder="Escribe un comentario..." maxlength="600">
+       <button type="button" class="comment-send" data-post-id="${esc(p.id)}">Enviar</button>
      </div>
      <div class="comments-list" data-post-id="${esc(p.id)}"></div>
    </div>
@@ -5216,8 +5531,9 @@ function wirePosts(root){
    const p=state.posts.find(x=>x.id===id);
 
    card.querySelectorAll(".reaction").forEach(btn=>{
-     btn.onclick=()=>react(id,btn.dataset.r);
+     btn.onclick=()=>setReaction(id,btn.dataset.r);
    });
+   queueReactionState(card);
 
    card.querySelectorAll(".poll-vote").forEach(btn=>{
      btn.onclick=()=>votePoll(btn.dataset.pollPost,btn.dataset.pollOption);
@@ -5330,8 +5646,6 @@ function wirePosts(root){
  });
 }
 document.addEventListener("click",()=>$$(".post-menu-panel").forEach(m=>m.classList.remove("show")));
-
-async function react(id,key){ return setReaction(id,key); }
 
 function clearSelectedMedia(){
   if(state.previewObjectURL){
@@ -6462,8 +6776,8 @@ function renderCommunities(){
         <div class="community-card-actions">
           <div class="community-member-count">${Number(c.memberCount||0)} miembro${Number(c.memberCount||0)===1?"":"s"}</div>
           <div class="community-card-actions-right">
-            <button class="community-open" data-open-community="${esc(c.id)}">Ver comunidad</button>
-            <button class="join ${joined?"joined":""} ${loading?"loading":""}" data-community-id="${esc(c.id)}" ${loading?"disabled":""}>${joinButtonContent(joined,loading,false)}</button>
+            <button type="button" class="community-open" data-open-community="${esc(c.id)}">Ver comunidad</button>
+            <button type="button" class="join ${joined?"joined":""} ${loading?"loading":""}" data-community-id="${esc(c.id)}" ${loading?"disabled":""}>${joinButtonContent(joined,loading,false)}</button>
           </div>
         </div>
       </div>
@@ -6472,7 +6786,7 @@ function renderCommunities(){
 
   $("#rightCommunities").innerHTML=base.slice(0,3).map(c=>{
     const joined=isCommunityJoined(c);
-    return `<div class="community-mini" data-open-community="${esc(c.id)}"><strong>${esc(c.name)}</strong><p>${Number(c.memberCount||0)} miembros</p><button class="join ${joined?"joined":""}" data-community-id="${esc(c.id)}" aria-label="${joined?"Miembro de "+esc(c.name):"Unirme a "+esc(c.name)}">${joinButtonContent(joined,false,false)}</button></div>`;
+    return `<div class="community-mini" data-open-community="${esc(c.id)}"><strong>${esc(c.name)}</strong><p>${Number(c.memberCount||0)} miembros</p><button type="button" class="join ${joined?"joined":""}" data-community-id="${esc(c.id)}" aria-label="${joined?"Miembro de "+esc(c.name):"Unirme a "+esc(c.name)}">${joinButtonContent(joined,false,false)}</button></div>`;
   }).join("");
 
   $$("[data-open-community]").forEach(el=>el.onclick=e=>{e.stopPropagation();openCommunity(el.dataset.openCommunity);});
@@ -7135,6 +7449,10 @@ async function setReaction(postId,type){
   if(!FIREBASE_READY || !state.user){toast("Inicia sesión para reaccionar.");return;}
   const postRef=doc(db,"posts",postId);
   const reactionRef=doc(db,"posts",postId,"reactions",state.user.uid);
+  const matchingCards=[...document.querySelectorAll(".post")].filter(card=>card.dataset.id===postId);
+  const buttons=matchingCards.flatMap(card=>[...card.querySelectorAll(".reaction")]);
+  buttons.forEach(btn=>btn.disabled=true);
+  let nextType="";
 
   try{
     await runTransaction(db,async tx=>{
@@ -7146,9 +7464,11 @@ async function setReaction(postId,type){
       const updates={};
 
       if(current===type){
+        nextType="";
         tx.delete(reactionRef);
         updates[type]=Math.max(0,(postSnap.data()[type]||0)-1);
       }else{
+        nextType=type;
         if(current) updates[current]=Math.max(0,(postSnap.data()[current]||0)-1);
         updates[type]=(postSnap.data()[type]||0)+1;
         tx.set(reactionRef,{type,createdAt:serverTimestamp()});
@@ -7157,9 +7477,14 @@ async function setReaction(postId,type){
       tx.update(postRef,updates);
     });
 
-    toast(type==="likes"?"Reacción actualizada":type==="value"?"Aporte registrado":"Ayuda registrada");
+    state.reactionTypes[postId]=nextType;
+    applyReactionState(postId,nextType);
+    const labels={likes:"Me gusta",value:"Me aportó",help:"Me ayudó"};
+    toast(nextType?`${labels[type]} agregado`:`${labels[type]} eliminado`);
   }catch(err){
     console.error("reaction",err);toast("No se pudo registrar la reacción.");
+  }finally{
+    buttons.forEach(btn=>btn.disabled=false);
   }
 }
 
@@ -7193,9 +7518,9 @@ function commentHTML(postId,c){
         </div>
         <div class="comment-text">${esc(c.text||"")}</div>
         <div class="comment-actions">
-          <button class="comment-action reply-comment" data-post-id="${esc(postId)}" data-comment-id="${esc(c.id)}">Responder</button>
-          ${mine?`<button class="comment-action edit-comment" data-post-id="${esc(postId)}" data-comment-id="${esc(c.id)}">Editar</button>
-          <button class="comment-action delete-comment" data-post-id="${esc(postId)}" data-comment-id="${esc(c.id)}">Eliminar</button>`:""}
+          <button type="button" class="comment-action reply-comment" data-post-id="${esc(postId)}" data-comment-id="${esc(c.id)}">Responder</button>
+          ${mine?`<button type="button" class="comment-action edit-comment" data-post-id="${esc(postId)}" data-comment-id="${esc(c.id)}">Editar</button>
+          <button type="button" class="comment-action delete-comment" data-post-id="${esc(postId)}" data-comment-id="${esc(c.id)}">Eliminar</button>`:""}
         </div>
       </div>
       <div class="comment-replies" data-replies-for="${esc(c.id)}"></div>
@@ -7216,8 +7541,8 @@ function replyHTML(postId,commentId,r){
         </div>
         <div class="comment-text">${esc(r.text||"")}</div>
         ${mine?`<div class="comment-actions">
-          <button class="comment-action edit-reply" data-post-id="${esc(postId)}" data-comment-id="${esc(commentId)}" data-reply-id="${esc(r.id)}">Editar</button>
-          <button class="comment-action delete-reply" data-post-id="${esc(postId)}" data-comment-id="${esc(commentId)}" data-reply-id="${esc(r.id)}">Eliminar</button>
+          <button type="button" class="comment-action edit-reply" data-post-id="${esc(postId)}" data-comment-id="${esc(commentId)}" data-reply-id="${esc(r.id)}">Editar</button>
+          <button type="button" class="comment-action delete-reply" data-post-id="${esc(postId)}" data-comment-id="${esc(commentId)}" data-reply-id="${esc(r.id)}">Eliminar</button>
         </div>`:""}
       </div>
     </div>
@@ -7401,8 +7726,8 @@ function showReplyComposer(postId,commentId){
   const slot=document.querySelector(`[data-reply-slot="${selEscape(commentId)}"]`);
   if(!slot)return;
   slot.innerHTML=`<div class="reply-composer">
-    <input class="comment-input" placeholder="Escribe una respuesta..." maxlength="600">
-    <button class="comment-send">Responder</button>
+    <input type="text" class="comment-input" placeholder="Escribe una respuesta..." maxlength="600">
+    <button type="button" class="comment-send">Responder</button>
   </div>`;
   const input=slot.querySelector("input");
   const btn=slot.querySelector("button");
@@ -7515,7 +7840,7 @@ async function renderDiscover(q=""){
              <small>${esc(normalizeBrandText(p.handle||"@usuario"))}</small>
              <div class="bio">${esc(normalizeBrandText(p.bio||""))}</div>
            </div>
-           <button class="secondary view-profile-btn" data-uid="${esc(ds.id)}">Ver perfil</button>
+           <button type="button" class="secondary view-profile-btn" data-uid="${esc(ds.id)}">Ver perfil</button>
          </div>`);
        }
      });
@@ -7523,7 +7848,7 @@ async function renderDiscover(q=""){
  }catch(err){console.error("discover users",err)}
 
  (state.communities.length?state.communities:fallbackCommunities).filter(c=>!q||(c.name+" "+c.desc).toLowerCase().includes(q)).forEach(c=>{
-   items.push(`<div class="card result"><div class="avatar">${esc(c.name[0])}</div><div class="result-info"><strong class="community-result-link" data-community-id="${esc(c.id)}">${esc(c.name)}</strong><small>${esc(c.desc)}</small></div><button class="join" data-community-id="${esc(c.id)}">${state.joinedCommunityIds.includes(c.id)?"Miembro":"Unirme"}</button></div>`);
+   items.push(`<div class="card result"><div class="avatar">${esc(c.name[0])}</div><div class="result-info"><strong class="community-result-link" data-community-id="${esc(c.id)}">${esc(c.name)}</strong><small>${esc(c.desc)}</small></div><button type="button" class="join" data-community-id="${esc(c.id)}">${state.joinedCommunityIds.includes(c.id)?"Miembro":"Unirme"}</button></div>`);
  });
 
  $("#discoverResults").innerHTML=items.join("")||`<div class="card empty-state"><strong>Sin resultados</strong>Prueba con otro nombre o comunidad.</div>`;
@@ -7689,7 +8014,7 @@ function updatePushNotificationUI(forcedMessage=""){
 async function ensurePushServiceWorker(){
   let registration=await navigator.serviceWorker.getRegistration("/");
   if(!registration){
-    registration=await navigator.serviceWorker.register("/sw.js?v=24.3");
+    registration=await navigator.serviceWorker.register("/sw.js?v=24.4");
   }
   await navigator.serviceWorker.ready;
   return registration;
@@ -7993,6 +8318,7 @@ $("#signOutTop").onclick=async()=>{
   try{
     if(FIREBASE_READY) await signOut(auth);
     else{
+      document.body.classList.remove("app-open");
       $("#appView").classList.add("hidden");
       $("#authView").classList.remove("hidden");
     }
@@ -8356,7 +8682,7 @@ window.addEventListener("offline",()=>updateConnectionState(true));
 if("serviceWorker" in navigator){
   window.addEventListener("load",async()=>{
     try{
-      const registration=await navigator.serviceWorker.register("/sw.js?v=24.3");
+      const registration=await navigator.serviceWorker.register("/sw.js?v=24.4");
       registration.update().catch(()=>{});
     }catch(err){
       console.error("SW registration:",err);
@@ -8385,7 +8711,7 @@ function runUniluvaHealthCheck(){
   }
 
   const result={
-    version:"24.3",
+    version:"24.4",
     ok:issues.length===0,
     issues,
     communities:state.communities.length,
