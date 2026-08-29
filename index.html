@@ -9,9 +9,9 @@
 <link rel="icon" type="image/svg+xml" href="/icon-192.svg">
 <link rel="apple-touch-icon" href="/icon-192.svg">
 <title>Uniluva — Conecta. Descubre. Aporta.</title>
-<meta name="app-version" content="24.4">
+<meta name="app-version" content="24.5">
 
-<link rel="manifest" href="/manifest.json?v=24.4">
+<link rel="manifest" href="/manifest.json?v=24.5">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Uniluva">
@@ -3625,7 +3625,7 @@ select:focus-visible,
   }
 }
 
-/* Refinamiento de interfaz v24.4 */
+/* Refinamiento de interfaz v24.5 */
 .ambient-bg{
   position:fixed;
   inset:0;
@@ -3686,6 +3686,61 @@ select:focus-visible,
 .profile-feed-spacer{height:18px}
 .profile-feed-title{font-size:18px}
 .file-hint{display:block;margin-top:5px;color:var(--muted)}
+
+.post-secondary-actions{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:8px;
+  margin-top:8px;
+}
+
+.post-secondary-actions .comment-btn{margin-top:0}
+
+.share-post-btn{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  min-height:44px;
+  padding:8px 16px;
+  border:1px solid rgba(91,61,245,.14);
+  border-radius:11px;
+  color:#5640c7;
+  background:rgba(245,243,255,.86);
+  font-size:12px;
+  font-weight:800;
+  transition:background .18s ease,border-color .18s ease,transform .18s ease;
+}
+
+.share-post-btn svg{
+  width:17px;
+  height:17px;
+  fill:none;
+  stroke:currentColor;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+  stroke-width:1.9;
+}
+
+.share-post-btn:hover{
+  border-color:rgba(91,61,245,.28);
+  background:#efecff;
+  transform:translateY(-1px);
+}
+
+.share-post-btn:focus-visible{
+  outline:3px solid rgba(109,93,252,.25);
+  outline-offset:2px;
+}
+
+.post.shared-post-focus{
+  animation:shared-post-focus 1.35s ease-out;
+}
+
+@keyframes shared-post-focus{
+  0%,35%{box-shadow:0 0 0 4px rgba(91,61,245,.22),0 18px 52px rgba(58,49,126,.17)}
+  100%{box-shadow:var(--shadow-sm)}
+}
 
 .post-actions{
   gap:7px;
@@ -3824,6 +3879,8 @@ select:focus-visible,
 
   .composer-actions button{width:100%}
 
+  .share-post-btn{padding:7px 13px}
+
   .post-actions{
     gap:4px!important;
     padding:5px!important;
@@ -3848,6 +3905,8 @@ select:focus-visible,
   .auth-panel{padding-left:12px;padding-right:12px}
   .auth-card{padding:21px 18px}
   .reaction-label{overflow:hidden;text-overflow:ellipsis}
+  .post-secondary-actions{grid-template-columns:minmax(0,1fr) 116px}
+  .share-post-btn{padding:7px 9px;font-size:11px}
 }
 
 @media(max-width:360px){
@@ -3868,7 +3927,8 @@ select:focus-visible,
   .community-card:hover,
   .user-card:hover,
   .result:hover,
-  .reaction:hover{transform:none}
+  .reaction:hover,
+  .share-post-btn:hover{transform:none}
 }
 
 </style>
@@ -5427,6 +5487,78 @@ async function syncReactionState(postId){
   return state.reactionLoads[postId];
 }
 
+function postShareURL(postId){
+  const url=new URL(location.href);
+  url.search="";
+  url.hash=`post-${encodeURIComponent(postId)}`;
+  return url.href;
+}
+
+async function copyText(value){
+  try{
+    if(navigator.clipboard?.writeText){
+      await navigator.clipboard.writeText(value);
+      return;
+    }
+  }catch{}
+
+  const area=document.createElement("textarea");
+  area.value=value;
+  area.setAttribute("readonly","");
+  area.style.position="fixed";
+  area.style.opacity="0";
+  document.body.append(area);
+  area.select();
+  const copied=document.execCommand("copy");
+  area.remove();
+  if(!copied)throw new Error("No se pudo copiar");
+}
+
+async function sharePost(post){
+  if(!post?.id)return;
+  const url=postShareURL(post.id);
+  const excerpt=String(post.text||"").replace(/\s+/g," ").trim().slice(0,160);
+  const shareData={
+    title:`Publicación de ${post.author||"Uniluva"}`,
+    text:excerpt||"Mira esta publicación en Uniluva",
+    url
+  };
+
+  if(typeof navigator.share==="function"){
+    try{
+      await navigator.share(shareData);
+      toast("Publicación compartida");
+      return;
+    }catch(err){
+      if(err?.name==="AbortError")return;
+      console.warn("native share",err);
+    }
+  }
+
+  try{
+    await copyText(url);
+    toast("Enlace copiado para compartir");
+  }catch(err){
+    console.error("share post",err);
+    toast("No se pudo compartir la publicación");
+  }
+}
+
+let lastFocusedPostHash="";
+function focusSharedPost(){
+  const match=location.hash.match(/^#post-(.+)$/);
+  if(!match || location.hash===lastFocusedPostHash)return;
+  let postId="";
+  try{postId=decodeURIComponent(match[1]);}catch{return;}
+  const card=[...document.querySelectorAll(".post")].find(item=>item.dataset.id===postId);
+  if(!card)return;
+  lastFocusedPostHash=location.hash;
+  card.scrollIntoView({behavior:"smooth",block:"center"});
+  card.classList.remove("shared-post-focus");
+  requestAnimationFrame(()=>card.classList.add("shared-post-focus"));
+  window.setTimeout(()=>card.classList.remove("shared-post-focus"),1500);
+}
+
 function postHTML(p){
  const commentCount=Array.isArray(p.comments)?p.comments.length:Number(p.comments||0);
  const communityName=p.communityName||p.community||"Comunidad general";
@@ -5468,7 +5600,13 @@ function postHTML(p){
      <button type="button" class="reaction${currentReaction==="value"?" active-value":""}" data-r="value" aria-pressed="${currentReaction==="value"}"><span class="reaction-icon" aria-hidden="true">💡</span><span class="reaction-label">Me aportó</span></button>
      <button type="button" class="reaction${currentReaction==="help"?" active-help":""}" data-r="help" aria-pressed="${currentReaction==="help"}"><span class="reaction-icon" aria-hidden="true">🤝</span><span class="reaction-label">Me ayudó</span></button>
    </div>
-   <button type="button" class="comment-btn">${commentCount ? `Ver ${commentCount} comentario${commentCount===1?"":"s"}` : "Comentar"}</button>
+   <div class="post-secondary-actions">
+     <button type="button" class="comment-btn">${commentCount ? `Ver ${commentCount} comentario${commentCount===1?"":"s"}` : "Comentar"}</button>
+     <button type="button" class="share-post-btn" aria-label="Compartir publicación de ${esc(p.author||"Usuario")}">
+       <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.7 10.7 6.6-4.1M8.7 13.3l6.6 4.1"/></svg>
+       <span>Compartir</span>
+     </button>
+   </div>
    <div class="comments-wrap" id="comments-${esc(p.id)}" hidden>
      <div class="comment-composer">
        <div class="avatar">${avatarHTML(state.profile.photoURL||"",state.profile.name||"Usuario")}</div>
@@ -5502,6 +5640,7 @@ async function applyFeed(mode){
 function renderFeedWith(posts){
   $("#feed").innerHTML=posts.length?posts.map(postHTML).join(""):`<div class="card empty-state"><strong>No hay contenido aquí todavía</strong>Sigue personas o explora nuevas comunidades.</div>`;
   wirePosts($("#feed"));
+  window.setTimeout(focusSharedPost,0);
 }
 
 function renderFeed(){
@@ -5548,6 +5687,9 @@ function wirePosts(root){
 
    const commentBtn=card.querySelector(".comment-btn");
    if(commentBtn) commentBtn.onclick=()=>toggleComments(id);
+
+   const shareBtn=card.querySelector(".share-post-btn");
+   if(shareBtn) shareBtn.onclick=()=>sharePost(p||{id});
 
    const commentInput=card.querySelector(".comment-input[data-post-id]");
    const commentSend=card.querySelector(".comment-send[data-post-id]");
@@ -5621,8 +5763,8 @@ function wirePosts(root){
 
      const copy=menuPanel.querySelector(".copy-post-link");
      if(copy) copy.onclick=async()=>{
-       const url=location.origin+location.pathname+"#post-"+id;
-       try{await navigator.clipboard.writeText(url);toast("Enlace copiado");}
+       const url=postShareURL(id);
+       try{await copyText(url);toast("Enlace copiado");}
        catch{toast("No se pudo copiar el enlace");}
        menuPanel.classList.remove("show");
      };
@@ -8014,7 +8156,7 @@ function updatePushNotificationUI(forcedMessage=""){
 async function ensurePushServiceWorker(){
   let registration=await navigator.serviceWorker.getRegistration("/");
   if(!registration){
-    registration=await navigator.serviceWorker.register("/sw.js?v=24.4");
+    registration=await navigator.serviceWorker.register("/sw.js?v=24.5");
   }
   await navigator.serviceWorker.ready;
   return registration;
@@ -8682,7 +8824,7 @@ window.addEventListener("offline",()=>updateConnectionState(true));
 if("serviceWorker" in navigator){
   window.addEventListener("load",async()=>{
     try{
-      const registration=await navigator.serviceWorker.register("/sw.js?v=24.4");
+      const registration=await navigator.serviceWorker.register("/sw.js?v=24.5");
       registration.update().catch(()=>{});
     }catch(err){
       console.error("SW registration:",err);
@@ -8711,7 +8853,7 @@ function runUniluvaHealthCheck(){
   }
 
   const result={
-    version:"24.4",
+    version:"24.5",
     ok:issues.length===0,
     issues,
     communities:state.communities.length,
@@ -8735,6 +8877,10 @@ updateInstallAppButton();
 updateRelativePostTimes();
 
 window.setInterval(updateRelativePostTimes,30000);
+window.addEventListener("hashchange",()=>{
+  lastFocusedPostHash="";
+  focusSharedPost();
+});
 document.addEventListener("visibilitychange",()=>{
   if(!document.hidden)updateRelativePostTimes();
 });

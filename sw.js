@@ -32,7 +32,7 @@ firebase.initializeApp({
 });
 
 const messaging=firebase.messaging();
-const CACHE_NAME = "uniluva-v24-4";
+const CACHE_NAME = "uniluva-v24-5";
 const OFFLINE_URL = "/index.html";
 
 const CORE = [
