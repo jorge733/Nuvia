@@ -717,6 +717,124 @@ main{
   .topbar .uniluva-logo-img{width:126px}
 }
 
+
+/* ============================================================
+   UNILUVA V11 — SOCIAL CORE + MOBILE
+   ============================================================ */
+.follow-btn{
+  border:0;border-radius:12px;padding:9px 13px;font-weight:900;
+  background:linear-gradient(135deg,var(--purple),#7658f7);color:white;
+  box-shadow:0 10px 24px rgba(91,61,245,.18)
+}
+.follow-btn.following{
+  background:rgba(255,255,255,.62);color:var(--purple);
+  border:1px solid rgba(255,255,255,.78);box-shadow:var(--shadow-sm)
+}
+.user-card{
+  display:flex;align-items:center;gap:12px;padding:14px
+}
+.user-card .user-main{flex:1;min-width:0}
+.user-card strong{display:block;font-size:13px}
+.user-card small{display:block;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.user-card .bio{font-size:12px;color:#666b7d;margin-top:4px;white-space:normal}
+.profile-actions{display:flex;gap:8px;align-items:center}
+.profile-counter{display:inline-flex;gap:4px;align-items:center}
+.profile-counter strong{font-size:13px}
+.profile-counter span{font-size:11px;color:var(--muted)}
+.profile-tabs{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:5px;
+  background:rgba(255,255,255,.45);border:1px solid var(--glass-border);
+  border-radius:15px;padding:5px;margin:16px 0
+}
+.profile-tabs button{
+  border:0;background:transparent;border-radius:10px;padding:9px 8px;font-weight:900;color:var(--muted)
+}
+.profile-tabs button.active{
+  background:rgba(255,255,255,.78);color:var(--purple);box-shadow:var(--shadow-sm)
+}
+.reaction.active-like{color:#e95772;background:rgba(233,87,114,.08)}
+.reaction.active-value{color:var(--purple);background:rgba(91,61,245,.08)}
+.reaction.active-help{color:var(--green);background:rgba(28,166,122,.08)}
+.profile-link{cursor:pointer}
+.profile-link:hover{text-decoration:underline}
+.mobile-sheet{
+  display:none;position:fixed;inset:auto 0 0 0;z-index:120;
+  background:rgba(255,255,255,.84);backdrop-filter:blur(28px) saturate(160%);
+  -webkit-backdrop-filter:blur(28px) saturate(160%);
+  border-top:1px solid rgba(255,255,255,.8);border-radius:24px 24px 0 0;
+  box-shadow:0 -20px 50px rgba(50,42,120,.14);padding:14px 16px 24px;
+  transform:translateY(110%);transition:.28s ease
+}
+.mobile-sheet.show{display:block;transform:translateY(0)}
+.mobile-sheet-grab{width:42px;height:5px;border-radius:999px;background:#d6d8e2;margin:0 auto 12px}
+.mobile-sheet h3{margin:0 0 12px;font-size:16px}
+.mobile-compose-btn{display:none}
+
+@media(max-width:860px){
+  body{padding-bottom:84px}
+  .topbar{
+    position:sticky;top:8px;width:calc(100% - 16px);margin:8px auto 0;
+    height:60px;border-radius:20px;padding:0 12px;
+  }
+  .top-actions{gap:6px}
+  .icon-btn{width:38px;height:38px;border-radius:12px}
+  .app-layout{padding:14px 10px 96px}
+  main{width:100%}
+  .feed-tabs{
+    position:sticky;top:76px;z-index:24;border-radius:15px;margin-bottom:12px
+  }
+  .composer{padding:14px;border-radius:20px}
+  .composer-line{gap:10px}
+  .composer textarea{font-size:16px;min-height:62px}
+  .composer-foot{align-items:flex-end;gap:8px}
+  .tools{gap:5px}
+  .tool{padding:8px 9px;font-size:11px}
+  .publish{padding:9px 13px}
+  .discovery{padding:15px;border-radius:20px}
+  .discovery h3{font-size:18px}
+  .post{padding:14px;border-radius:20px;margin-bottom:12px}
+  .post-head{align-items:flex-start}
+  .post-text{font-size:15px;line-height:1.55;margin:12px 0}
+  .post-media,.post-image{border-radius:15px}
+  .post-meta{gap:7px;font-size:10px}
+  .post-actions{gap:4px}
+  .reaction{font-size:10px;padding:9px 3px}
+  .comment-btn{font-size:11px}
+  .section-head{align-items:flex-start;flex-direction:column}
+  .section-head h2{font-size:22px}
+  .profile-card{border-radius:22px}
+  .cover{height:125px}
+  .profile-body{padding:0 16px 18px}
+  .profile-top{align-items:center;margin-top:-31px}
+  .avatar-lg{width:74px;height:74px;font-size:24px}
+  .profile-info h2{font-size:21px}
+  .profile-stats{gap:12px;flex-wrap:wrap}
+  .grid2{grid-template-columns:1fr}
+  .result{padding:12px}
+  .mobile-nav{
+    left:8px;right:8px;bottom:8px;height:60px;border-radius:18px
+  }
+  .mobile-nav .create-fab{
+    width:48px;height:48px;border-radius:15px;font-size:24px
+  }
+  .modal-bg{align-items:flex-end;padding:0}
+  .modal{
+    width:100%;max-height:88vh;border-radius:24px 24px 0 0;
+    padding:18px 16px 24px
+  }
+  .install-app-btn{bottom:78px}
+  .mobile-compose-btn{display:flex}
+}
+
+@media(max-width:420px){
+  .topbar .uniluva-logo-img{width:110px}
+  .topbar .icon-btn:nth-of-type(1){display:none}
+  .post-actions{grid-template-columns:repeat(3,1fr)}
+  .reaction span.long-label{display:none}
+  .tool svg{display:none}
+  .tool{padding:8px}
+}
+
 </style>
 </head>
 <body>
@@ -793,10 +911,10 @@ main{
       <div class="firebase-banner" id="firebaseBanner"><strong>Modo demo.</strong> Agrega tu configuración de Firebase en el bloque <code>firebaseConfig</code> para activar cuentas y publicaciones en tiempo real.</div>
 
       <section class="page active" id="page-home"><div class="connection-pill" id="connectionPill"><span class="connection-dot"></span><span id="connectionText">Conectado</span></div>
-        <div class="feed-tabs"><button class="active">Para ti</button><button>Siguiendo</button><button>Reciente</button></div>
+        <div class="feed-tabs"><button class="active" data-feed="forYou">Para ti</button><button data-feed="following">Siguiendo</button><button data-feed="recent">Reciente</button></div>
 
         <div class="card composer">
-          <div class="composer-line"><div class="avatar" id="composerAvatar">N</div><textarea id="postText" placeholder="Comparte algo que pueda aportar a otros..."></textarea></div>
+          <div class="composer-line"><div class="avatar" id="composerAvatar">N</div><textarea id="postText" placeholder="Comparte algo que pueda aportar a otros..." autocapitalize="sentences" autocomplete="off" spellcheck="true"></textarea></div>
           <div class="composer-foot">
             <div class="tools">
               <input type="file" id="photoInput" accept="image/*" hidden>
@@ -844,13 +962,45 @@ main{
         <div id="notificationsList"></div>
       </section>
 
+
+      <section class="page" id="page-user">
+        <div class="card profile-card">
+          <div class="cover"></div>
+          <div class="profile-body">
+            <div class="profile-top">
+              <div class="avatar-lg" id="viewUserAvatar">U</div>
+              <div class="profile-actions">
+                <button class="secondary" id="blockUserBtn">Bloquear</button>
+                <button class="follow-btn" id="followUserBtn">Seguir</button>
+              </div>
+            </div>
+            <div class="profile-info">
+              <h2 id="viewUserName">Usuario</h2>
+              <small id="viewUserHandle">@usuario</small>
+              <p id="viewUserBio"></p>
+              <div class="profile-stats">
+                <span class="profile-counter"><strong id="viewFollowers">0</strong><span>seguidores</span></span>
+                <span class="profile-counter"><strong id="viewFollowing">0</strong><span>siguiendo</span></span>
+                <span class="profile-counter"><strong id="viewPosts">0</strong><span>publicaciones</span></span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="profile-tabs">
+          <button class="active">Publicaciones</button>
+          <button>Acerca de</button>
+          <button>Comunidades</button>
+        </div>
+        <div id="viewUserFeed"></div>
+      </section>
+
       <section class="page" id="page-profile">
         <div class="card profile-card">
           <div class="cover"></div>
           <div class="profile-body">
             <div class="profile-top"><div class="avatar-lg" id="profileAvatar">N</div><button class="secondary" id="editProfile">Editar perfil</button></div>
             <div class="profile-info"><h2 id="profileName">Usuario</h2><small id="profileUser">@usuario</small><p id="profileBio">Explorando ideas, comunidades y contenido que aporta.</p>
-              <div class="profile-stats"><span><strong id="profilePostCount">0</strong> publicaciones</span><span><strong id="profileCommunityCount">0</strong> comunidades</span></div>
+              <div class="profile-stats"><span><strong id="profilePostCount">0</strong> publicaciones</span><span><strong id="profileFollowers">0</strong> seguidores</span><span><strong id="profileFollowing">0</strong> siguiendo</span><span><strong id="profileCommunityCount">0</strong> comunidades</span></div>
             </div>
           </div>
         </div>
@@ -882,7 +1032,7 @@ main{
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, updateProfile, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
-import { getFirestore, collection, doc, setDoc, addDoc, updateDoc, getDoc, onSnapshot, query, orderBy, serverTimestamp, arrayUnion, arrayRemove, deleteDoc } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
+import { getFirestore, collection, doc, setDoc, addDoc, updateDoc, getDoc, onSnapshot, query, orderBy, serverTimestamp, arrayUnion, arrayRemove, deleteDoc, runTransaction, increment, where, getDocs, limit } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
 import { getStorage, ref as storageRef, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-storage.js";
 
 /* ============================================================
@@ -933,7 +1083,8 @@ let state={
   posts:JSON.parse(localStorage.getItem("uniluva_posts_v4")||"null")||demoPosts,
   joined:JSON.parse(localStorage.getItem("uniluva_joined_v4")||"[]"),
   activePost:null,
-  selectedMedia:null
+  selectedMedia:null,
+  viewedUser:null
 };
 
 function toast(t){const e=$("#toast");e.textContent=t;e.classList.add("show");clearTimeout(window.__t);window.__t=setTimeout(()=>e.classList.remove("show"),1700)}
@@ -958,7 +1109,7 @@ async function doAuth(){
        const cred=await createUserWithEmailAndPassword(auth,email,pass);
        await updateProfile(cred.user,{displayName:name});
        const handle="@"+email.split("@")[0].replace(/[^a-z0-9_]/gi,"").toLowerCase();
-       await setDoc(doc(db,"users",cred.user.uid),{name,handle,bio:"Explorando Uniluva.",createdAt:serverTimestamp(),joinedCommunities:[]});
+       await setDoc(doc(db,"users",cred.user.uid),{name,handle,bio:"Explorando Uniluva.",followersCount:0,followingCount:0,createdAt:serverTimestamp(),joinedCommunities:[],followersCount:0,followingCount:0});
      }else await signInWithEmailAndPassword(auth,email,pass);
    }catch(err){toast(friendlyAuthError(err.code));}
  }else{
@@ -988,7 +1139,7 @@ $("#googleSignIn").onclick=async()=>{
     state.profile={
       name:user.displayName||"Usuario Uniluva",
       user:"@"+(user.email||"usuario").split("@")[0].replace(/[^a-z0-9_]/gi,"").toLowerCase(),
-      bio:"Explorando Uniluva.",
+      bio:"Explorando Uniluva.",followersCount:0,followingCount:0,
       photoURL:user.photoURL||""
     };
     openApp();
@@ -1017,7 +1168,7 @@ $("#googleSignIn").onclick=async()=>{
           photoURL:user.photoURL||"",
           email:user.email||"",
           createdAt:serverTimestamp(),
-          joinedCommunities:[]
+          joinedCommunities:[],followersCount:0,followingCount:0
         });
       }
     }catch(dbErr){
@@ -1053,8 +1204,8 @@ function friendlyAuthError(c){return ({"auth/invalid-credential":"Correo o contr
 
 async function loadProfile(user){
  const snap=await getDoc(doc(db,"users",user.uid));
- if(snap.exists()){const d=snap.data();state.profile={name:d.name||user.displayName||"Usuario",user:d.handle||"@usuario",bio:d.bio||""};state.joined=d.joinedCommunities||[];}
- else{state.profile={name:user.displayName||"Usuario",user:"@"+(user.email||"usuario").split("@")[0],bio:"Explorando Uniluva.",photoURL:user.photoURL||""}}
+ if(snap.exists()){const d=snap.data();state.profile={name:d.name||user.displayName||"Usuario",user:d.handle||"@usuario",bio:d.bio||"",followersCount:d.followersCount||0,followingCount:d.followingCount||0};state.joined=d.joinedCommunities||[];}
+ else{state.profile={name:user.displayName||"Usuario",user:"@"+(user.email||"usuario").split("@")[0],bio:"Explorando Uniluva.",followersCount:0,followingCount:0,photoURL:user.photoURL||""}}
  renderAll();
 }
 
@@ -1105,13 +1256,13 @@ function renderAll(){renderProfile();renderCommunities();renderDiscover();render
 function renderProfile(){
  const i=initial();["topAvatar","sideAvatar","composerAvatar","profileAvatar"].forEach(id=>{const e=document.getElementById(id);if(e)e.textContent=i});
  $("#sideName").textContent=state.profile.name;$("#sideUser").textContent=state.profile.user;$("#profileName").textContent=state.profile.name;$("#profileUser").textContent=state.profile.user;$("#profileBio").textContent=state.profile.bio||"";
- $("#profilePostCount").textContent=state.posts.filter(p=>p.mine||p.authorId===state.user?.uid).length;$("#profileCommunityCount").textContent=state.joined.length;
+ $("#profilePostCount").textContent=state.posts.filter(p=>p.mine||p.authorId===state.user?.uid).length;$("#profileCommunityCount").textContent=state.joined.length;$("#profileFollowers").textContent=state.profile.followersCount||0;$("#profileFollowing").textContent=state.profile.followingCount||0;
 }
 
 function postHTML(p){
  const comments=p.comments||[];
  return `<article class="card post" data-id="${esc(p.id)}">
-   <div class="post-head"><div class="avatar">${esc(p.initial||((p.author||"N")[0]))}</div><div class="post-user"><strong>${esc(p.author||"Usuario")}</strong><small>${esc(p.user||"@usuario")} · ${p.createdAt?.toDate?"ahora":"hace poco"}</small><div class="community-tag">${esc(p.community||"Comunidad general")}</div></div><div class="post-menu-wrap"><button class="post-menu">···</button>
+   <div class="post-head"><div class="avatar">${esc(p.initial||((p.author||"N")[0]))}</div><div class="post-user"><strong class="profile-link" data-author-id="${esc(p.authorId||"")}">${esc(p.author||"Usuario")}</strong><small>${esc(p.user||"@usuario")} · ${p.createdAt?.toDate?"ahora":"hace poco"}</small><div class="community-tag">${esc(p.community||"Comunidad general")}</div></div><div class="post-menu-wrap"><button class="post-menu">···</button>
       <div class="post-menu-panel">
         <button class="copy-post-link">Copiar enlace</button>
         <button class="danger delete-post">Eliminar publicación</button>
@@ -1124,8 +1275,33 @@ function postHTML(p){
    <button class="comment-btn">Ver comentarios</button>
  </article>`;
 }
+
+async function applyFeed(mode){
+  $$(".feed-tabs button").forEach(b=>b.classList.toggle("active",b.dataset.feed===mode));
+  if(mode==="recent"){
+    renderFeedWith(state.posts);
+    return;
+  }
+  if(mode==="following" && FIREBASE_READY && state.user){
+    try{
+      const snap=await getDocs(collection(db,"users",state.user.uid,"following"));
+      const ids=new Set(snap.docs.map(d=>d.id));
+      renderFeedWith(state.posts.filter(p=>ids.has(p.authorId)));
+    }catch(err){
+      console.error(err);toast("No se pudo cargar Siguiendo");
+    }
+    return;
+  }
+  renderFeedWith(state.posts);
+}
+
+function renderFeedWith(posts){
+  $("#feed").innerHTML=posts.length?posts.map(postHTML).join(""):`<div class="card empty-state"><strong>No hay contenido aquí todavía</strong>Sigue personas o explora nuevas comunidades.</div>`;
+  wirePosts($("#feed"));
+}
+
 function renderFeed(){
- $("#feed").innerHTML=state.posts.length?state.posts.map(postHTML).join(""):`<div class="card empty-state"><strong>Aún no hay publicaciones</strong>Empieza compartiendo algo útil con la comunidad.</div>`;
+ renderFeedWith(state.posts);
  const mine=state.posts.filter(p=>p.mine||p.authorId===state.user?.uid);$("#profileFeed").innerHTML=mine.length?mine.map(postHTML).join(""):`<div class="card" style="padding:16px;color:var(--muted);font-size:13px">Todavía no has publicado nada.</div>`;
  wirePosts($("#feed"));wirePosts($("#profileFeed"));renderProfile();
 }
@@ -1138,6 +1314,9 @@ function wirePosts(root){
    card.querySelectorAll(".reaction").forEach(btn=>{
      btn.onclick=()=>react(id,btn.dataset.r);
    });
+
+   const profileLink=card.querySelector(".profile-link");
+   if(profileLink && profileLink.dataset.authorId) profileLink.onclick=()=>openUserProfile(profileLink.dataset.authorId);
 
    const commentBtn=card.querySelector(".comment-btn");
    if(commentBtn) commentBtn.onclick=()=>openComments(id);
@@ -1183,26 +1362,7 @@ function wirePosts(root){
 }
 document.addEventListener("click",()=>$$(".post-menu-panel").forEach(m=>m.classList.remove("show")));
 
-async function react(id,key){
- const p=state.posts.find(x=>x.id===id);if(!p)return;
- const reactionKey=`uniluva_react_${id}_${key}_${state.user?.uid||"demo"}`;
- if(sessionStorage.getItem(reactionKey)){
-   toast("Ya registraste esta reacción en esta sesión.");
-   return;
- }
- try{
-   if(FIREBASE_READY){
-     await updateDoc(doc(db,"posts",id),{[key]:(p[key]||0)+1});
-   }else{
-     p[key]=(p[key]||0)+1;saveLocal();renderFeed();
-   }
-   sessionStorage.setItem(reactionKey,"1");
-   toast(key==="likes"?"Te gusta":key==="value"?"Marcado como aporte":"Marcado como útil");
- }catch(err){
-   console.error(err);
-   toast("No se pudo registrar la reacción.");
- }
-}
+async function react(id,key){ return setReaction(id,key); }
 
 function clearSelectedMedia(){
   state.selectedMedia=null;
@@ -1342,13 +1502,166 @@ async function toggleCommunity(name){
  renderCommunities();renderProfile();toast(joined?"Saliste de la comunidad":"Te uniste a "+name);
 }
 
-function renderDiscover(q=""){
+
+async function isFollowing(targetUid){
+  if(!FIREBASE_READY || !state.user || !targetUid) return false;
+  const snap=await getDoc(doc(db,"users",state.user.uid,"following",targetUid));
+  return snap.exists();
+}
+
+async function toggleFollow(targetUid){
+  if(!FIREBASE_READY || !state.user || !targetUid) return;
+  if(targetUid===state.user.uid){toast("No puedes seguirte a ti mismo.");return;}
+
+  const myFollowingRef=doc(db,"users",state.user.uid,"following",targetUid);
+  const theirFollowerRef=doc(db,"users",targetUid,"followers",state.user.uid);
+  const meRef=doc(db,"users",state.user.uid);
+  const themRef=doc(db,"users",targetUid);
+
+  try{
+    const following=await isFollowing(targetUid);
+
+    await runTransaction(db,async tx=>{
+      const meSnap=await tx.get(meRef);
+      const themSnap=await tx.get(themRef);
+      if(!meSnap.exists()||!themSnap.exists()) throw new Error("Usuario no encontrado");
+
+      if(following){
+        tx.delete(myFollowingRef);
+        tx.delete(theirFollowerRef);
+        tx.update(meRef,{followingCount:Math.max(0,(meSnap.data().followingCount||0)-1)});
+        tx.update(themRef,{followersCount:Math.max(0,(themSnap.data().followersCount||0)-1)});
+      }else{
+        tx.set(myFollowingRef,{createdAt:serverTimestamp()});
+        tx.set(theirFollowerRef,{createdAt:serverTimestamp()});
+        tx.update(meRef,{followingCount:(meSnap.data().followingCount||0)+1});
+        tx.update(themRef,{followersCount:(themSnap.data().followersCount||0)+1});
+      }
+    });
+
+    await loadProfile(state.user);
+    if(state.viewedUser?.uid===targetUid) await openUserProfile(targetUid);
+    toast(following?"Dejaste de seguir":"Ahora sigues a esta persona");
+  }catch(err){
+    console.error("follow error",err);
+    toast("No se pudo actualizar el seguimiento.");
+  }
+}
+
+async function blockUser(targetUid){
+  if(!FIREBASE_READY || !state.user || !targetUid) return;
+  if(targetUid===state.user.uid)return;
+  if(!confirm("¿Bloquear a este usuario? Dejarás de ver su contenido cuando implementemos el filtro completo."))return;
+  try{
+    await setDoc(doc(db,"users",state.user.uid,"blocked",targetUid),{createdAt:serverTimestamp()});
+    toast("Usuario bloqueado");
+  }catch(err){
+    console.error(err);toast("No se pudo bloquear.");
+  }
+}
+
+async function openUserProfile(uid){
+  if(!uid)return;
+  if(uid===state.user?.uid){nav("profile");return;}
+
+  try{
+    const snap=await getDoc(doc(db,"users",uid));
+    if(!snap.exists()){toast("Perfil no disponible.");return;}
+    const d=snap.data();
+    state.viewedUser={uid,...d};
+
+    $("#viewUserAvatar").textContent=(d.name||"U")[0].toUpperCase();
+    $("#viewUserName").textContent=d.name||"Usuario";
+    $("#viewUserHandle").textContent=d.handle||"@usuario";
+    $("#viewUserBio").textContent=d.bio||"";
+    $("#viewFollowers").textContent=d.followersCount||0;
+    $("#viewFollowing").textContent=d.followingCount||0;
+
+    const userPosts=state.posts.filter(p=>p.authorId===uid);
+    $("#viewPosts").textContent=userPosts.length;
+    $("#viewUserFeed").innerHTML=userPosts.length?userPosts.map(postHTML).join(""):`<div class="card empty-state"><strong>Sin publicaciones todavía</strong>Este usuario aún no ha publicado.</div>`;
+    wirePosts($("#viewUserFeed"));
+
+    const following=await isFollowing(uid);
+    $("#followUserBtn").textContent=following?"Siguiendo":"Seguir";
+    $("#followUserBtn").classList.toggle("following",following);
+    $("#followUserBtn").onclick=()=>toggleFollow(uid);
+    $("#blockUserBtn").onclick=()=>blockUser(uid);
+
+    nav("user");
+  }catch(err){
+    console.error("open profile",err);toast("No se pudo abrir el perfil.");
+  }
+}
+
+async function setReaction(postId,type){
+  if(!FIREBASE_READY || !state.user){toast("Inicia sesión para reaccionar.");return;}
+  const postRef=doc(db,"posts",postId);
+  const reactionRef=doc(db,"posts",postId,"reactions",state.user.uid);
+
+  try{
+    await runTransaction(db,async tx=>{
+      const postSnap=await tx.get(postRef);
+      const reactionSnap=await tx.get(reactionRef);
+      if(!postSnap.exists()) throw new Error("Publicación no encontrada");
+
+      const current=reactionSnap.exists()?reactionSnap.data().type:null;
+      const updates={};
+
+      if(current===type){
+        tx.delete(reactionRef);
+        updates[type]=Math.max(0,(postSnap.data()[type]||0)-1);
+      }else{
+        if(current) updates[current]=Math.max(0,(postSnap.data()[current]||0)-1);
+        updates[type]=(postSnap.data()[type]||0)+1;
+        tx.set(reactionRef,{type,createdAt:serverTimestamp()});
+      }
+
+      tx.update(postRef,updates);
+    });
+
+    toast(type==="likes"?"Reacción actualizada":type==="value"?"Aporte registrado":"Ayuda registrada");
+  }catch(err){
+    console.error("reaction",err);toast("No se pudo registrar la reacción.");
+  }
+}
+
+
+async function renderDiscover(q=""){
  q=q.trim().toLowerCase();
- const people=[{name:"Ana Silva",user:"@anasilva",detail:"Fotografía · Cine"},{name:"Mateo Cruz",user:"@mateocruz",detail:"Tecnología · Audio"},{name:"Laura Méndez",user:"@lauram",detail:"Creatividad · Comunidades"}];
  let items=[];
- people.filter(p=>!q||(p.name+" "+p.user+" "+p.detail).toLowerCase().includes(q)).forEach(p=>items.push(`<div class="card result"><div class="avatar">${p.name[0]}</div><div class="result-info"><strong>${esc(p.name)}</strong><small>${esc(p.user)} · ${esc(p.detail)}</small></div><button class="secondary">Ver perfil</button></div>`));
- communities.filter(c=>!q||(c.name+" "+c.desc).toLowerCase().includes(q)).forEach(c=>items.push(`<div class="card result"><div class="avatar">${c.name[0]}</div><div class="result-info"><strong>${esc(c.name)}</strong><small>${esc(c.desc)}</small></div><button class="join" data-c="${esc(c.name)}">${state.joined.includes(c.name)?"Miembro":"Unirme"}</button></div>`));
- $("#discoverResults").innerHTML=items.join("")||`<div class="card" style="padding:16px;color:var(--muted)">No encontramos resultados.</div>`;$$("#discoverResults .join").forEach(b=>b.onclick=()=>toggleCommunity(b.dataset.c));
+
+ try{
+   if(FIREBASE_READY){
+     const snap=await getDocs(query(collection(db,"users"),limit(20)));
+     snap.forEach(ds=>{
+       if(ds.id===state.user?.uid)return;
+       const p=ds.data();
+       const hay=(p.name+" "+(p.handle||"")+" "+(p.bio||"")).toLowerCase();
+       if(!q || hay.includes(q)){
+         items.push(`<div class="card result user-card">
+           <div class="avatar">${esc((p.name||"U")[0])}</div>
+           <div class="user-main">
+             <strong class="profile-link" data-uid="${esc(ds.id)}">${esc(p.name||"Usuario")}</strong>
+             <small>${esc(p.handle||"@usuario")}</small>
+             <div class="bio">${esc(p.bio||"")}</div>
+           </div>
+           <button class="secondary view-profile-btn" data-uid="${esc(ds.id)}">Ver perfil</button>
+         </div>`);
+       }
+     });
+   }
+ }catch(err){console.error("discover users",err)}
+
+ communities.filter(c=>!q||(c.name+" "+c.desc).toLowerCase().includes(q)).forEach(c=>{
+   items.push(`<div class="card result"><div class="avatar">${esc(c.name[0])}</div><div class="result-info"><strong>${esc(c.name)}</strong><small>${esc(c.desc)}</small></div><button class="join" data-c="${esc(c.name)}">${state.joined.includes(c.name)?"Miembro":"Unirme"}</button></div>`);
+ });
+
+ $("#discoverResults").innerHTML=items.join("")||`<div class="card empty-state"><strong>Sin resultados</strong>Prueba con otro nombre o comunidad.</div>`;
+
+ $$("#discoverResults .join").forEach(b=>b.onclick=()=>toggleCommunity(b.dataset.c));
+ $$("#discoverResults .view-profile-btn").forEach(b=>b.onclick=()=>openUserProfile(b.dataset.uid));
+ $$("#discoverResults .profile-link").forEach(b=>b.onclick=()=>openUserProfile(b.dataset.uid));
 }
 
 function renderNotifications(){
@@ -1356,8 +1669,17 @@ function renderNotifications(){
  $("#notificationsList").innerHTML=ns.map(n=>`<div class="card notif ${n.unread?"unread":""}">${n.unread?'<div class="dot"></div>':'<div style="width:8px"></div>'}<div><p>${esc(n.text)}</p><small>${n.time}</small></div></div>`).join("");
 }
 
+
+function focusComposer(){
+  nav("home");
+  setTimeout(()=>{
+    $("#postText").focus();
+    if(window.innerWidth<=860) $("#postText").scrollIntoView({behavior:"smooth",block:"center"});
+  },80);
+}
+
 function nav(page){$$(".page").forEach(x=>x.classList.remove("active"));$("#page-"+page).classList.add("active");$$("[data-page]").forEach(x=>x.classList.toggle("active",x.dataset.page===page));if(page==="discover")renderDiscover($("#globalSearch").value);window.scrollTo({top:0,behavior:"smooth"})}
-$$("[data-page]").forEach(b=>b.onclick=()=>nav(b.dataset.page));$("#notificationsTop").onclick=()=>nav("notifications");$("#profileTop").onclick=()=>nav("profile");
+$$("[data-page]").forEach(b=>b.onclick=()=>nav(b.dataset.page));$$(".feed-tabs button").forEach(b=>b.onclick=()=>applyFeed(b.dataset.feed));$("#notificationsTop").onclick=()=>nav("notifications");$("#profileTop").onclick=()=>nav("profile");
 $("#signOutTop").onclick=async()=>{
   try{
     if(FIREBASE_READY) await signOut(auth);
@@ -1370,7 +1692,7 @@ $("#signOutTop").onclick=async()=>{
     console.error(err);
     toast("No se pudo cerrar la sesión");
   }
-};$("#createMain").onclick=()=>{nav("home");$("#postText").focus()};$("#mobileCreate").onclick=()=>{nav("home");$("#postText").focus()};
+};$("#createMain").onclick=focusComposer;$("#mobileCreate").onclick=focusComposer;
 $("#globalSearch").addEventListener("input",e=>{nav("discover");renderDiscover(e.target.value)});$("#discoverPhoto").onclick=()=>nav("communities");$("#discoverOther").onclick=()=>toast("Prueba explorar Cine");
 
 $("#editProfile").onclick=()=>{$("#editName").value=state.profile.name;$("#editUser").value=state.profile.user;$("#editBio").value=state.profile.bio||"";$("#profileModal").classList.add("show")};
