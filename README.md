@@ -1,6 +1,6 @@
 # Uniluva
 
-Página de unión, luz y valor, con ideas para aprender y compartir, una pausa de un minuto y una lista personal de pendientes. Dirección principal: https://unluva.com/.
+Página de unión, luz y valor, con ideas para aprender y compartir, una pausa de un minuto y una lista personal de pendientes. Dirección principal: https://www.uniluva.com/.
 
 ## Desarrollo
 
