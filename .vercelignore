@@ -1,0 +1,7 @@
+functions/
+dist/
+.env*
+firebase-debug.log
+uniluva-cargar-contenido.html
+icon-192.png
+icon-512.png
