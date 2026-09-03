@@ -18,7 +18,7 @@ Los pendientes y la preferencia de texto grande se guardan solo en el navegador.
 
 La portada incluye accesos de búsqueda en Spotify y YouTube y una selección por ánimo e intención. Sin IA, el texto libre no se transmite ni se utiliza.
 
-El servidor api/recommend.js conecta directamente con Google Gemini mediante generateContent. Configurar GEMINI_API_KEY como variable secreta de Production en Vercel y volver a desplegar. No se requiere AI Gateway. GEMINI_MODEL permite cambiar el modelo; por defecto gemini-2.5-flash. UNILUVA_AI_ENABLED=false desactiva temporalmente la IA; sin esa variable, la clave permite activarla. Nunca se expone la clave al navegador.
+El servidor api/recommend.js conecta directamente con Google Gemini mediante generateContent. Configurar GEMINI_API_KEY como variable secreta de Production en Vercel y volver a desplegar. No se requiere AI Gateway. GEMINI_MODEL permite cambiar el modelo; por defecto gemini-3.5-flash-lite. UNILUVA_AI_ENABLED=false desactiva temporalmente la IA; sin esa variable, la clave permite activarla. Nunca se expone la clave al navegador.
 
 GET /api/recommend indica disponibilidad y proveedor. La respuesta se valida contra el catálogo. Errores, bloqueos y respuestas incompletas usan la selección local claramente identificada sin IA. La aplicación no guarda ni registra el texto libre. Google procesa el texto bajo los términos del plan de Gemini utilizado.
 
