@@ -16,8 +16,10 @@ Los pendientes y la preferencia de texto grande se guardan solo en el navegador.
 
 ## Música y recomendaciones
 
-La portada incluye accesos de búsqueda en Spotify y YouTube, selección de ánimo e intención y una selección musical local. El texto libre no se usa ni transmite mientras la IA esté desactivada.
+La portada incluye accesos de búsqueda en Spotify y YouTube y una selección por ánimo e intención. Sin IA, el texto libre no se transmite ni se utiliza.
 
-`api/recommend.js` usa Vercel AI Gateway desde el servidor. Para activar: completar la habilitación de AI Gateway en Vercel, configurar `UNILUVA_AI_ENABLED=true` en Production y volver a desplegar. Se usa `AI_GATEWAY_API_KEY` o la identidad `VERCEL_OIDC_TOKEN` del proyecto; nunca se expone una credencial al navegador. Sin habilitación, GET devuelve available=false. La IA está limitada al catálogo y devuelve una explicación según el texto libre; ante errores la interfaz indica que muestra una selección sin IA.
+El servidor api/recommend.js conecta directamente con Google Gemini mediante generateContent. Configurar GEMINI_API_KEY como variable secreta de Production en Vercel y volver a desplegar. No se requiere AI Gateway. GEMINI_MODEL permite cambiar el modelo; por defecto gemini-2.5-flash. UNILUVA_AI_ENABLED=false desactiva temporalmente la IA; sin esa variable, la clave permite activarla. Nunca se expone la clave al navegador.
 
-El límite de seis consultas por minuto es por instancia; para tráfico elevado configurar también un límite global en Vercel Firewall y un presupuesto del servicio. No se registran textos en el código de la aplicación. Vercel y el proveedor procesan el texto cuando el visitante solicita una sugerencia con IA.
+GET /api/recommend indica disponibilidad y proveedor. La respuesta se valida contra el catálogo. Errores, bloqueos y respuestas incompletas usan la selección local claramente identificada sin IA. La aplicación no guarda ni registra el texto libre. Google procesa el texto bajo los términos del plan de Gemini utilizado.
+
+El límite de seis consultas por minuto es por instancia. Para tráfico elevado, configurar un límite global en Vercel Firewall y revisar las cuotas de Google.
