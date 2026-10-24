@@ -4,8 +4,11 @@ const crypto = require("node:crypto");
 const {initializeApp} = require("firebase-admin/app");
 const {getFirestore, FieldValue} = require("firebase-admin/firestore");
 const {getMessaging} = require("firebase-admin/messaging");
+const {getAuth} = require("firebase-admin/auth");
+const {getStorage} = require("firebase-admin/storage");
 const {setGlobalOptions} = require("firebase-functions/v2");
 const {onDocumentCreated} = require("firebase-functions/v2/firestore");
+const {onCall, HttpsError} = require("firebase-functions/v2/https");
 const {logger} = require("firebase-functions");
 
 initializeApp();
@@ -213,3 +216,90 @@ exports.notifyCommentReply = onDocumentCreated(
     });
   },
 );
+
+async function deleteQueryDocs(query) {
+  let deleted = 0;
+  for (;;) {
+    const snap = await query.limit(400).get();
+    if (snap.empty) return deleted;
+    const batch = db.batch();
+    snap.docs.forEach((doc) => batch.delete(doc.ref));
+    await batch.commit();
+    deleted += snap.size;
+  }
+}
+
+async function deleteStoragePrefix(prefix) {
+  try {
+    await getStorage().bucket().deleteFiles({prefix, force: true});
+  } catch (error) {
+    logger.warn("No se pudieron borrar archivos", {prefix, error: error?.message || String(error)});
+  }
+}
+
+// Elimina la cuenta de quien la solicita junto con su contenido y relaciones.
+exports.deleteMyAccount = onCall({timeoutSeconds: 300, memory: "512MiB"}, async (request) => {
+  const uid = request.auth?.uid;
+  if (!uid) throw new HttpsError("unauthenticated", "Debes iniciar sesión.");
+
+  const authTime = Number(request.auth.token?.auth_time || 0);
+  if (!authTime || Date.now() / 1000 - authTime > 10 * 60) {
+    throw new HttpsError("failed-precondition", "Vuelve a iniciar sesión para confirmar que eres tú.");
+  }
+
+  const userRef = db.collection("users").doc(uid);
+  const summary = {posts: 0, comments: 0, replies: 0};
+
+  // Publicaciones propias, con sus comentarios, reacciones y votos.
+  const postsSnap = await db.collection("posts").where("authorId", "==", uid).get();
+  for (const post of postsSnap.docs) {
+    await db.recursiveDelete(post.ref);
+    await deleteStoragePrefix(`postMedia/${post.id}/`);
+    summary.posts += 1;
+  }
+
+  // Comentarios y respuestas en publicaciones de otras personas.
+  for (const group of ["comments", "replies"]) {
+    try {
+      const snap = await db.collectionGroup(group).where("authorId", "==", uid).get();
+      for (const item of snap.docs) {
+        await db.recursiveDelete(item.ref);
+        summary[group] += 1;
+      }
+    } catch (error) {
+      logger.error(`No se pudieron borrar ${group}`, {uid, error: error?.message || String(error)});
+    }
+  }
+
+  // Relaciones guardadas en perfiles ajenos y membresías en comunidades.
+  const [followingSnap, followersSnap, communitiesSnap] = await Promise.all([
+    userRef.collection("following").get(),
+    userRef.collection("followers").get(),
+    db.collection("communities").get(),
+  ]);
+  const writer = db.bulkWriter();
+  followingSnap.docs.forEach((doc) => {
+    writer.delete(db.collection("users").doc(doc.id).collection("followers").doc(uid));
+  });
+  followersSnap.docs.forEach((doc) => {
+    writer.delete(db.collection("users").doc(doc.id).collection("following").doc(uid));
+  });
+  communitiesSnap.docs.forEach((community) => {
+    writer.delete(community.ref.collection("members").doc(uid));
+  });
+  await writer.close();
+
+  await deleteQueryDocs(db.collection("usernames").where("uid", "==", uid));
+  await deleteQueryDocs(db.collection("notifications").where("userId", "==", uid));
+  await db.recursiveDelete(userRef);
+  await deleteStoragePrefix(`users/${uid}/`);
+
+  try {
+    await getAuth().deleteUser(uid);
+  } catch (error) {
+    if (error?.code !== "auth/user-not-found") throw error;
+  }
+
+  logger.info("Cuenta eliminada", {uid, ...summary});
+  return {ok: true, ...summary};
+});

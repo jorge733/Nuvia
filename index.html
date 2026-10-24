@@ -4,14 +4,29 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#5B3DF5">
-<meta name="description" content="Uniluva es una red social para conectar con comunidades, descubrir ideas y compartir aportes útiles.">
+<meta name="description" content="Una red social donde el valor de tus aportes importa más que tu popularidad. Conecta. Descubre. Aporta.">
+<link rel="canonical" href="https://www.uniluva.com/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Uniluva">
+<meta property="og:locale" content="es_LA">
+<meta property="og:url" content="https://www.uniluva.com/">
+<meta property="og:title" content="Uniluva — Conecta. Descubre. Aporta.">
+<meta property="og:description" content="No necesitas ser famoso para ser importante. Comparte lo que sabes, descubre nuevas perspectivas y conecta alrededor del valor.">
+<meta property="og:image" content="https://www.uniluva.com/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Uniluva: No necesitas ser famoso para ser importante.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Uniluva — Conecta. Descubre. Aporta.">
+<meta name="twitter:description" content="Una red social donde el valor de tus aportes importa más que tu popularidad.">
+<meta name="twitter:image" content="https://www.uniluva.com/og-image.png">
 <meta name="color-scheme" content="light">
 <link rel="icon" type="image/svg+xml" href="/icon-192.svg">
-<link rel="apple-touch-icon" href="/icon-192.svg">
+<link rel="apple-touch-icon" href="/icon-192.png">
 <title>Uniluva — Conecta. Descubre. Aporta.</title>
-<meta name="app-version" content="24.4">
+<meta name="app-version" content="24.5">
 
-<link rel="manifest" href="/manifest.json?v=24.4">
+<link rel="manifest" href="/manifest.json?v=24.5">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Uniluva">
@@ -3863,6 +3878,35 @@ select:focus-visible,
   .field{margin-bottom:10px}
 }
 
+.user-about-card{padding:18px 20px}
+.user-about-bio{margin:0 0 12px;line-height:1.6;color:#33374a}
+.user-about-row{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 12px;padding:10px 0;border-top:1px solid var(--line);font-size:14px}
+.user-about-row span{color:var(--muted)}
+.account-card{margin-top:16px;padding:0;overflow:hidden}
+.account-card summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 18px}
+.account-card summary::-webkit-details-marker{display:none}
+.account-card summary:after{content:"";width:9px;height:9px;flex:none;border-right:2px solid #8a8fa3;border-bottom:2px solid #8a8fa3;transform:rotate(45deg);transition:transform .2s}
+.account-card[open] summary:after{transform:rotate(225deg)}
+.account-card summary strong{display:block;font-size:15px}
+.account-card summary small{display:block;color:var(--muted);font-size:13px;margin-top:2px;line-height:1.45}
+.account-actions{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;padding:0 18px 4px}
+.account-action{display:flex;flex-direction:column;gap:4px;text-align:left;border:1px solid var(--line);background:var(--surface-soft);border-radius:16px;padding:14px;color:var(--text)}
+.account-action strong{font-size:14px}
+.account-action span{font-size:12.5px;color:var(--muted);line-height:1.45}
+.account-action:hover{border-color:#c9c0ff;background:#fff}
+.account-action.danger strong{color:#c23a55}
+.account-action.danger:hover{border-color:rgba(233,87,114,.45)}
+.account-legal{display:flex;flex-wrap:wrap;gap:6px 18px;padding:14px 18px 16px;font-size:13px}
+.account-legal a{color:var(--purple-dark);font-weight:700}
+.ui-dialog-password{min-height:0}
+
+.auth-consent{display:flex;gap:10px;align-items:flex-start;margin:2px 0 14px;font-size:13px;line-height:1.5;color:#53586c;cursor:pointer}
+.auth-consent[hidden]{display:none}
+.auth-consent input{width:18px;height:18px;margin:1px 0 0;flex:none;accent-color:var(--purple)}
+.auth-consent a,.auth-note a{color:var(--purple-dark);font-weight:700}
+.auth-legal{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:8px}
+.auth-legal a{color:inherit}
+
 @media(hover:none){
   .post:hover,
   .community-card:hover,
@@ -3889,7 +3933,7 @@ select:focus-visible,
       <h1>No necesitas ser famoso para ser importante.</h1>
       <p>Conecta con personas y comunidades, descubre lo que importa y aporta valor con lo que compartes.</p>
     </div>
-    <div class="auth-foot">UNILUVA · Conecta. Descubre. Aporta.</div>
+    <div class="auth-foot">UNILUVA · Conecta. Descubre. Aporta.<nav class="auth-legal" aria-label="Documentos legales de Uniluva"><a href="/privacidad.html">Privacidad</a><a href="/terminos.html">Términos</a><a href="/normas.html">Normas de la comunidad</a></nav></div>
   </div>
   <div class="auth-panel">
     <div class="auth-card">
@@ -3899,6 +3943,7 @@ select:focus-visible,
       <div class="field" id="nameField"><label for="authName">Nombre</label><input type="text" id="authName" autocomplete="name" placeholder="Tu nombre"></div>
       <div class="field"><label for="authEmail">Correo</label><input id="authEmail" type="email" inputmode="email" autocomplete="email" placeholder="tu@correo.com" required></div>
       <div class="field"><label for="authPassword">Contraseña</label><input id="authPassword" type="password" autocomplete="current-password" placeholder="Mínimo 6 caracteres" minlength="6" required></div>
+      <label class="auth-consent" id="authConsentField" hidden><input type="checkbox" id="authConsent"><span>Acepto los <a href="/terminos.html" target="_blank" rel="noopener">Términos de uso</a>, la <a href="/privacidad.html" target="_blank" rel="noopener">Política de privacidad</a> y las <a href="/normas.html" target="_blank" rel="noopener">Normas de la comunidad</a>.</span></label>
       <button type="button" class="primary full" id="authSubmit">Entrar a Uniluva</button>
       <button class="auth-reset-link" id="forgotPasswordBtn" type="button">¿Olvidaste tu contraseña?</button>
       <div class="auth-divider">o</div>
@@ -3906,7 +3951,7 @@ select:focus-visible,
         <span class="google-g">G</span>
         Continuar con Google
       </button>
-      <div class="auth-note" id="authModeNote">Si ocurre un problema de acceso, Uniluva mostrará aquí el detalle.</div><div id="authDiagnostic" role="alert" aria-live="assertive"></div>
+      <div class="auth-note" id="authModeNote">Al continuar, aceptas los <a href="/terminos.html" target="_blank" rel="noopener">Términos</a>, la <a href="/privacidad.html" target="_blank" rel="noopener">Privacidad</a> y las <a href="/normas.html" target="_blank" rel="noopener">Normas de la comunidad</a> de Uniluva.</div><div id="authDiagnostic" role="alert" aria-live="assertive"></div>
     </div>
   </div>
 </section>
@@ -4027,9 +4072,9 @@ select:focus-visible,
 
         <div class="card discovery">
           <div class="eyebrow">Descubrimiento Uniluva</div>
-          <h3>Normalmente exploras tecnología. Hoy descubre fotografía urbana.</h3>
-          <p>Uniluva reserva espacio para mostrarte ideas fuera de tu burbuja habitual.</p>
-          <div class="discovery-actions"><button type="button" class="soft-btn" id="discoverPhoto">Explorar fotografía</button><button type="button" class="soft-btn" id="discoverOther">Muéstrame otra cosa</button></div>
+          <h3 id="discoveryTitle">Descubre una comunidad fuera de tu burbuja.</h3>
+          <p id="discoveryText">Uniluva reserva espacio para mostrarte ideas fuera de tu burbuja habitual.</p>
+          <div class="discovery-actions"><button type="button" class="soft-btn" id="discoverPhoto">Explorar comunidad</button><button type="button" class="soft-btn" id="discoverOther">Muéstrame otra cosa</button></div>
         </div>
 
         <div id="feed"></div>
@@ -4129,12 +4174,14 @@ select:focus-visible,
             </div>
           </div>
         </div>
-        <div class="profile-tabs">
-          <button type="button" class="active">Publicaciones</button>
-          <button type="button">Acerca de</button>
-          <button type="button">Comunidades</button>
+        <div class="profile-tabs" role="tablist" aria-label="Secciones del perfil">
+          <button type="button" class="active" role="tab" aria-selected="true" data-user-tab="posts">Publicaciones</button>
+          <button type="button" role="tab" aria-selected="false" data-user-tab="about">Acerca de</button>
+          <button type="button" role="tab" aria-selected="false" data-user-tab="communities">Comunidades</button>
         </div>
-        <div id="viewUserFeed"></div>
+        <div id="viewUserFeed" data-user-panel="posts"></div>
+        <div id="viewUserAbout" data-user-panel="about" hidden></div>
+        <div id="viewUserCommunities" data-user-panel="communities" hidden></div>
       </section>
 
       <section class="page" id="page-profile">
@@ -4147,6 +4194,19 @@ select:focus-visible,
             </div>
           </div>
         </div>
+        <details class="card account-card" id="accountCard">
+          <summary><span><strong>Tu cuenta y privacidad</strong><small>Descarga tus datos, revisa las normas o elimina tu cuenta.</small></span></summary>
+          <div class="account-actions">
+            <button type="button" class="account-action" id="exportDataBtn"><strong>Descargar mis datos</strong><span>Un archivo con tu perfil, tus publicaciones, comentarios y relaciones.</span></button>
+            <button type="button" class="account-action" id="signOutProfileBtn"><strong>Cerrar sesión</strong><span>Sal de Uniluva en este dispositivo.</span></button>
+            <button type="button" class="account-action danger" id="deleteAccountBtn"><strong>Eliminar cuenta</strong><span>Borra tu perfil y todo lo que has compartido. No se puede deshacer.</span></button>
+          </div>
+          <nav class="account-legal" aria-label="Documentos legales de tu cuenta">
+            <a href="/normas.html" target="_blank" rel="noopener">Normas de la comunidad</a>
+            <a href="/privacidad.html" target="_blank" rel="noopener">Privacidad</a>
+            <a href="/terminos.html" target="_blank" rel="noopener">Términos</a>
+          </nav>
+        </details>
         <div class="profile-feed-spacer"></div>
         <div class="section-head"><div><h2 class="profile-feed-title">Tus publicaciones</h2></div></div>
         <div id="profileFeed"></div>
@@ -4315,6 +4375,7 @@ select:focus-visible,
     </div>
     <p class="ui-dialog-message" id="uiDialogMessage"></p>
     <textarea class="ui-dialog-input" id="uiDialogInput" hidden></textarea>
+    <input class="ui-dialog-input ui-dialog-password" id="uiDialogPassword" type="password" autocomplete="current-password" aria-label="Contraseña" hidden>
     <div class="ui-dialog-actions">
       <button type="button" class="secondary" id="uiDialogCancel">Cancelar</button>
       <button type="button" class="primary" id="uiDialogConfirm">Aceptar</button>
@@ -4422,8 +4483,9 @@ select:focus-visible,
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
-import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, updateProfile, GoogleAuthProvider, signInWithPopup, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
-import { getFirestore, collection, doc, getDoc, getDocs, setDoc, updateDoc, addDoc, deleteDoc, onSnapshot, query, orderBy, limit, where, serverTimestamp, runTransaction, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
+import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, updateProfile, GoogleAuthProvider, signInWithPopup, sendPasswordResetEmail, reauthenticateWithPopup, reauthenticateWithCredential, EmailAuthProvider } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
+import { getFirestore, collection, doc, getDoc, getDocs, setDoc, updateDoc, addDoc, deleteDoc, onSnapshot, query, orderBy, limit, where, serverTimestamp, runTransaction, arrayUnion, arrayRemove, collectionGroup } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
+import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-functions.js";
 import { getStorage, ref as storageRef, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-storage.js";
 import { getMessaging, getToken, deleteToken, onMessage, isSupported as isMessagingSupported } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-messaging.js";
 
@@ -4442,7 +4504,9 @@ const firebaseConfig = {
 };
 const PUSH_VAPID_KEY = "BLuXbaMV_m-P3UguK0cNPwwJSP1bXP77ueNf2_jUB9HmLMRlhsXrPfGUXogjjAt6Elf2vveIu-wvnM9awVvm_UI";
 
+const TERMS_VERSION = "2026-10-24";
 const FIREBASE_READY = !Object.values(firebaseConfig).some(v => String(v).startsWith("PEGAR_"));
+let functionsClient=null;
 let app=null, auth=null, db=null, storage=null, messaging=null, unsubscribePosts=null, unsubscribeNotifications=null;
 
 let googleProvider=null;
@@ -4451,6 +4515,7 @@ if(FIREBASE_READY){
   auth=getAuth(app);
   db=getFirestore(app);
   storage=getStorage(app);
+  functionsClient=getFunctions(app,"southamerica-west1");
   googleProvider=new GoogleAuthProvider();
   googleProvider.setCustomParameters({ prompt: "select_account" });
 }
@@ -4508,7 +4573,8 @@ let state={
   notifications:[],
   notificationsLoaded:false,
   reactionTypes:{},
-  reactionLoads:{}
+  reactionLoads:{},
+  discoveryCommunityId:""
 };
 
 function toast(t){const e=$("#toast");e.textContent=t;e.classList.add("show");clearTimeout(window.__t);window.__t=setTimeout(()=>e.classList.remove("show"),1700)}
@@ -4547,6 +4613,8 @@ function closeUiDialog(value){
   $("#uiDialogModal").classList.remove("show");
   $("#uiDialogInput").hidden=true;
   $("#uiDialogInput").value="";
+  $("#uiDialogPassword").hidden=true;
+  $("#uiDialogPassword").value="";
   if(uiDialogResolver){
     const resolve=uiDialogResolver;
     uiDialogResolver=null;
@@ -4574,6 +4642,18 @@ function uiPrompt(message,value="",title="Editar"){
   return new Promise(resolve=>{uiDialogResolver=resolve;});
 }
 
+function uiPassword(message,title="Confirma que eres tú"){
+  $("#uiDialogTitle").textContent=title;
+  $("#uiDialogMessage").textContent=message;
+  $("#uiDialogInput").hidden=true;
+  $("#uiDialogPassword").hidden=false;
+  $("#uiDialogPassword").value="";
+  $("#uiDialogConfirm").textContent="Continuar";
+  $("#uiDialogModal").classList.add("show");
+  setTimeout(()=>$("#uiDialogPassword").focus(),30);
+  return new Promise(resolve=>{uiDialogResolver=resolve;});
+}
+
 function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[m]))}
 function saveLocal(){localStorage.setItem("uniluva_profile",JSON.stringify(state.profile));localStorage.setItem("uniluva_posts_v4",JSON.stringify(state.posts));localStorage.setItem("uniluva_joined_v4",JSON.stringify(state.joined))}
 function initial(){return (state.profile.name||"N")[0].toUpperCase()}
@@ -4581,7 +4661,7 @@ function initial(){return (state.profile.name||"N")[0].toUpperCase()}
 function setAuthMode(mode){
  state.mode=mode;const reg=mode==="register";
  $("#tabLogin").classList.toggle("active",!reg);$("#tabRegister").classList.toggle("active",reg);
- $("#nameField").style.display=reg?"block":"none";$("#authSubmit").textContent=reg?"Crear cuenta":"Entrar a Uniluva";
+ $("#nameField").style.display=reg?"block":"none";$("#authConsentField").hidden=!reg;$("#authSubmit").textContent=reg?"Crear cuenta":"Entrar a Uniluva";
  $("#authSubtitle").textContent=reg?"Crea tu cuenta para comenzar.":"Ingresa a tu cuenta.";
 }
 $("#tabLogin").onclick=()=>setAuthMode("login");$("#tabRegister").onclick=()=>setAuthMode("register");
@@ -4591,6 +4671,11 @@ async function doAuth(){
  if(FIREBASE_READY){
    try{
      if(state.mode==="register"){
+       if(!$("#authConsent").checked){
+         toast("Para crear tu cuenta, acepta los Términos y la Política de privacidad.");
+         $("#authConsent").focus();
+         return;
+       }
        const name=$("#authName").value.trim()||"Usuario Uniluva";
        const cred=await createUserWithEmailAndPassword(auth,email,pass);
        await updateProfile(cred.user,{displayName:name});
@@ -4611,6 +4696,8 @@ async function doAuth(){
          followersCount:0,
          followingCount:0,
          role:"user",
+         termsVersion:TERMS_VERSION,
+         termsAcceptedAt:serverTimestamp(),
          createdAt:serverTimestamp(),
          updatedAt:serverTimestamp()
        });
@@ -4705,7 +4792,9 @@ $("#googleSignIn").onclick=async()=>{
           joinedCommunities:[],
           followersCount:0,
           followingCount:0,
-          role:"user"
+          role:"user",
+          termsVersion:TERMS_VERSION,
+          termsAcceptedAt:serverTimestamp()
         });
       }
     }catch(dbErr){
@@ -6756,7 +6845,36 @@ function renderCommunitySelect(){
   }
 }
 
+function renderDiscoveryCard(pickNew=false){
+  const base=state.communities.length?state.communities:fallbackCommunities;
+  const options=base.filter(c=>!(state.user && isCommunityJoined(c)));
+  const title=$("#discoveryTitle"),text=$("#discoveryText"),go=$("#discoverPhoto"),other=$("#discoverOther");
+  if(!title)return;
+
+  if(!options.length){
+    state.discoveryCommunityId="";
+    title.textContent="Ya eres parte de todas las comunidades. ¿Creamos una nueva?";
+    text.textContent="Si un tema que te importa aún no tiene espacio, puedes abrirlo para que otras personas lo encuentren.";
+    go.textContent="Crear comunidad";
+    other.hidden=true;
+    return;
+  }
+
+  let current=options.find(c=>c.id===state.discoveryCommunityId);
+  if(!current || pickNew){
+    const pool=options.length>1?options.filter(c=>c.id!==state.discoveryCommunityId):options;
+    current=pool[Math.floor(Math.random()*pool.length)];
+    state.discoveryCommunityId=current.id;
+  }
+
+  title.textContent=`Fuera de tu burbuja: ${current.name}`;
+  text.textContent=current.desc||current.description||"Una comunidad con perspectivas que quizás aún no conoces.";
+  go.textContent="Explorar comunidad";
+  other.hidden=options.length<2;
+}
+
 function renderCommunities(){
+  renderDiscoveryCard();
   const base=state.communities.length?state.communities:fallbackCommunities.map(c=>({...c,memberCount:0,joined:false}));
   let list=[...base];
   if(state.communityFilter==="joined")list=list.filter(c=>isCommunityJoined(c));
@@ -7409,6 +7527,48 @@ async function blockUser(targetUid){
   }
 }
 
+function showUserTab(tab){
+  $$("[data-user-tab]").forEach(b=>{
+    const active=b.dataset.userTab===tab;
+    b.classList.toggle("active",active);
+    b.setAttribute("aria-selected",String(active));
+  });
+  $$("[data-user-panel]").forEach(p=>p.hidden=p.dataset.userPanel!==tab);
+}
+$$("[data-user-tab]").forEach(b=>b.onclick=()=>showUserTab(b.dataset.userTab));
+
+function userAboutHTML(d,userPosts){
+  const since=d.createdAt?.toDate?d.createdAt.toDate():null;
+  const sinceText=since?since.toLocaleDateString("es",{month:"long",year:"numeric"}):"";
+  const totals=userPosts.reduce((acc,p)=>{acc.value+=Number(p.value)||0;acc.help+=Number(p.help)||0;return acc;},{value:0,help:0});
+  const rows=[];
+  rows.push(`<p class="user-about-bio">${esc(normalizeBrandText(d.bio||""))||"Esta persona aún no ha escrito una biografía."}</p>`);
+  if(sinceText)rows.push(`<div class="user-about-row"><span>En Uniluva desde</span><strong>${esc(sinceText)}</strong></div>`);
+  rows.push(`<div class="user-about-row"><span>Sus aportes recibieron</span><strong>${totals.value} «Me aportó» · ${totals.help} «Me ayudó»</strong></div>`);
+  return `<div class="card user-about-card">${rows.join("")}</div>`;
+}
+
+async function loadUserCommunities(uid){
+  const box=$("#viewUserCommunities");
+  const base=state.communities.length?state.communities:[];
+  let joined=[];
+  try{
+    if(FIREBASE_READY){
+      const checks=await Promise.all(base.map(c=>
+        c.createdBy===uid
+          ? Promise.resolve(true)
+          : getDoc(doc(db,"communities",c.id,"members",uid)).then(s=>s.exists()).catch(()=>false)
+      ));
+      joined=base.filter((c,i)=>checks[i]);
+    }
+  }catch(err){console.warn("user communities",err);}
+  if(state.viewedUser?.uid!==uid)return;
+  box.innerHTML=joined.length
+    ? joined.map(c=>`<div class="card result"><div class="avatar">${esc((c.name||"C")[0])}</div><div class="result-info"><strong class="community-result-link" data-community-id="${esc(c.id)}">${esc(c.name)}</strong><small>${esc(c.desc||"")}</small></div><button type="button" class="secondary" data-community-id="${esc(c.id)}">Ver</button></div>`).join("")
+    : `<div class="card empty-state"><strong>Sin comunidades todavía</strong>Esta persona aún no se ha unido a ninguna comunidad.</div>`;
+  box.querySelectorAll("[data-community-id]").forEach(b=>b.onclick=()=>openCommunity(b.dataset.communityId));
+}
+
 async function openUserProfile(uid){
   if(!uid)return;
   if(uid===state.user?.uid){nav("profile");return;}
@@ -7431,6 +7591,11 @@ async function openUserProfile(uid){
     $("#viewPosts").textContent=userPosts.length;
     $("#viewUserFeed").innerHTML=userPosts.length?userPosts.map(postHTML).join(""):`<div class="card empty-state"><strong>Sin publicaciones todavía</strong>Este usuario aún no ha publicado.</div>`;
     wirePosts($("#viewUserFeed"));
+
+    $("#viewUserAbout").innerHTML=userAboutHTML(d,userPosts);
+    $("#viewUserCommunities").innerHTML=`<div class="card empty-state"><strong>Cargando comunidades…</strong></div>`;
+    showUserTab("posts");
+    loadUserCommunities(uid);
 
     const following=await isFollowing(uid);
     $("#followUserBtn").textContent=following?"Siguiendo":"Seguir";
@@ -8014,7 +8179,7 @@ function updatePushNotificationUI(forcedMessage=""){
 async function ensurePushServiceWorker(){
   let registration=await navigator.serviceWorker.getRegistration("/");
   if(!registration){
-    registration=await navigator.serviceWorker.register("/sw.js?v=24.4");
+    registration=await navigator.serviceWorker.register("/sw.js?v=24.5");
   }
   await navigator.serviceWorker.ready;
   return registration;
@@ -8328,8 +8493,134 @@ $("#signOutTop").onclick=async()=>{
     toast("No se pudo cerrar la sesión");
   }
 };$("#createMain").onclick=openCreateHub;$("#mobileCreate").onclick=openCreateHub;
-$("#globalSearch").addEventListener("input",e=>{nav("discover");renderDiscover(e.target.value)});$("#discoverPhoto").onclick=()=>nav("communities");$("#discoverOther").onclick=()=>toast("Prueba explorar Cine");
+$("#globalSearch").addEventListener("input",e=>{nav("discover");renderDiscover(e.target.value)});$("#discoverPhoto").onclick=()=>{
+  if(state.discoveryCommunityId)openCommunity(state.discoveryCommunityId);
+  else $("#createCommunityBtn").click();
+};
+$("#discoverOther").onclick=()=>renderDiscoveryCard(true);
 
+
+function serializeForExport(value){
+  if(value===null || value===undefined)return value;
+  if(typeof value.toDate==="function")return value.toDate().toISOString();
+  if(Array.isArray(value))return value.map(serializeForExport);
+  if(typeof value==="object"){
+    return Object.fromEntries(Object.entries(value).map(([k,v])=>[k,serializeForExport(v)]));
+  }
+  return value;
+}
+
+async function exportMyData(){
+  if(!FIREBASE_READY || !state.user){toast("Inicia sesión para descargar tus datos.");return;}
+  const btn=$("#exportDataBtn");
+  btn.disabled=true;
+  toast("Preparando tus datos…");
+  const uid=state.user.uid;
+  const readDocs=async q=>{
+    try{return (await getDocs(q)).docs.map(d=>({id:d.id,...serializeForExport(d.data())}));}
+    catch(err){console.warn("export",err);return [];}
+  };
+  try{
+    const profileSnap=await getDoc(doc(db,"users",uid));
+    const [posts,comments,replies,following,followers,blocked]=await Promise.all([
+      readDocs(query(collection(db,"posts"),where("authorId","==",uid))),
+      readDocs(query(collectionGroup(db,"comments"),where("authorId","==",uid))),
+      readDocs(query(collectionGroup(db,"replies"),where("authorId","==",uid))),
+      readDocs(collection(db,"users",uid,"following")),
+      readDocs(collection(db,"users",uid,"followers")),
+      readDocs(collection(db,"users",uid,"blocked"))
+    ]);
+    const data={
+      exportadoEl:new Date().toISOString(),
+      cuenta:{uid,correo:state.user.email||"",proveedores:state.user.providerData.map(p=>p.providerId)},
+      perfil:profileSnap.exists()?serializeForExport(profileSnap.data()):null,
+      comunidades:state.communities.filter(c=>state.joinedCommunityIds.includes(c.id)).map(c=>({id:c.id,nombre:c.name})),
+      publicaciones:posts,
+      comentarios:comments,
+      respuestas:replies,
+      siguiendo:following.map(f=>f.id),
+      seguidores:followers.map(f=>f.id),
+      bloqueados:blocked.map(b=>b.id),
+      notificaciones:state.notifications.map(serializeForExport)
+    };
+    const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement("a");
+    a.href=url;
+    a.download=`uniluva-mis-datos-${new Date().toISOString().slice(0,10)}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),2000);
+    toast("Tus datos se descargaron.");
+  }catch(err){
+    console.error("export data",err);
+    toast("No se pudieron preparar tus datos.");
+  }finally{
+    btn.disabled=false;
+  }
+}
+
+async function confirmIdentity(){
+  const user=auth.currentUser;
+  const token=await user.getIdTokenResult();
+  const authTime=Date.parse(token.authTime||0)/1000;
+  if(authTime && Date.now()/1000-authTime<5*60)return true;
+
+  const providers=user.providerData.map(p=>p.providerId);
+  if(providers.includes("password") && user.email){
+    const password=await uiPassword("Por seguridad, escribe tu contraseña para continuar.");
+    if(!password)return false;
+    await reauthenticateWithCredential(user,EmailAuthProvider.credential(user.email,password));
+    return true;
+  }
+  if(providers.includes("google.com")){
+    await reauthenticateWithPopup(user,googleProvider);
+    return true;
+  }
+  toast("Vuelve a iniciar sesión y repite la eliminación.");
+  return false;
+}
+
+async function deleteMyAccount(){
+  if(!FIREBASE_READY || !state.user){toast("Inicia sesión para administrar tu cuenta.");return;}
+  const ok=await uiConfirm(
+    "Se borrarán tu perfil, tus publicaciones, tus comentarios, tus archivos y tus relaciones en Uniluva. Si quieres conservar una copia, primero usa «Descargar mis datos».",
+    "¿Eliminar tu cuenta?"
+  );
+  if(!ok)return;
+  const typed=await uiPrompt("Para confirmar, escribe ELIMINAR.","","Confirmar eliminación");
+  if(typed===null)return;
+  if(String(typed).trim().toUpperCase()!=="ELIMINAR"){
+    toast("No se eliminó la cuenta. Escribe ELIMINAR para confirmar.");
+    return;
+  }
+
+  const btn=$("#deleteAccountBtn");
+  btn.disabled=true;
+  try{
+    if(!await confirmIdentity())return;
+    toast("Eliminando tu cuenta…");
+    if(messaging){try{await deleteToken(messaging);}catch{}}
+    await httpsCallable(functionsClient,"deleteMyAccount",{timeout:300000})();
+    try{localStorage.removeItem("uniluva_profile");}catch{}
+    try{await signOut(auth);}catch{}
+    toast("Tu cuenta fue eliminada. Gracias por haber aportado a Uniluva.");
+  }catch(err){
+    console.error("delete account",err);
+    const code=err?.code||"";
+    if(code==="auth/wrong-password" || code==="auth/invalid-credential")toast("La contraseña no es correcta.");
+    else if(code==="auth/popup-closed-by-user")toast("Cerraste la ventana antes de confirmar.");
+    else if(code==="functions/failed-precondition")toast("Vuelve a iniciar sesión y repite la eliminación.");
+    else toast("No se pudo eliminar la cuenta. Inténtalo de nuevo.");
+  }finally{
+    btn.disabled=false;
+  }
+}
+
+$("#exportDataBtn").onclick=exportMyData;
+$("#deleteAccountBtn").onclick=deleteMyAccount;
+$("#signOutProfileBtn").onclick=()=>$("#signOutTop").click();
 
 function renderEditPhotoPreview(){
   const box=$("#editPhotoPreview");
@@ -8511,8 +8802,12 @@ $("#saveProfile").onclick=async()=>{
 
 $("#uiDialogConfirm").onclick=()=>{
   const input=$("#uiDialogInput");
-  closeUiDialog(input.hidden?true:input.value);
+  const password=$("#uiDialogPassword");
+  closeUiDialog(!password.hidden?password.value:input.hidden?true:input.value);
 };
+$("#uiDialogPassword").addEventListener("keydown",e=>{
+  if(e.key==="Enter")$("#uiDialogConfirm").click();
+});
 $("#uiDialogCancel").onclick=()=>closeUiDialog(null);
 $("#uiDialogClose").onclick=()=>closeUiDialog(null);
 $("#uiDialogModal").addEventListener("click",e=>{
@@ -8682,7 +8977,7 @@ window.addEventListener("offline",()=>updateConnectionState(true));
 if("serviceWorker" in navigator){
   window.addEventListener("load",async()=>{
     try{
-      const registration=await navigator.serviceWorker.register("/sw.js?v=24.4");
+      const registration=await navigator.serviceWorker.register("/sw.js?v=24.5");
       registration.update().catch(()=>{});
     }catch(err){
       console.error("SW registration:",err);
@@ -8711,7 +9006,7 @@ function runUniluvaHealthCheck(){
   }
 
   const result={
-    version:"24.4",
+    version:"24.5",
     ok:issues.length===0,
     issues,
     communities:state.communities.length,

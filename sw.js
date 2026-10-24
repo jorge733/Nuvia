@@ -32,7 +32,7 @@ firebase.initializeApp({
 });
 
 const messaging=firebase.messaging();
-const CACHE_NAME = "uniluva-v24-4";
+const CACHE_NAME = "uniluva-v24-5";
 const OFFLINE_URL = "/index.html";
 
 const CORE = [
@@ -112,9 +112,14 @@ self.addEventListener("fetch", event => {
   if (isFirebaseRequest(url)) return;
 
   if (request.mode === "navigate") {
+    // Solo la app se guarda como copia sin conexión; las páginas legales no.
+    const isAppShell = url.pathname === "/" || url.pathname === "/index.html";
+
     event.respondWith(
       fetch(request)
         .then(response => {
+          if (!isAppShell || !response.ok) return response;
+
           const copy = response.clone();
 
           caches
