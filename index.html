@@ -2,45 +2,782 @@
 <html lang="es">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="robots" content="noindex">
-  <title>Uniluva — En mantenimiento</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Uniluva — Audiolibros</title>
+  <meta name="description" content="Uniluva: escucha audiolibros gratis en español. Clásicos de dominio público narrados por voluntarios de LibriVox.">
+  <meta name="theme-color" content="#6c4cf5">
+  <meta property="og:title" content="Uniluva — Audiolibros">
+  <meta property="og:description" content="Escucha audiolibros gratis en español. Clásicos de dominio público, sin registro.">
+  <meta property="og:url" content="https://www.uniluva.com/">
+  <link rel="canonical" href="https://www.uniluva.com/">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%236c4cf5'/%3E%3Cpath d='M18 40v-6a14 14 0 0 1 28 0v6' fill='none' stroke='white' stroke-width='5' stroke-linecap='round'/%3E%3Crect x='14' y='36' width='9' height='14' rx='4' fill='white'/%3E%3Crect x='41' y='36' width='9' height='14' rx='4' fill='white'/%3E%3C/svg%3E">
   <style>
-    :root { --bg: #f7f7f8; --fg: #1d1d1f; --muted: #6e6e73; --accent: #6c4cf5; }
+    :root {
+      --bg: #f7f7f9; --surface: #ffffff; --surface-2: #efedf6; --fg: #1b1a22; --muted: #6b6977;
+      --line: #e3e1ea; --accent: #6c4cf5; --accent-fg: #ffffff; --accent-soft: #ece7ff;
+      --shadow: 0 1px 2px rgba(20,16,40,.06), 0 6px 20px rgba(20,16,40,.06);
+      --radius: 14px; --player-h: 0px;
+    }
     @media (prefers-color-scheme: dark) {
-      :root { --bg: #111113; --fg: #f2f2f4; --muted: #a1a1a8; --accent: #9b85ff; }
+      :root {
+        --bg: #111015; --surface: #1a1920; --surface-2: #24222c; --fg: #f1f0f5; --muted: #a3a0b0;
+        --line: #2d2b36; --accent: #9b85ff; --accent-fg: #14111f; --accent-soft: #2a2442;
+        --shadow: 0 1px 2px rgba(0,0,0,.3), 0 6px 20px rgba(0,0,0,.25);
+      }
     }
     * { box-sizing: border-box; }
-    html, body { height: 100%; margin: 0; }
+    html { -webkit-text-size-adjust: 100%; }
     body {
-      display: grid; place-items: center; padding: 24px 16px;
-      background: var(--bg); color: var(--fg);
-      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-      text-align: center;
+      margin: 0; background: var(--bg); color: var(--fg);
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; line-height: 1.5;
+      padding-bottom: calc(var(--player-h) + env(safe-area-inset-bottom));
     }
-    main { max-width: 440px; }
-    .dot {
-      width: 14px; height: 14px; margin: 0 auto 28px; border-radius: 50%;
-      background: var(--accent); animation: pulse 2s ease-in-out infinite;
+    button, input, select { font: inherit; color: inherit; }
+    button { cursor: pointer; }
+    a { color: inherit; }
+    img { display: block; max-width: 100%; }
+    .wrap { max-width: 1080px; margin: 0 auto; padding: 0 16px; }
+
+    header.top {
+      position: sticky; top: 0; z-index: 20; background: color-mix(in srgb, var(--bg) 88%, transparent);
+      backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-bottom: 1px solid var(--line);
     }
-    @keyframes pulse { 0%,100% { opacity: .35; transform: scale(.85); } 50% { opacity: 1; transform: scale(1); } }
-    @media (prefers-reduced-motion: reduce) { .dot { animation: none; } }
-    h1 { font-size: clamp(1.6rem, 5vw, 2.2rem); margin: 0 0 12px; letter-spacing: -.02em; }
-    p { margin: 0; color: var(--muted); line-height: 1.6; font-size: 1.05rem; }
+    .top .wrap { display: flex; align-items: center; gap: 12px; height: 60px; }
+    .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; font-weight: 700; font-size: 1.15rem; letter-spacing: -.01em; }
+    .brand .logo { width: 30px; height: 30px; border-radius: 9px; background: var(--accent); display: grid; place-items: center; color: var(--accent-fg); }
+    nav.tabs { margin-left: auto; display: flex; gap: 4px; }
+    nav.tabs a {
+      text-decoration: none; padding: 7px 12px; border-radius: 999px; color: var(--muted); font-weight: 500; font-size: .95rem;
+    }
+    nav.tabs a[aria-current="page"] { background: var(--accent-soft); color: var(--accent); }
+
+    .hero { padding: 36px 0 8px; }
+    .hero h1 { font-size: clamp(1.7rem, 5vw, 2.6rem); line-height: 1.15; margin: 0 0 10px; letter-spacing: -.025em; }
+    .hero p { margin: 0 0 22px; color: var(--muted); max-width: 560px; font-size: 1.05rem; }
+    form.search { display: flex; gap: 8px; max-width: 620px; }
+    form.search input {
+      flex: 1; min-width: 0; padding: 12px 16px; border-radius: 999px; border: 1px solid var(--line);
+      background: var(--surface); outline: none;
+    }
+    form.search input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+    .btn {
+      border: 0; border-radius: 999px; padding: 11px 18px; background: var(--accent); color: var(--accent-fg); font-weight: 600;
+      display: inline-flex; align-items: center; gap: 8px; text-decoration: none; white-space: nowrap;
+    }
+    .btn.ghost { background: var(--surface-2); color: var(--fg); }
+    .btn:active { transform: scale(.97); }
+    .chips { display: flex; gap: 8px; overflow-x: auto; padding: 18px 0 4px; scrollbar-width: none; }
+    .chips::-webkit-scrollbar { display: none; }
+    .chip {
+      flex: none; border: 1px solid var(--line); background: var(--surface); padding: 7px 14px; border-radius: 999px;
+      font-size: .92rem; color: var(--muted);
+    }
+    .chip[aria-pressed="true"] { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+
+    section.shelf { padding: 22px 0 6px; }
+    .shelf-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+    .shelf-head h2 { margin: 0; font-size: 1.2rem; letter-spacing: -.01em; }
+    .shelf-head .count { color: var(--muted); font-size: .9rem; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 18px 16px; }
+    @media (max-width: 480px) { .grid { grid-template-columns: repeat(2, 1fr); gap: 16px 12px; } }
+    .card { text-decoration: none; display: block; min-width: 0; }
+    .cover {
+      aspect-ratio: 1; border-radius: 12px; overflow: hidden; background: var(--surface-2); box-shadow: var(--shadow); position: relative;
+    }
+    .cover img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+    .cover .ph {
+      position: absolute; inset: 0; display: grid; place-items: center; padding: 12px; text-align: center; font-weight: 700; font-size: .95rem;
+      color: #fff; line-height: 1.2;
+    }
+    .cover .bar { position: absolute; left: 0; right: 0; bottom: 0; height: 4px; background: rgba(0,0,0,.25); }
+    .cover .bar i { display: block; height: 100%; background: var(--accent); }
+    .card .t { margin: 9px 0 1px; font-weight: 600; font-size: .95rem; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .card .a { margin: 0; color: var(--muted); font-size: .85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .row { display: grid; grid-auto-flow: column; grid-auto-columns: 150px; gap: 16px; overflow-x: auto; padding-bottom: 8px; scrollbar-width: thin; }
+    .more { display: flex; justify-content: center; padding: 26px 0 8px; }
+    .empty, .status { color: var(--muted); padding: 32px 0; text-align: center; }
+    .skel .cover { animation: shimmer 1.4s ease-in-out infinite; box-shadow: none; }
+    .skel .t, .skel .a { height: 12px; border-radius: 6px; background: var(--surface-2); margin-top: 10px; }
+    .skel .a { width: 60%; }
+    @keyframes shimmer { 50% { opacity: .55; } }
+
+    /* Detalle */
+    .detail { display: grid; grid-template-columns: 260px 1fr; gap: 32px; padding: 32px 0 12px; align-items: start; }
+    @media (max-width: 720px) { .detail { grid-template-columns: 1fr; gap: 20px; padding-top: 20px; } .detail .cover { max-width: 240px; } }
+    .detail h1 { margin: 0 0 4px; font-size: clamp(1.5rem, 4vw, 2.1rem); line-height: 1.2; letter-spacing: -.02em; }
+    .detail .author { color: var(--muted); margin: 0 0 14px; font-size: 1.05rem; }
+    .meta { display: flex; flex-wrap: wrap; gap: 6px 16px; color: var(--muted); font-size: .9rem; margin-bottom: 18px; }
+    .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+    .desc { color: var(--fg); opacity: .9; max-width: 680px; }
+    .desc.clamp { display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; overflow: hidden; }
+    .linkbtn { background: none; border: 0; padding: 4px 0; color: var(--accent); font-weight: 600; }
+    .chapters { list-style: none; margin: 8px 0 0; padding: 0; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); overflow: hidden; }
+    .chapters li + li { border-top: 1px solid var(--line); }
+    .chapters button {
+      width: 100%; display: grid; grid-template-columns: 34px 1fr auto; align-items: center; gap: 12px; text-align: left;
+      background: none; border: 0; padding: 12px 16px;
+    }
+    .chapters button:hover { background: var(--surface-2); }
+    .chapters .n { color: var(--muted); font-variant-numeric: tabular-nums; font-size: .9rem; }
+    .chapters .d { color: var(--muted); font-size: .85rem; font-variant-numeric: tabular-nums; }
+    .chapters .ct { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+    .chapters li.done .ct { color: var(--muted); }
+    .chapters li.current button { background: var(--accent-soft); }
+    .chapters li.current .ct, .chapters li.current .n { color: var(--accent); font-weight: 600; }
+    .credit { color: var(--muted); font-size: .85rem; margin: 18px 0 0; }
+
+    /* Reproductor */
+    .player {
+      position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; background: var(--surface); border-top: 1px solid var(--line);
+      box-shadow: 0 -6px 24px rgba(0,0,0,.08); padding-bottom: env(safe-area-inset-bottom);
+      transform: translateY(110%); transition: transform .3s ease;
+    }
+    .player.on { transform: none; }
+    .player .wrap { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 16px; padding-top: 10px; padding-bottom: 10px; }
+    .p-info { display: flex; align-items: center; gap: 12px; min-width: 0; text-decoration: none; }
+    .p-info .cover { width: 48px; height: 48px; flex: none; border-radius: 8px; box-shadow: none; }
+    .p-info .cover .ph { font-size: .55rem; padding: 4px; }
+    .p-text { min-width: 0; }
+    .p-text .t { font-weight: 600; font-size: .93rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .p-text .c { color: var(--muted); font-size: .82rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .p-ctrl { display: flex; align-items: center; gap: 6px; }
+    .icon {
+      width: 40px; height: 40px; border-radius: 50%; border: 0; background: none; display: grid; place-items: center; color: var(--fg); position: relative;
+    }
+    .icon:hover { background: var(--surface-2); }
+    .icon svg { width: 22px; height: 22px; }
+    .icon.big { width: 48px; height: 48px; background: var(--accent); color: var(--accent-fg); }
+    .icon.big:hover { background: var(--accent); filter: brightness(1.08); }
+    .icon .lbl { position: absolute; font-size: 8px; font-weight: 700; top: 15px; }
+    .p-extra { display: flex; justify-content: flex-end; align-items: center; gap: 4px; }
+    .pill { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 5px 11px; font-size: .85rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+    .pill.active { border-color: var(--accent); color: var(--accent); }
+    .p-seek { grid-column: 1 / -1; display: flex; align-items: center; gap: 10px; font-size: .78rem; color: var(--muted); font-variant-numeric: tabular-nums; margin-top: -4px; }
+    .p-seek input { flex: 1; accent-color: var(--accent); min-width: 0; }
+    @media (max-width: 720px) {
+      .player .wrap { grid-template-columns: minmax(0, 1fr) auto; gap: 8px 10px; }
+      .p-extra { grid-column: 1 / -1; grid-row: 3; justify-content: center; }
+      .p-ctrl .hide-sm { display: none; }
+      .p-seek { grid-row: 2; margin-top: 0; }
+    }
+    .menu {
+      position: fixed; z-index: 40; right: 16px; bottom: calc(var(--player-h) + 8px); background: var(--surface); border: 1px solid var(--line);
+      border-radius: var(--radius); box-shadow: var(--shadow); padding: 6px; min-width: 200px; display: none;
+    }
+    .menu.on { display: block; }
+    .menu h3 { margin: 6px 10px 4px; font-size: .78rem; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+    .menu button { display: block; width: 100%; text-align: left; border: 0; background: none; padding: 9px 12px; border-radius: 9px; }
+    .menu button:hover { background: var(--surface-2); }
+    .menu button[aria-checked="true"] { color: var(--accent); font-weight: 600; }
+
+    footer { color: var(--muted); font-size: .85rem; padding: 40px 0 28px; text-align: center; }
+    footer a { color: var(--muted); }
+    .toast {
+      position: fixed; left: 50%; bottom: calc(var(--player-h) + 16px); transform: translate(-50%, 20px); opacity: 0; z-index: 50;
+      background: var(--fg); color: var(--bg); padding: 10px 16px; border-radius: 999px; font-size: .9rem; transition: .25s; pointer-events: none;
+      max-width: calc(100% - 32px);
+    }
+    .toast.on { opacity: 1; transform: translate(-50%, 0); }
+    .view { animation: fade .25s ease; }
+    @keyframes fade { from { opacity: 0; transform: translateY(6px); } }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+    :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
   </style>
 </head>
 <body>
-  <main>
-    <div class="dot" aria-hidden="true"></div>
-    <h1>Estamos en mantenimiento</h1>
-    <p>Uniluva se está renovando. Volveremos pronto con algo nuevo.</p>
-  </main>
+  <header class="top">
+    <div class="wrap">
+      <a class="brand" href="#/">
+        <span class="logo" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M4 15v-3a8 8 0 0 1 16 0v3"/><rect x="3" y="14" width="4" height="7" rx="2" fill="currentColor"/><rect x="17" y="14" width="4" height="7" rx="2" fill="currentColor"/></svg></span>
+        Uniluva
+      </a>
+      <nav class="tabs" aria-label="Secciones">
+        <a href="#/" data-tab="home">Explorar</a>
+        <a href="#/biblioteca" data-tab="library">Mi biblioteca</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="app" class="wrap" tabindex="-1"></main>
+
+  <footer class="wrap">
+    Audiolibros de dominio público grabados por voluntarios de <a href="https://librivox.org" target="_blank" rel="noopener">LibriVox</a>
+    y alojados en <a href="https://archive.org" target="_blank" rel="noopener">Internet Archive</a>.
+  </footer>
+
+  <div class="player" id="player" aria-label="Reproductor">
+    <div class="wrap">
+      <a class="p-info" id="pInfo" href="#/">
+        <div class="cover" id="pCover"></div>
+        <div class="p-text"><div class="t" id="pTitle"></div><div class="c" id="pChapter"></div></div>
+      </a>
+      <div class="p-ctrl">
+        <button class="icon hide-sm" id="pPrev" aria-label="Capítulo anterior"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h2v14H6zM20 5v14L9 12z"/></svg></button>
+        <button class="icon" id="pBack" aria-label="Retroceder 15 segundos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 3v5h5"/></svg><span class="lbl">15</span></button>
+        <button class="icon big" id="pPlay" aria-label="Reproducir"></button>
+        <button class="icon" id="pFwd" aria-label="Adelantar 30 segundos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 3v5h-5"/></svg><span class="lbl">30</span></button>
+        <button class="icon hide-sm" id="pNext" aria-label="Capítulo siguiente"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 5h2v14h-2zM4 5v14l11-7z"/></svg></button>
+      </div>
+      <div class="p-extra">
+        <button class="pill" id="pSpeed" aria-label="Velocidad de reproducción">1×</button>
+        <button class="pill" id="pSleep" aria-label="Temporizador para dormir">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:-2px"><path d="M21 13A9 9 0 1 1 11 3a7 7 0 0 0 10 10z"/></svg>
+          <span id="pSleepTxt">Dormir</span>
+        </button>
+      </div>
+      <div class="p-seek">
+        <span id="pCur">0:00</span>
+        <input type="range" id="pRange" min="0" max="1000" value="0" aria-label="Posición en el capítulo">
+        <span id="pDur">0:00</span>
+      </div>
+    </div>
+  </div>
+  <div class="menu" id="speedMenu" role="menu"></div>
+  <div class="menu" id="sleepMenu" role="menu"></div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <audio id="audio" preload="metadata"></audio>
+
   <script>
-    // Quita el service worker y la caché de la versión anterior para que nadie vea la app antigua.
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.getRegistrations().then(function (regs) { regs.forEach(function (r) { r.unregister(); }); });
+  (function () {
+    'use strict';
+
+    // ---------- Utilidades ----------
+    const $ = (s, r) => (r || document).querySelector(s);
+    const app = $('#app');
+    const audio = $('#audio');
+    const IA = 'https://archive.org';
+    const PAGE = 24;
+
+    const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const first = (v) => Array.isArray(v) ? v[0] : v;
+    const fmt = (s) => {
+      s = Math.max(0, Math.floor(s || 0));
+      const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), x = s % 60;
+      return h ? `${h}:${String(m).padStart(2, '0')}:${String(x).padStart(2, '0')}` : `${m}:${String(x).padStart(2, '0')}`;
+    };
+    const fmtLong = (s) => {
+      s = Math.round(s || 0); const h = Math.floor(s / 3600), m = Math.round((s % 3600) / 60);
+      return h ? `${h} h ${m} min` : `${m} min`;
+    };
+    const parseLen = (v) => {
+      if (v == null) return 0;
+      v = String(v);
+      if (v.includes(':')) return v.split(':').reduce((a, p) => a * 60 + parseFloat(p || 0), 0);
+      return parseFloat(v) || 0;
+    };
+    // Títulos de LibriVox: "Don Quijote, Volume 1" → se deja tal cual; se limpia el sufijo "(version 2)" de forma legible.
+    const cleanTitle = (t) => String(first(t) || 'Sin título').replace(/\s*\((?:version|versión)\s*(\d+)\)/i, ' · versión $1');
+    const cleanAuthor = (a) => {
+      a = first(a) || 'Autor desconocido';
+      return a === 'Anonymous' || a === 'Unknown' ? 'Anónimo' : a;
+    };
+    const stripHtml = (h) => { const d = document.createElement('div'); d.innerHTML = String(first(h) || ''); return (d.textContent || '').replace(/\s+\n/g, '\n').trim(); };
+    const hue = (s) => { let h = 0; for (const c of String(s)) h = (h * 31 + c.charCodeAt(0)) % 360; return h; };
+    const coverUrl = (id) => `${IA}/services/img/${encodeURIComponent(id)}`;
+
+    function coverHTML(book, progress) {
+      const h = hue(book.id);
+      return `<div class="cover" style="background:linear-gradient(135deg,hsl(${h} 55% 52%),hsl(${(h + 40) % 360} 60% 38%))">
+        <span class="ph">${esc(book.title)}</span>
+        <img src="${coverUrl(book.id)}" alt="" loading="lazy" onerror="this.remove()">
+        ${progress ? `<span class="bar"><i style="width:${Math.min(100, progress * 100).toFixed(1)}%"></i></span>` : ''}
+      </div>`;
     }
-    if (window.caches) { caches.keys().then(function (keys) { keys.forEach(function (k) { caches.delete(k); }); }); }
+
+    const store = {
+      get(k, d) { try { const v = localStorage.getItem('uniluva.' + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
+      set(k, v) { try { localStorage.setItem('uniluva.' + k, JSON.stringify(v)); } catch (e) {} }
+    };
+
+    let toastTimer;
+    function toast(msg) {
+      const t = $('#toast'); t.textContent = msg; t.classList.add('on');
+      clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('on'), 2400);
+    }
+
+    // ---------- Datos (Internet Archive / LibriVox) ----------
+    const GENRES = [
+      { id: '', label: 'Todos' },
+      { id: 'novela', label: 'Novela', q: 'subject:(novel OR novela OR fiction OR ficción)' },
+      { id: 'cuentos', label: 'Cuentos', q: 'subject:(short OR cuento OR cuentos OR stories)' },
+      { id: 'poesia', label: 'Poesía', q: 'subject:(poetry OR poesía OR poesia OR poems)' },
+      { id: 'infantil', label: 'Infantil', q: "subject:(children OR infantil OR fábulas OR fabulas OR fairy)" },
+      { id: 'teatro', label: 'Teatro', q: 'subject:(drama OR teatro OR play)' },
+      { id: 'historia', label: 'Historia', q: 'subject:(history OR historia OR biography OR biografía)' },
+      { id: 'filosofia', label: 'Filosofía', q: 'subject:(philosophy OR filosofía OR filosofia OR religion)' },
+      { id: 'misterio', label: 'Misterio', q: 'subject:(mystery OR misterio OR detective OR terror OR horror)' }
+    ];
+    const LANGS = { es: 'language:(spa OR Spanish OR español)', all: '' };
+
+    const cache = new Map();
+    async function getJSON(url) {
+      if (cache.has(url)) return cache.get(url);
+      const p = fetch(url).then((r) => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); });
+      cache.set(url, p);
+      p.catch(() => cache.delete(url));
+      return p;
+    }
+
+    async function searchBooks({ text = '', genre = '', lang = 'es', page = 1, sort = 'downloads desc' }) {
+      const parts = ['collection:librivoxaudio'];
+      if (LANGS[lang]) parts.push(LANGS[lang]);
+      const g = GENRES.find((x) => x.id === genre);
+      if (g && g.q) parts.push(g.q);
+      if (text.trim()) {
+        const t = text.trim().replace(/[:()"\\]/g, ' ');
+        parts.push(`(title:(${t}) OR creator:(${t}) OR description:(${t}))`);
+      }
+      const params = new URLSearchParams({ q: parts.join(' AND '), rows: PAGE, page, output: 'json' });
+      ['identifier', 'title', 'creator', 'runtime'].forEach((f) => params.append('fl[]', f));
+      params.append('sort[]', sort);
+      const data = await getJSON(`${IA}/advancedsearch.php?${params}`);
+      return {
+        total: data.response.numFound,
+        books: data.response.docs.map((d) => ({ id: d.identifier, title: cleanTitle(d.title), author: cleanAuthor(d.creator) }))
+      };
+    }
+
+    async function getBook(id) {
+      const d = await getJSON(`${IA}/metadata/${encodeURIComponent(id)}`);
+      if (!d || !d.metadata) throw new Error('No encontrado');
+      const m = d.metadata;
+      const files = d.files || [];
+      const byName = new Map(files.map((f) => [f.name, f]));
+      // Los originales traen el número de pista; para escuchar en línea se prefiere la versión de 64 kbps, más liviana.
+      let tracks = files.filter((f) => /\.mp3$/i.test(f.name) && !/_64kb\.mp3$/i.test(f.name) && f.format !== 'Metadata');
+      if (!tracks.length) tracks = files.filter((f) => /\.mp3$/i.test(f.name));
+      const num = (f) => parseInt(String(f.track || '').split('/')[0], 10);
+      tracks.sort((a, b) => (num(a) || 0) - (num(b) || 0) || a.name.localeCompare(b.name, undefined, { numeric: true }));
+      const chapters = tracks.map((f, i) => {
+        const light = byName.get(f.name.replace(/\.mp3$/i, '_64kb.mp3'));
+        const file = light || f;
+        return {
+          title: (f.title || file.title || `Capítulo ${i + 1}`).replace(/^\s*\d+[a-z]?\s*[:.-]\s*/i, '').trim() || `Capítulo ${i + 1}`,
+          url: `${IA}/download/${encodeURIComponent(id)}/${file.name.split('/').map(encodeURIComponent).join('/')}`,
+          length: parseLen(f.length || file.length)
+        };
+      });
+      const total = chapters.reduce((a, c) => a + c.length, 0) || parseLen(m.runtime);
+      return {
+        id, title: cleanTitle(m.title), author: cleanAuthor(m.creator), description: stripHtml(m.description),
+        year: first(m.date) ? String(first(m.date)).slice(0, 4) : '', language: first(m.language) || '', total, chapters
+      };
+    }
+
+    // ---------- Estado de escucha ----------
+    // progress[id] = { ch, t, done, updated, book: {id,title,author}, total, pct }
+    const progress = store.get('progress', {});
+    const favorites = store.get('favorites', {});
+    const saveProgress = () => store.set('progress', progress);
+    const saveFavs = () => store.set('favorites', favorites);
+
+    function bookPct(id) {
+      const p = progress[id];
+      return p ? (p.done ? 1 : p.pct || 0) : 0;
+    }
+
+    // ---------- Vistas ----------
+    const state = { text: '', genre: '', lang: store.get('lang', 'es'), page: 1, books: [], total: 0 };
+
+    function cardHTML(b) {
+      return `<a class="card" href="#/libro/${encodeURIComponent(b.id)}">
+        ${coverHTML(b, bookPct(b.id))}
+        <p class="t">${esc(b.title)}</p><p class="a">${esc(b.author)}</p></a>`;
+    }
+    const skeleton = (n) => Array.from({ length: n }, () => '<div class="card skel"><div class="cover"></div><div class="t"></div><div class="a"></div></div>').join('');
+
+    function continueList() {
+      return Object.values(progress).filter((p) => !p.done && p.book).sort((a, b) => b.updated - a.updated);
+    }
+
+    function renderHome() {
+      const cont = continueList();
+      app.innerHTML = `<div class="view">
+        <section class="hero">
+          <h1>Historias para escuchar, cuando quieras.</h1>
+          <p>Cientos de audiolibros gratis en español: clásicos, cuentos, poesía y más. Sin registro ni anuncios.</p>
+          <form class="search" role="search">
+            <label class="sr" for="q">Buscar audiolibros</label>
+            <input id="q" type="search" placeholder="Busca un título o autor…" value="${esc(state.text)}" autocomplete="off">
+            <button class="btn" type="submit">Buscar</button>
+          </form>
+          <div class="chips" role="group" aria-label="Géneros">
+            ${GENRES.map((g) => `<button class="chip" data-genre="${g.id}" aria-pressed="${state.genre === g.id}">${g.label}</button>`).join('')}
+          </div>
+        </section>
+        ${cont.length ? `<section class="shelf"><div class="shelf-head"><h2>Seguir escuchando</h2></div>
+          <div class="row">${cont.slice(0, 12).map((p) => cardHTML(p.book)).join('')}</div></section>` : ''}
+        <section class="shelf">
+          <div class="shelf-head">
+            <h2 id="resTitle">Más escuchados</h2>
+            <span class="count" id="resCount"></span>
+          </div>
+          <div class="grid" id="results">${skeleton(12)}</div>
+          <div class="more" id="more"></div>
+          <div style="text-align:center">
+            <button class="linkbtn" id="langToggle">${state.lang === 'es' ? 'Ver también audiolibros en otros idiomas' : 'Mostrar solo audiolibros en español'}</button>
+          </div>
+        </section></div>`;
+
+      $('form.search', app).addEventListener('submit', (e) => { e.preventDefault(); state.text = $('#q').value; loadResults(true); });
+      app.querySelectorAll('.chip').forEach((c) => c.addEventListener('click', () => {
+        state.genre = c.dataset.genre;
+        app.querySelectorAll('.chip').forEach((x) => x.setAttribute('aria-pressed', x === c));
+        loadResults(true);
+      }));
+      $('#langToggle').addEventListener('click', () => {
+        state.lang = state.lang === 'es' ? 'all' : 'es'; store.set('lang', state.lang);
+        $('#langToggle').textContent = state.lang === 'es' ? 'Ver también audiolibros en otros idiomas' : 'Mostrar solo audiolibros en español';
+        loadResults(true);
+      });
+      if (state.books.length) paintResults(); else loadResults(true);
+    }
+
+    function paintResults() {
+      const res = $('#results'); if (!res) return;
+      const g = GENRES.find((x) => x.id === state.genre);
+      $('#resTitle').textContent = state.text.trim() ? `Resultados para “${state.text.trim()}”` : (g && g.id ? g.label : 'Más escuchados');
+      $('#resCount').textContent = state.total ? `${state.total.toLocaleString('es')} audiolibros` : '';
+      res.innerHTML = state.books.length ? state.books.map(cardHTML).join('') : '';
+      if (!state.books.length) res.outerHTML = `<div id="results" class="empty">No encontramos audiolibros con esa búsqueda. Prueba con otro título o autor.</div>`;
+      const more = $('#more');
+      more.innerHTML = state.books.length < state.total ? '<button class="btn ghost" id="moreBtn">Ver más</button>' : '';
+      const mb = $('#moreBtn'); if (mb) mb.addEventListener('click', () => { state.page++; loadResults(false); });
+    }
+
+    let reqId = 0;
+    async function loadResults(reset) {
+      const my = ++reqId;
+      if (reset) {
+        state.page = 1; state.books = [];
+        const r = $('#results'); if (r) { r.className = 'grid'; r.innerHTML = skeleton(12); }
+        $('#more') && ($('#more').innerHTML = '');
+      } else {
+        const mb = $('#moreBtn'); if (mb) { mb.disabled = true; mb.textContent = 'Cargando…'; }
+      }
+      try {
+        const { total, books } = await searchBooks(state);
+        if (my !== reqId) return;
+        state.total = total; state.books = state.books.concat(books);
+        paintResults();
+      } catch (e) {
+        if (my !== reqId) return;
+        const r = $('#results');
+        if (r) r.outerHTML = `<div id="results" class="status">No pudimos cargar el catálogo. Revisa tu conexión e inténtalo de nuevo.<br><br><button class="btn ghost" id="retry">Reintentar</button></div>`;
+        const rt = $('#retry'); if (rt) rt.addEventListener('click', () => loadResults(true));
+      }
+    }
+
+    async function renderBook(id) {
+      app.innerHTML = `<div class="view"><div class="detail"><div class="card skel"><div class="cover"></div></div><div><p class="status" style="text-align:left">Cargando audiolibro…</p></div></div></div>`;
+      let book;
+      try { book = await getBook(id); } catch (e) {
+        app.innerHTML = `<div class="view status">No pudimos abrir este audiolibro.<br><br><a class="btn ghost" href="#/">Volver a explorar</a></div>`;
+        return;
+      }
+      if (currentRoute().id !== id) return;
+      document.title = `${book.title} — Uniluva`;
+      const p = progress[id];
+      const fav = !!favorites[id];
+      const started = p && (p.ch > 0 || p.t > 5) && !p.done;
+      const desc = book.description;
+      app.innerHTML = `<div class="view"><div class="detail">
+        ${coverHTML(book, bookPct(id))}
+        <div>
+          <h1>${esc(book.title)}</h1>
+          <p class="author">${esc(book.author)}</p>
+          <div class="meta">
+            ${book.total ? `<span>${fmtLong(book.total)}</span>` : ''}
+            <span>${book.chapters.length} ${book.chapters.length === 1 ? 'parte' : 'partes'}</span>
+            ${book.year ? `<span>Grabado en ${esc(book.year)}</span>` : ''}
+            ${p && p.done ? '<span>✓ Terminado</span>' : started ? `<span>${Math.round(bookPct(id) * 100)}% escuchado</span>` : ''}
+          </div>
+          <div class="actions">
+            <button class="btn" id="playBook" ${book.chapters.length ? '' : 'disabled'}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4v16l13-8z"/></svg>
+              ${started ? 'Continuar' : 'Escuchar'}</button>
+            <button class="btn ghost" id="favBtn" aria-pressed="${fav}">${fav ? '♥ En tu biblioteca' : '♡ Guardar'}</button>
+          </div>
+          ${desc ? `<div class="desc clamp" id="desc">${esc(desc).replace(/\n+/g, '<br>')}</div><button class="linkbtn" id="descMore" hidden>Leer más</button>` : ''}
+        </div>
+      </div>
+      <section class="shelf">
+        <div class="shelf-head"><h2>Capítulos</h2></div>
+        ${book.chapters.length ? `<ol class="chapters" id="chapters">${book.chapters.map((c, i) => `
+          <li data-i="${i}"><button data-i="${i}"><span class="n">${i + 1}</span><span class="ct">${esc(c.title)}</span><span class="d">${c.length ? fmt(c.length) : ''}</span></button></li>`).join('')}
+        </ol>` : '<p class="empty">Este audiolibro no tiene archivos de audio disponibles.</p>'}
+        <p class="credit">Grabación de LibriVox, de dominio público. <a href="${IA}/details/${encodeURIComponent(id)}" target="_blank" rel="noopener">Ver en Internet Archive</a></p>
+      </section></div>`;
+
+      const d = $('#desc');
+      if (d && d.scrollHeight > d.clientHeight + 4) {
+        const m = $('#descMore'); m.hidden = false;
+        m.addEventListener('click', () => { d.classList.toggle('clamp'); m.textContent = d.classList.contains('clamp') ? 'Leer más' : 'Leer menos'; });
+      }
+      $('#playBook').addEventListener('click', () => {
+        if (player.book && player.book.id === id) { togglePlay(); return; }
+        const pp = progress[id];
+        play(book, pp && !pp.done ? pp.ch : 0, pp && !pp.done ? pp.t : 0);
+      });
+      $('#favBtn').addEventListener('click', (e) => {
+        if (favorites[id]) { delete favorites[id]; toast('Quitado de tu biblioteca'); }
+        else { favorites[id] = { id, title: book.title, author: book.author, added: Date.now() }; toast('Guardado en tu biblioteca'); }
+        saveFavs();
+        e.currentTarget.setAttribute('aria-pressed', !!favorites[id]);
+        e.currentTarget.textContent = favorites[id] ? '♥ En tu biblioteca' : '♡ Guardar';
+      });
+      const list = $('#chapters');
+      if (list) list.addEventListener('click', (e) => {
+        const b = e.target.closest('button[data-i]'); if (!b) return;
+        const i = +b.dataset.i;
+        if (player.book && player.book.id === id && player.ch === i) togglePlay(); else play(book, i, 0);
+      });
+      markChapters();
+    }
+
+    function markChapters() {
+      const list = $('#chapters'); if (!list) return;
+      const id = currentRoute().id;
+      const p = progress[id];
+      const isCur = player.book && player.book.id === id;
+      list.querySelectorAll('li').forEach((li) => {
+        const i = +li.dataset.i;
+        li.classList.toggle('current', isCur && player.ch === i);
+        li.classList.toggle('done', !!p && (p.done || i < p.ch));
+      });
+      const pb = $('#playBook');
+      if (pb && isCur) pb.innerHTML = audio.paused
+        ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4v16l13-8z"/></svg> Continuar'
+        : '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></svg> Pausar';
+    }
+
+    function renderLibrary() {
+      const cont = continueList();
+      const favs = Object.values(favorites).sort((a, b) => b.added - a.added);
+      const done = Object.values(progress).filter((p) => p.done && p.book).sort((a, b) => b.updated - a.updated);
+      const shelf = (title, items, empty) => `<section class="shelf"><div class="shelf-head"><h2>${title}</h2><span class="count">${items.length || ''}</span></div>
+        ${items.length ? `<div class="grid">${items.map(cardHTML).join('')}</div>` : `<p class="empty" style="text-align:left;padding:8px 0">${empty}</p>`}</section>`;
+      app.innerHTML = `<div class="view"><section class="hero" style="padding-bottom:0"><h1>Mi biblioteca</h1>
+        <p>Tu progreso y tus guardados se quedan en este dispositivo.</p></section>
+        ${shelf('Escuchando', cont.map((p) => p.book), 'Cuando empieces un audiolibro aparecerá aquí para que sigas donde lo dejaste.')}
+        ${shelf('Guardados', favs, 'Toca “Guardar” en cualquier audiolibro para tenerlo a mano.')}
+        ${done.length ? shelf('Terminados', done.map((p) => p.book), '') : ''}
+        ${!cont.length && !favs.length ? '<p style="padding-top:12px"><a class="btn" href="#/">Explorar audiolibros</a></p>' : ''}
+      </div>`;
+    }
+
+    // ---------- Reproductor ----------
+    const player = { book: null, ch: 0, sleepEnd: 0, sleepChapter: false };
+    const SPEEDS = [0.75, 1, 1.25, 1.5, 1.75, 2];
+    let speed = store.get('speed', 1);
+    const ICON_PLAY = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4v16l13-8z"/></svg>';
+    const ICON_PAUSE = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></svg>';
+    const ICON_LOAD = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 3a9 9 0 1 0 9 9"><animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur=".9s" repeatCount="indefinite"/></path></svg>';
+
+    function showPlayer() {
+      const el = $('#player');
+      el.classList.add('on');
+      requestAnimationFrame(() => document.documentElement.style.setProperty('--player-h', el.offsetHeight + 'px'));
+    }
+
+    function play(book, ch, t) {
+      player.book = book; player.ch = Math.max(0, Math.min(ch || 0, book.chapters.length - 1));
+      const c = book.chapters[player.ch];
+      audio.src = c.url;
+      audio.playbackRate = speed;
+      const start = t || 0;
+      if (start > 0) audio.addEventListener('loadedmetadata', function once() { audio.currentTime = Math.min(start, (audio.duration || start + 1) - 1); audio.removeEventListener('loadedmetadata', once); });
+      audio.play().catch(() => {});
+      store.set('last', { id: book.id });
+      remember(true);
+      paintPlayer(); showPlayer(); mediaSession(); markChapters();
+    }
+
+    function togglePlay() { if (!player.book) return; audio.paused ? audio.play().catch(() => {}) : audio.pause(); }
+    function seekBy(s) { if (!player.book) return; audio.currentTime = Math.max(0, Math.min((audio.duration || 0) - 0.5, audio.currentTime + s)); }
+    function chapter(delta) {
+      if (!player.book) return;
+      const n = player.ch + delta;
+      if (delta < 0 && audio.currentTime > 5) { audio.currentTime = 0; return; }
+      if (n < 0 || n >= player.book.chapters.length) return;
+      play(player.book, n, 0);
+    }
+
+    function remember(force) {
+      const b = player.book; if (!b) return;
+      const now = Date.now();
+      if (!force && now - (remember.last || 0) < 4000) return;
+      remember.last = now;
+      const before = b.chapters.slice(0, player.ch).reduce((a, c) => a + c.length, 0);
+      const pct = b.total ? Math.min(0.999, (before + (audio.currentTime || 0)) / b.total) : player.ch / b.chapters.length;
+      const prev = progress[b.id] || {};
+      progress[b.id] = { ch: player.ch, t: audio.currentTime || prev.t || 0, done: false, pct, updated: now, book: { id: b.id, title: b.title, author: b.author } };
+      saveProgress();
+    }
+
+    function paintPlayer() {
+      const b = player.book; if (!b) return;
+      $('#pCover').outerHTML = coverHTML(b).replace('class="cover"', 'class="cover" id="pCover"');
+      $('#pTitle').textContent = b.title;
+      $('#pChapter').textContent = `${player.ch + 1}/${b.chapters.length} · ${b.chapters[player.ch].title}`;
+      $('#pInfo').href = `#/libro/${encodeURIComponent(b.id)}`;
+      $('#pPrev').disabled = false;
+      $('#pNext').disabled = player.ch >= b.chapters.length - 1;
+      $('#pSpeed').textContent = `${String(speed).replace('.', ',')}×`;
+      paintPlayBtn();
+    }
+    function paintPlayBtn() {
+      const btn = $('#pPlay');
+      const loading = !audio.paused && audio.readyState < 3;
+      btn.innerHTML = loading ? ICON_LOAD : audio.paused ? ICON_PLAY : ICON_PAUSE;
+      btn.setAttribute('aria-label', audio.paused ? 'Reproducir' : 'Pausar');
+    }
+
+    let dragging = false;
+    function paintTime() {
+      const d = audio.duration || (player.book && player.book.chapters[player.ch].length) || 0;
+      $('#pCur').textContent = fmt(audio.currentTime);
+      $('#pDur').textContent = '-' + fmt(Math.max(0, d - audio.currentTime));
+      if (!dragging && d) $('#pRange').value = Math.round((audio.currentTime / d) * 1000);
+    }
+
+    audio.addEventListener('timeupdate', () => { paintTime(); remember(false); checkSleep(); });
+    audio.addEventListener('play', () => { paintPlayBtn(); markChapters(); });
+    audio.addEventListener('pause', () => { paintPlayBtn(); remember(true); markChapters(); });
+    audio.addEventListener('waiting', paintPlayBtn);
+    audio.addEventListener('playing', paintPlayBtn);
+    audio.addEventListener('canplay', paintPlayBtn);
+    audio.addEventListener('ratechange', () => { if (Math.abs(audio.playbackRate - speed) > 0.01) audio.playbackRate = speed; });
+    audio.addEventListener('error', () => { if (audio.src) { toast('No se pudo cargar este capítulo.'); paintPlayBtn(); } });
+    audio.addEventListener('ended', () => {
+      const b = player.book; if (!b) return;
+      if (player.sleepChapter) { player.sleepChapter = false; paintSleep(); toast('Buenas noches 🌙'); remember(true); return; }
+      if (player.ch < b.chapters.length - 1) { play(b, player.ch + 1, 0); return; }
+      progress[b.id] = { ch: 0, t: 0, done: true, pct: 1, updated: Date.now(), book: { id: b.id, title: b.title, author: b.author } };
+      saveProgress(); markChapters(); toast('¡Terminaste el audiolibro!');
+    });
+
+    $('#pPlay').addEventListener('click', togglePlay);
+    $('#pBack').addEventListener('click', () => seekBy(-15));
+    $('#pFwd').addEventListener('click', () => seekBy(30));
+    $('#pPrev').addEventListener('click', () => chapter(-1));
+    $('#pNext').addEventListener('click', () => chapter(1));
+    const range = $('#pRange');
+    range.addEventListener('input', () => { dragging = true; const d = audio.duration || 0; $('#pCur').textContent = fmt((range.value / 1000) * d); });
+    range.addEventListener('change', () => { const d = audio.duration || 0; if (d) audio.currentTime = (range.value / 1000) * d; dragging = false; });
+
+    // Menús de velocidad y temporizador
+    function openMenu(menu, html) {
+      const isOpen = menu.classList.contains('on');
+      document.querySelectorAll('.menu').forEach((m) => m.classList.remove('on'));
+      if (isOpen) return;
+      menu.innerHTML = html; menu.classList.add('on');
+    }
+    document.addEventListener('click', (e) => { if (!e.target.closest('.menu, #pSpeed, #pSleep')) document.querySelectorAll('.menu').forEach((m) => m.classList.remove('on')); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') document.querySelectorAll('.menu').forEach((m) => m.classList.remove('on')); });
+
+    $('#pSpeed').addEventListener('click', () => {
+      openMenu($('#speedMenu'), '<h3>Velocidad</h3>' + SPEEDS.map((s) => `<button role="menuitemradio" aria-checked="${s === speed}" data-s="${s}">${String(s).replace('.', ',')}×${s === 1 ? ' (normal)' : ''}</button>`).join(''));
+    });
+    $('#speedMenu').addEventListener('click', (e) => {
+      const b = e.target.closest('[data-s]'); if (!b) return;
+      speed = +b.dataset.s; store.set('speed', speed); audio.playbackRate = speed;
+      $('#speedMenu').classList.remove('on'); paintPlayer();
+    });
+
+    const SLEEPS = [[0, 'Desactivado'], [5, '5 minutos'], [15, '15 minutos'], [30, '30 minutos'], [45, '45 minutos'], [60, '1 hora'], [-1, 'Al terminar el capítulo']];
+    $('#pSleep').addEventListener('click', () => {
+      const cur = player.sleepChapter ? -1 : player.sleepEnd ? 'x' : 0;
+      openMenu($('#sleepMenu'), '<h3>Temporizador</h3>' + SLEEPS.map(([m, l]) => `<button role="menuitemradio" aria-checked="${m === cur}" data-m="${m}">${l}</button>`).join(''));
+    });
+    $('#sleepMenu').addEventListener('click', (e) => {
+      const b = e.target.closest('[data-m]'); if (!b) return;
+      const m = +b.dataset.m;
+      player.sleepChapter = m === -1;
+      player.sleepEnd = m > 0 ? Date.now() + m * 60000 : 0;
+      $('#sleepMenu').classList.remove('on'); paintSleep();
+      if (m) toast(m === -1 ? 'Se detendrá al terminar el capítulo' : `Se detendrá en ${b.textContent}`);
+    });
+    function paintSleep() {
+      const btn = $('#pSleep'), txt = $('#pSleepTxt');
+      if (player.sleepChapter) { txt.textContent = 'Fin cap.'; btn.classList.add('active'); }
+      else if (player.sleepEnd) { txt.textContent = fmt((player.sleepEnd - Date.now()) / 1000); btn.classList.add('active'); }
+      else { txt.textContent = 'Dormir'; btn.classList.remove('active'); }
+    }
+    function checkSleep() {
+      if (!player.sleepEnd) return;
+      if (Date.now() >= player.sleepEnd) { player.sleepEnd = 0; audio.pause(); toast('Buenas noches 🌙'); }
+      paintSleep();
+    }
+    setInterval(() => { if (player.sleepEnd) checkSleep(); }, 1000);
+
+    function mediaSession() {
+      if (!('mediaSession' in navigator) || !player.book) return;
+      const b = player.book;
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: b.chapters[player.ch].title, artist: b.author, album: b.title,
+        artwork: [{ src: coverUrl(b.id), sizes: '300x300' }]
+      });
+      const set = (a, f) => { try { navigator.mediaSession.setActionHandler(a, f); } catch (e) {} };
+      set('play', () => audio.play()); set('pause', () => audio.pause());
+      set('seekbackward', () => seekBy(-15)); set('seekforward', () => seekBy(30));
+      set('previoustrack', () => chapter(-1)); set('nexttrack', () => chapter(1));
+      set('seekto', (d) => { if (d.seekTime != null) audio.currentTime = d.seekTime; });
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (!player.book || e.target.closest('input, textarea, select, [contenteditable]')) return;
+      if (e.code === 'Space' && !e.target.closest('button, a')) { e.preventDefault(); togglePlay(); }
+      else if (e.key === 'ArrowLeft' && !e.target.closest('input')) seekBy(-15);
+      else if (e.key === 'ArrowRight' && !e.target.closest('input')) seekBy(30);
+    });
+    window.addEventListener('pagehide', () => remember(true));
+    document.addEventListener('visibilitychange', () => { if (document.hidden) remember(true); });
+
+    // Restaura el último audiolibro (en pausa) para seguir con un toque.
+    async function restore() {
+      const last = store.get('last', null);
+      if (!last || !progress[last.id] || progress[last.id].done) return;
+      try {
+        const book = await getBook(last.id);
+        if (player.book) return;
+        const p = progress[last.id];
+        player.book = book; player.ch = Math.min(p.ch, book.chapters.length - 1);
+        audio.src = book.chapters[player.ch].url; audio.playbackRate = speed;
+        audio.addEventListener('loadedmetadata', function once() { audio.currentTime = p.t || 0; audio.removeEventListener('loadedmetadata', once); paintTime(); });
+        paintPlayer(); showPlayer(); mediaSession(); markChapters();
+      } catch (e) {}
+    }
+
+    // ---------- Rutas ----------
+    function currentRoute() {
+      const h = location.hash.replace(/^#\/?/, '');
+      const [a, b] = h.split('/');
+      if (a === 'libro' && b) return { name: 'book', id: decodeURIComponent(b) };
+      if (a === 'biblioteca') return { name: 'library' };
+      return { name: 'home' };
+    }
+    function route() {
+      const r = currentRoute();
+      document.querySelectorAll('nav.tabs a').forEach((a) => a.toggleAttribute('aria-current', false));
+      const tab = r.name === 'library' ? 'library' : r.name === 'home' ? 'home' : null;
+      if (tab) $(`nav.tabs a[data-tab="${tab}"]`).setAttribute('aria-current', 'page');
+      if (r.name !== 'book') document.title = r.name === 'library' ? 'Mi biblioteca — Uniluva' : 'Uniluva — Audiolibros';
+      if (r.name === 'book') renderBook(r.id);
+      else if (r.name === 'library') renderLibrary();
+      else renderHome();
+      window.scrollTo(0, 0);
+    }
+    window.addEventListener('hashchange', route);
+    window.addEventListener('resize', () => { if ($('#player').classList.contains('on')) document.documentElement.style.setProperty('--player-h', $('#player').offsetHeight + 'px'); });
+
+    // La versión anterior de Uniluva tenía un service worker: lo damos de baja para que nadie quede en la app vieja.
+    if ('serviceWorker' in navigator) navigator.serviceWorker.getRegistrations().then((rs) => rs.forEach((r) => r.unregister())).catch(() => {});
+
+    route();
+    restore();
+  })();
   </script>
 </body>
 </html>
