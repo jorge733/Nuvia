@@ -23,7 +23,6 @@ src/
   lib/supabase/        Clientes de Supabase (server + middleware)
   lib/data.ts          Consultas compartidas
 supabase/migrations/   Esquema SQL, RLS, triggers y funciones
-legacy/                Versión anterior (Firebase, HTML único), solo como referencia
 ```
 
 ## Puesta en marcha
