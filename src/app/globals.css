@@ -1,0 +1,115 @@
+@import "tailwindcss";
+
+@custom-variant dark (@media (prefers-color-scheme: dark));
+
+:root {
+  --bg: #f7f8fc;
+  --surface: #ffffff;
+  --soft: #f1f3fa;
+  --text: #161724;
+  --muted: #6b7086;
+  --line: #e6e8f1;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0f1017;
+    --surface: #171925;
+    --soft: #1f2230;
+    --text: #eceefa;
+    --muted: #9aa0b8;
+    --line: #2a2d3d;
+  }
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-soft: var(--soft);
+  --color-fg: var(--text);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-brand: #6d5dfc;
+  --color-brand-dark: #4f3ad8;
+  --color-accent: #2ec9d3;
+  --color-danger: #e95772;
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+html {
+  color-scheme: light dark;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+}
+
+@layer components {
+  .card {
+    @apply rounded-2xl border border-line bg-surface shadow-[0_1px_2px_rgb(0_0_0/0.03)];
+  }
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-brand px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-dark disabled:cursor-not-allowed disabled:opacity-60;
+  }
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-1.5 rounded-full border border-line px-3 py-1.5 text-sm font-medium transition hover:border-brand/50 hover:text-brand disabled:opacity-60;
+  }
+  .chip {
+    @apply inline-flex items-center gap-1 rounded-full border border-line px-3 py-1 text-sm;
+  }
+  .input {
+    @apply w-full rounded-xl border border-line bg-surface px-3 py-2 outline-none transition placeholder:text-muted focus:border-brand focus:ring-2 focus:ring-brand/20;
+  }
+  .label {
+    @apply mb-1 block text-sm font-medium;
+  }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.animate-in {
+  animation: fade-up 0.35s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-in {
+    animation: none;
+  }
+}
+
+.legal h1 {
+  @apply text-3xl font-bold;
+}
+.legal h2 {
+  @apply mt-6 mb-2 text-lg font-semibold;
+}
+.legal p,
+.legal li {
+  @apply leading-relaxed text-fg/90;
+}
+.legal p {
+  @apply my-3;
+}
+.legal ul {
+  @apply my-3 list-disc space-y-1 pl-5;
+}
+.legal a {
+  @apply text-brand hover:underline;
+}
+.legal .kicker {
+  @apply text-sm font-semibold uppercase tracking-wider text-brand;
+}
+.legal .updated {
+  @apply text-sm text-muted;
+}
