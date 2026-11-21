@@ -38,3 +38,5 @@ $$;
 
 revoke execute on function public.delete_my_account() from public, anon;
 grant execute on function public.delete_my_account() to authenticated;
+
+grant select, insert on public.reports to authenticated;

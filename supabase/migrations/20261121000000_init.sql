@@ -354,3 +354,13 @@ create policy "media_update_own" on storage.objects for update to authenticated
   using (bucket_id = 'media' and (storage.foldername(name))[1] = (select auth.uid())::text);
 create policy "media_delete_own" on storage.objects for delete to authenticated
   using (bucket_id = 'media' and (storage.foldername(name))[1] = (select auth.uid())::text);
+
+-- ─────────────────────────────────────────────────────────────
+-- Permisos de la Data API (explícitos, por si el proyecto no los
+-- concede automáticamente). RLS sigue decidiendo qué filas se ven.
+-- ─────────────────────────────────────────────────────────────
+grant usage on schema public to anon, authenticated;
+grant select on all tables in schema public to anon, authenticated;
+grant insert, update, delete on all tables in schema public to authenticated;
+grant execute on function public.feed(text, uuid, int, int) to anon, authenticated;
+grant execute on function public.reputation(uuid) to anon, authenticated;
