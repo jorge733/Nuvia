@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getFamily } from "@/lib/family";
 import { AppHeader } from "@/components/app-header";
+import { PageTransition } from "@/components/page-transition";
 import { FamilyNav } from "@/components/family-nav";
 import { MyNav } from "@/components/my-nav";
 import { AvatarStack } from "@/components/member-avatar";
@@ -19,7 +20,7 @@ export default async function FamilyLayout({ children, params }: LayoutProps<"/f
       <>
         <AppHeader userInitial={me.name.charAt(0).toUpperCase()} />
         <MyNav familyHref="/inicio?lista=1" />
-        <main className="mx-auto w-full max-w-3xl px-4 pt-4 pb-32 sm:pt-6 sm:pb-16">{children}</main>
+        <main className="mx-auto w-full max-w-3xl px-4 pt-4 pb-32 sm:pt-6 sm:pb-16"><PageTransition>{children}</PageTransition></main>
       </>
     );
   }
@@ -39,7 +40,7 @@ export default async function FamilyLayout({ children, params }: LayoutProps<"/f
         </Link>
       </AppHeader>
       <FamilyNav id={id} openReliefs={count ?? 0} />
-      <main className="mx-auto w-full max-w-3xl px-4 pt-4 pb-32 sm:pt-6 sm:pb-16">{children}</main>
+      <main className="mx-auto w-full max-w-3xl px-4 pt-4 pb-32 sm:pt-6 sm:pb-16"><PageTransition>{children}</PageTransition></main>
     </>
   );
 }

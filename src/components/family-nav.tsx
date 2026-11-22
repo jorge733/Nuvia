@@ -36,7 +36,7 @@ export function FamilyNav({ id, openReliefs }: { id: string; openReliefs: number
               {!!badge && <span className="rounded-full bg-sun px-1.5 text-[11px] leading-5 font-bold text-white">{badge}</span>}
             </Link>
           ))}
-          <Link href={`${base}/nuevo`} className="btn-primary ml-auto min-h-10 py-2">
+          <Link href={`${base}/nuevo`} className="spin-plus btn-primary ml-auto min-h-10 py-2">
             <Plus className="size-4" /> Agregar
           </Link>
         </div>
@@ -63,7 +63,7 @@ export function FamilyNav({ id, openReliefs }: { id: string; openReliefs: number
                 )}
               </Link>
             ) : (
-              <Link key="nuevo" href={`${base}/nuevo`} className="mx-auto -my-3 grid size-14 place-items-center rounded-full bg-accent text-accent-fg shadow-soft ring-4 ring-bg transition active:scale-95" aria-label="Agregar actividad">
+              <Link key="nuevo" href={`${base}/nuevo`} className="spin-plus mx-auto -my-3 grid size-14 place-items-center rounded-full bg-accent text-accent-fg shadow-soft ring-4 ring-bg transition active:scale-95" aria-label="Agregar actividad">
                 <Plus className="size-7" strokeWidth={2.4} />
               </Link>
             ),

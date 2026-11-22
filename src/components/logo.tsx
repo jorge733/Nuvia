@@ -33,7 +33,7 @@ export function FamilyCircles({ className = "" }: { className?: string }) {
   return (
     <svg viewBox="0 0 360 300" className={className} aria-hidden>
       {circles.map((c, i) => (
-        <circle key={i} cx={c.cx} cy={c.cy} r={c.r} fill={c.c} fillOpacity={0.82} style={{ mixBlendMode: "multiply" }} />
+        <circle key={i} className="circle-float" cx={c.cx} cy={c.cy} r={c.r} fill={c.c} fillOpacity={0.82} style={{ mixBlendMode: "multiply", animationDelay: `${i * -1.3}s`, animationDuration: `${7 + i}s` }} />
       ))}
     </svg>
   );

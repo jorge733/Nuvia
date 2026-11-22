@@ -29,7 +29,7 @@ export function MyNav({ familyHref }: { familyHref: string }) {
               {label}
             </Link>
           ))}
-          <Link href="/mi/nuevo" className="btn-primary ml-auto min-h-10 py-2">
+          <Link href="/mi/nuevo" className="spin-plus btn-primary ml-auto min-h-10 py-2">
             <Plus className="size-4" /> Agregar
           </Link>
         </div>
@@ -52,7 +52,7 @@ export function MyNav({ familyHref }: { familyHref: string }) {
                 {it.label}
               </Link>
             ) : (
-              <Link key="nuevo" href="/mi/nuevo" className="mx-auto -my-3 grid size-14 place-items-center rounded-full bg-accent text-accent-fg shadow-soft ring-4 ring-bg transition active:scale-95" aria-label="Agregar actividad">
+              <Link key="nuevo" href="/mi/nuevo" className="spin-plus mx-auto -my-3 grid size-14 place-items-center rounded-full bg-accent text-accent-fg shadow-soft ring-4 ring-bg transition active:scale-95" aria-label="Agregar actividad">
                 <Plus className="size-7" strokeWidth={2.4} />
               </Link>
             ),

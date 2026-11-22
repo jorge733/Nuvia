@@ -138,14 +138,175 @@ h2,
   }
 }
 
+/* ─── Movimiento ─────────────────────────────────────────────
+   Todo se desactiva si el dispositivo pide reducir el movimiento. */
+:root {
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
 @media (prefers-reduced-motion: no-preference) {
   .rise {
-    animation: rise 0.35s ease-out both;
+    animation: rise 0.45s var(--ease-out) both;
   }
-  @keyframes rise {
-    from {
-      opacity: 0;
-      transform: translateY(6px);
+
+  /* Listas que aparecen en cascada */
+  .stagger > * {
+    animation: rise 0.45s var(--ease-out) both;
+  }
+  .stagger > *:nth-child(2) { animation-delay: 40ms; }
+  .stagger > *:nth-child(3) { animation-delay: 80ms; }
+  .stagger > *:nth-child(4) { animation-delay: 120ms; }
+  .stagger > *:nth-child(5) { animation-delay: 160ms; }
+  .stagger > *:nth-child(6) { animation-delay: 200ms; }
+  .stagger > *:nth-child(7) { animation-delay: 240ms; }
+  .stagger > *:nth-child(n + 8) { animation-delay: 280ms; }
+
+  /* Barras que crecen (balance) */
+  .grow-x {
+    transform-origin: left center;
+    animation: grow-x 0.9s var(--ease-out) 0.15s both;
+  }
+
+  /* Encabezado con degradado que respira */
+  .hero-glow {
+    background-size: 160% 160% !important;
+    animation: hero-drift 14s ease-in-out infinite alternate;
+  }
+  .rise.hero-glow {
+    animation:
+      rise 0.45s var(--ease-out) both,
+      hero-drift 14s ease-in-out infinite alternate;
+  }
+  .float-slow {
+    animation: float 9s ease-in-out infinite alternate;
+  }
+
+  /* Círculos de la portada */
+  .circle-float {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: float 8s ease-in-out infinite alternate;
+  }
+
+  /* ✓ al marcar como hecho */
+  .pop {
+    animation: pop 0.45s var(--ease-spring);
+  }
+
+  /* Secciones desplegables */
+  details[open] > :not(summary) {
+    animation: rise 0.3s var(--ease-out) both;
+  }
+
+  /* Botón + que gira al pasar el mouse */
+  .spin-plus svg {
+    transition: transform 0.35s var(--ease-spring);
+  }
+  .spin-plus:hover svg {
+    transform: rotate(90deg);
+  }
+
+  /* Tarjetas que aparecen al hacer scroll (navegadores compatibles) */
+  @supports (animation-timeline: view()) {
+    .reveal {
+      animation: rise linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 60%;
     }
+  }
+
+  /* Esqueletos de carga */
+  .skeleton {
+    background: linear-gradient(90deg, var(--surface-2) 0%, var(--line) 50%, var(--surface-2) 100%);
+    background-size: 200% 100%;
+    animation: shimmer 1.4s ease-in-out infinite;
+  }
+
+  /* Transiciones entre páginas (React ViewTransition) */
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none;
+  }
+  ::view-transition-old(.page-out) {
+    animation: 140ms ease-out both fade-out;
+  }
+  ::view-transition-new(.page-in) {
+    animation:
+      220ms ease-out 100ms both fade-in,
+      380ms var(--ease-out) both slide-up;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    background: var(--surface-2);
+  }
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+@keyframes grow-x {
+  from {
+    transform: scaleX(0);
+  }
+}
+@keyframes hero-drift {
+  from {
+    background-position: 0% 30%;
+  }
+  to {
+    background-position: 100% 70%;
+  }
+}
+@keyframes float {
+  from {
+    transform: translate(0, 0) scale(1);
+  }
+  to {
+    transform: translate(6px, -10px) scale(1.03);
+  }
+}
+@keyframes pop {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.25);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+@keyframes shimmer {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: -100% 0;
+  }
+}
+@keyframes fade-out {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes slide-up {
+  from {
+    transform: translateY(12px);
   }
 }

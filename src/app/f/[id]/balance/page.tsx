@@ -88,7 +88,7 @@ export default async function Balance({ params, searchParams }: PageProps<"/f/[i
               {stats
                 .filter((s) => s.count)
                 .map((s) => (
-                  <span key={s.member.id} style={{ width: `${s.share * 100}%`, background: memberHex(s.member) }} className="h-full border-r-2 border-surface last:border-0" />
+                  <span key={s.member.id} style={{ width: `${s.share * 100}%`, background: memberHex(s.member) }} className="grow-x h-full border-r-2 border-surface last:border-0" />
                 ))}
               {unassigned > 0 && <span style={{ width: `${(unassigned / total) * 100}%` }} className="h-full bg-sun/40" />}
             </div>
@@ -124,7 +124,7 @@ export default async function Balance({ params, searchParams }: PageProps<"/f/[i
             )}
           </section>
 
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="stagger grid gap-4 sm:grid-cols-2">
             {stats.map((s) => (
               <section key={s.member.id} className="card">
                 <div className="flex items-center gap-3">
@@ -137,7 +137,7 @@ export default async function Balance({ params, searchParams }: PageProps<"/f/[i
                 </div>
                 {s.count > 0 && (
                   <div className="mt-4 h-2 overflow-hidden rounded-full bg-surface-2">
-                    <div className="h-full rounded-full" style={{ width: `${(s.done / s.count) * 100}%`, background: memberHex(s.member) }} />
+                    <div className="grow-x h-full rounded-full" style={{ width: `${(s.done / s.count) * 100}%`, background: memberHex(s.member) }} />
                   </div>
                 )}
                 {(s.topCats.length > 0 || s.reliefsTaken > 0) && (

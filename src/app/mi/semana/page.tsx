@@ -74,7 +74,7 @@ export default async function MiSemana({ searchParams }: PageProps<"/mi/semana">
                 </Link>
               </div>
               {list.length ? (
-                <div className={`card divide-y divide-line p-1 ${d === today ? "ring-2 ring-accent/30" : ""}`}>
+                <div className={`stagger card divide-y divide-line p-1 ${d === today ? "ring-2 ring-accent/30" : ""}`}>
                   {list.map((o) => (
                     <OccurrenceRow
                       key={o.key}

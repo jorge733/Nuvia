@@ -1,12 +1,12 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Check, ChevronRight, House, Plus } from "lucide-react";
+import { ChevronRight, House, Plus } from "lucide-react";
 import { getMySpaces } from "@/lib/family";
 import { groupByDay } from "@/lib/agenda";
 import { loadMine, type MyOccurrence } from "@/lib/mine";
 import { addDays, capitalize, formatDay, nowMs, relativeDay, shortDay, startOfDay, todayKey } from "@/lib/time";
 import { Empty, Flash, SectionHeader } from "@/components/ui";
-import { SubmitButton } from "@/components/submit-button";
+import { DoneButton } from "@/components/done-button";
 import { OccurrenceRow } from "@/components/occurrence-row";
 import { toggleDone } from "@/app/f/[id]/actions";
 
@@ -47,13 +47,7 @@ export default async function MiAgenda({ searchParams }: PageProps<"/mi">) {
       action={
         opts.done ? (
           <form action={toggleDone.bind(null, o.space.id, o.event.id, o.start.toISOString(), o.done, "/mi")}>
-            <SubmitButton
-              className={`grid size-10 place-items-center rounded-full border-2 transition ${o.done ? "border-ok bg-ok text-white" : "border-line text-line hover:border-ok hover:text-ok"}`}
-              pendingText="·"
-            >
-              <Check className="size-5" strokeWidth={3} />
-              <span className="sr-only">{o.done ? "Marcar pendiente" : "Marcar hecho"}</span>
-            </SubmitButton>
+            <DoneButton done={o.done} />
           </form>
         ) : undefined
       }
@@ -64,8 +58,8 @@ export default async function MiAgenda({ searchParams }: PageProps<"/mi">) {
     <div className="space-y-8">
       <div>
         <Flash ok={typeof sp.ok === "string" ? sp.ok : undefined} error={typeof sp.error === "string" ? sp.error : undefined} />
-        <header className="rise relative overflow-hidden rounded-[2rem] p-6 text-white shadow-soft sm:p-8" style={{ background: "var(--hero)" }}>
-          <div className="pointer-events-none absolute -top-16 -right-10 size-56 rounded-full bg-white/10" aria-hidden />
+        <header className="rise hero-glow relative overflow-hidden rounded-[2rem] p-6 text-white shadow-soft sm:p-8" style={{ background: "var(--hero)" }}>
+          <div className="float-slow pointer-events-none absolute -top-16 -right-10 size-56 rounded-full bg-white/10" aria-hidden />
           <p className="text-sm font-semibold text-white/80">{capitalize(formatDay(today))}</p>
           <h1 className="mt-1 text-4xl font-semibold sm:text-5xl">
             {greeting(hour)}, {profile.full_name.split(" ")[0]}
@@ -86,18 +80,18 @@ export default async function MiAgenda({ searchParams }: PageProps<"/mi">) {
 
       <section>
         <SectionHeader title="Hoy" href="/mi/nuevo" linkText="＋ Agregar" />
-        {todayList.length ? <div className="card divide-y divide-line p-1">{todayList.map((o) => row(o, { done: true }))}</div> : <Empty>Nada para hoy.</Empty>}
+        {todayList.length ? <div className="stagger card divide-y divide-line p-1">{todayList.map((o) => row(o, { done: true }))}</div> : <Empty>Nada para hoy.</Empty>}
       </section>
 
       <section>
         <SectionHeader title="Mañana" />
-        {tomorrowList.length ? <div className="card divide-y divide-line p-1">{tomorrowList.map((o) => row(o))}</div> : <Empty>Nada para mañana.</Empty>}
+        {tomorrowList.length ? <div className="stagger card divide-y divide-line p-1">{tomorrowList.map((o) => row(o))}</div> : <Empty>Nada para mañana.</Empty>}
       </section>
 
       {nextDays.length > 0 && (
         <section>
           <SectionHeader title="Próximos días" href="/mi/semana" linkText="Ver semana" />
-          <div className="space-y-4">
+          <div className="stagger space-y-4">
             {nextDays.map((d) => (
               <div key={d} className="card p-1">
                 <p className="px-4 pt-3 pb-1 text-sm font-bold text-muted">{relativeDay(d, today)}</p>

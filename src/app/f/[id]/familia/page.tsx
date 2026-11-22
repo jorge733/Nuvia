@@ -26,7 +26,7 @@ export default async function Familia({ params, searchParams }: PageProps<"/f/[i
 
       <section className="mb-8">
         <SectionHeader title="Integrantes" />
-        <ul className="space-y-2">
+        <ul className="stagger space-y-2">
           {members.map((m) => (
             <li key={m.id}>
               <details className="card group p-0">

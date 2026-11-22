@@ -1,11 +1,12 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { CalendarPlus, Check, HandHeart, Sparkles, UserPlus } from "lucide-react";
+import { CalendarPlus, HandHeart, Sparkles, UserPlus } from "lucide-react";
 import { getFamily } from "@/lib/family";
 import { groupByDay, loadAgenda, type Occurrence } from "@/lib/agenda";
 import { addDays, capitalize, formatDay, nowMs, relativeDay, shortDay, startOfDay, todayKey } from "@/lib/time";
 import { Empty, Flash, SectionHeader } from "@/components/ui";
 import { SubmitButton } from "@/components/submit-button";
+import { DoneButton } from "@/components/done-button";
 import { OccurrenceRow } from "@/components/occurrence-row";
 import { takeOccurrence, takeRelief, toggleDone } from "./actions";
 
@@ -42,13 +43,7 @@ export default async function Hoy({ params, searchParams }: PageProps<"/f/[id]">
   const doneButton = (o: Occurrence) =>
     o.event.masked ? null : (
       <form action={toggleDone.bind(null, id, o.event.id, o.start.toISOString(), o.done, self)}>
-        <SubmitButton
-          className={`grid size-10 place-items-center rounded-full border-2 transition ${o.done ? "border-ok bg-ok text-white" : "border-line text-line hover:border-ok hover:text-ok"}`}
-          pendingText="·"
-        >
-          <Check className="size-5" strokeWidth={3} />
-          <span className="sr-only">{o.done ? "Marcar pendiente" : "Marcar hecho"}</span>
-        </SubmitButton>
+        <DoneButton done={o.done} />
       </form>
     );
 
@@ -57,8 +52,8 @@ export default async function Hoy({ params, searchParams }: PageProps<"/f/[id]">
       <div>
         <Flash ok={typeof sp.ok === "string" ? sp.ok : undefined} error={typeof sp.error === "string" ? sp.error : undefined} />
 
-        <header className="rise relative overflow-hidden rounded-[2rem] p-6 text-white shadow-soft sm:p-8" style={{ background: "var(--hero)" }}>
-          <div className="pointer-events-none absolute -top-16 -right-10 size-56 rounded-full bg-white/10" aria-hidden />
+        <header className="rise hero-glow relative overflow-hidden rounded-[2rem] p-6 text-white shadow-soft sm:p-8" style={{ background: "var(--hero)" }}>
+          <div className="float-slow pointer-events-none absolute -top-16 -right-10 size-56 rounded-full bg-white/10" aria-hidden />
           <div className="pointer-events-none absolute -bottom-20 right-24 size-40 rounded-full bg-white/10" aria-hidden />
           <p className="text-sm font-semibold text-white/80">{capitalize(formatDay(today))}</p>
           <h1 className="mt-1 text-4xl font-semibold sm:text-5xl">
@@ -106,7 +101,7 @@ export default async function Hoy({ params, searchParams }: PageProps<"/f/[id]">
       {needRelief.length > 0 && (
         <section>
           <SectionHeader title="Necesitan relevo" count={needRelief.length} />
-          <div className="card divide-y divide-line p-1 ring-2 ring-sun/40">
+          <div className="stagger card divide-y divide-line p-1 ring-2 ring-sun/40">
             {needRelief.map((o) => (
               <OccurrenceRow
                 key={o.key}
@@ -134,7 +129,7 @@ export default async function Hoy({ params, searchParams }: PageProps<"/f/[id]">
       {unassigned.length > 0 && (
         <section>
           <SectionHeader title="Sin responsable" count={unassigned.length} />
-          <div className="card divide-y divide-line p-1">
+          <div className="stagger card divide-y divide-line p-1">
             {unassigned.map((o) => (
               <OccurrenceRow
                 key={o.key}
@@ -158,7 +153,7 @@ export default async function Hoy({ params, searchParams }: PageProps<"/f/[id]">
       <section>
         <SectionHeader title="Hoy" href={`/f/${id}/nuevo`} linkText="＋ Agregar" />
         {todayList.length ? (
-          <div className="card divide-y divide-line p-1">
+          <div className="stagger card divide-y divide-line p-1">
             {todayList.map((o) => (
               <OccurrenceRow key={o.key} familyId={id} o={o} byId={byId} action={doneButton(o)} />
             ))}
@@ -171,7 +166,7 @@ export default async function Hoy({ params, searchParams }: PageProps<"/f/[id]">
       <section>
         <SectionHeader title="Mañana" href={`/f/${id}/nuevo?fecha=${tomorrow}`} linkText="＋ Agregar" />
         {tomorrowList.length ? (
-          <div className="card divide-y divide-line p-1">
+          <div className="stagger card divide-y divide-line p-1">
             {tomorrowList.map((o) => (
               <OccurrenceRow key={o.key} familyId={id} o={o} byId={byId} />
             ))}
@@ -184,7 +179,7 @@ export default async function Hoy({ params, searchParams }: PageProps<"/f/[id]">
       {nextDays.length > 0 && (
         <section>
           <SectionHeader title="Próximos días" href={`/f/${id}/semana`} linkText="Ver semana" />
-          <div className="space-y-4">
+          <div className="stagger space-y-4">
             {nextDays.map((d) => (
               <div key={d} className="card p-1">
                 <p className="px-4 pt-3 pb-1 text-sm font-bold text-muted">{relativeDay(d, today)}</p>

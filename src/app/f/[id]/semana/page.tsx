@@ -107,7 +107,7 @@ export default async function Semana({ params, searchParams }: PageProps<"/f/[id
                 </Link>
               </div>
               {items.length ? (
-                <div className={`card divide-y divide-line p-1 ${isToday ? "ring-2 ring-accent/30" : ""}`}>
+                <div className={`stagger card divide-y divide-line p-1 ${isToday ? "ring-2 ring-accent/30" : ""}`}>
                   {items.map((o) => (
                     <OccurrenceRow key={o.key} familyId={id} o={o} byId={byId} />
                   ))}

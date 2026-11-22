@@ -56,7 +56,7 @@ export default async function Relevos({ params, searchParams }: PageProps<"/f/[i
 
       <SectionHeader title="Pendientes" />
       {open.length ? (
-        <div className="card divide-y divide-line p-1">
+        <div className="stagger card divide-y divide-line p-1">
           {open.map((o) => (
             <div key={o.key}>
               <OccurrenceRow
@@ -108,7 +108,7 @@ export default async function Relevos({ params, searchParams }: PageProps<"/f/[i
       <section className="mt-8">
         <SectionHeader title="Últimos 30 días" />
         {history?.length ? (
-          <ul className="card divide-y divide-line p-1">
+          <ul className="stagger card divide-y divide-line p-1">
             {history.map((r) => (
               <li key={r.id} className="flex items-center gap-3 px-4 py-3 text-sm">
                 <MemberAvatar member={r.taken_by ? byId[r.taken_by] : null} size={28} />

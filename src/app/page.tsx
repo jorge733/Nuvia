@@ -26,7 +26,7 @@ export default async function Home() {
       </header>
 
       <section className="grid items-center gap-8 py-12 sm:py-20 lg:grid-cols-[1.1fr_1fr]">
-        <div className="rise">
+        <div className="stagger">
           <p className="eyebrow text-accent">Agenda familiar y personal</p>
           <h1 className="mt-3 text-5xl leading-[1.02] font-semibold sm:text-7xl">
             En tu familia, <em className="text-accent">todos</em> cuentan.
@@ -48,7 +48,7 @@ export default async function Home() {
 
       <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {FEATURES.map(({ Icon, title, text }) => (
-          <div key={title} className="card">
+          <div key={title} className="reveal card">
             <span className="grid size-11 place-items-center rounded-2xl bg-accent-soft text-accent">
               <Icon className="size-5" />
             </span>
@@ -58,7 +58,7 @@ export default async function Home() {
         ))}
       </section>
 
-      <section className="relative mt-6 overflow-hidden rounded-[2rem] p-8 text-white sm:p-12" style={{ background: "var(--hero)" }}>
+      <section className="reveal hero-glow relative mt-6 overflow-hidden rounded-[2rem] p-8 text-white sm:p-12" style={{ background: "var(--hero)" }}>
         <div className="pointer-events-none absolute -top-20 -right-16 size-72 rounded-full bg-white/10" aria-hidden />
         <p className="eyebrow text-white/70">El sello Uniluva</p>
         <h2 className="mt-3 max-w-2xl text-3xl leading-tight font-semibold sm:text-5xl">No necesitas ser famoso para ser importante.</h2>
