@@ -80,3 +80,4 @@ create policy "agregar perfil sin cuenta" on public.family_members for insert to
               and not exists (select 1 from public.families f where f.id = family_id and f.is_personal));
 
 grant execute on function public.ensure_personal_space() to authenticated;
+revoke execute on function public.ensure_personal_space() from public, anon;
