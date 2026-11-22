@@ -9,6 +9,20 @@ export const metadata: Metadata = {
   title: { default: "Uniluva — Agenda familiar", template: "%s · Uniluva" },
   description: "La agenda familiar y personal donde cada cosa tiene quién se encargue y todos cuentan.",
   applicationName: "Uniluva",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://www.uniluva.com"),
+  openGraph: {
+    type: "website",
+    siteName: "Uniluva",
+    locale: "es_CL",
+    title: "Uniluva — En tu familia, todos cuentan",
+    description: "La agenda familiar y personal donde cada cosa tiene quién se encargue. Relevos, balance del hogar y tu agenda personal.",
+    url: "/",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Uniluva — En tu familia, todos cuentan",
+    description: "La agenda familiar y personal donde cada cosa tiene quién se encargue.",
+  },
   robots: { index: false, follow: false },
 };
 

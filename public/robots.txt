@@ -1,2 +1,14 @@
+# Las vistas previas de enlaces (WhatsApp, redes sociales) pueden leer el sitio.
+User-agent: facebookexternalhit
+User-agent: Facebot
+User-agent: WhatsApp
+User-agent: Twitterbot
+User-agent: TelegramBot
+User-agent: Slackbot-LinkExpanding
+User-agent: LinkedInBot
+User-agent: Discordbot
+Allow: /
+
+# Por ahora el sitio no se indexa en buscadores.
 User-agent: *
 Disallow: /

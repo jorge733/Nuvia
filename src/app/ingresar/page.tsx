@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { MailCheck } from "lucide-react";
 import { FamilyCircles, Logo } from "@/components/logo";
@@ -7,7 +8,15 @@ import { Flash } from "@/components/ui";
 import { SubmitButton } from "@/components/submit-button";
 import { sendMagicLink } from "./actions";
 
-export const metadata = { title: "Ingresar" };
+export async function generateMetadata({ searchParams }: PageProps<"/ingresar">): Promise<Metadata> {
+  const sp = await searchParams;
+  const invite = typeof sp.siguiente === "string" && sp.siguiente.startsWith("/unirse");
+  if (!invite) return { title: "Ingresar" };
+  const title = "Te invitaron a Uniluva";
+  const description = "Únete a la agenda de tu familia: quién lleva, quién compra, quién va. Todos cuentan.";
+  const images = [{ url: "/og/invitacion", width: 1200, height: 630, alt: title }];
+  return { title, description, openGraph: { title, description, images }, twitter: { card: "summary_large_image", title, description, images } };
+}
 
 export default async function Ingresar({ searchParams }: PageProps<"/ingresar">) {
   const sp = await searchParams;
