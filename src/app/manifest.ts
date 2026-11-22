@@ -4,7 +4,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "Uniluva",
     short_name: "Uniluva",
-    description: "Tu comunidad en un solo lugar: gastos comunes, reuniones, documentos, reclamos y oficios recomendados.",
+    description: "Agenda familiar y personal: responsables, relevos y balance del hogar.",
     start_url: "/inicio",
     display: "standalone",
     background_color: "#f6f5f2",

@@ -10,18 +10,16 @@ export default function Terminos() {
       </p>
       <h2>El servicio</h2>
       <p>
-        Uniluva es una herramienta para que comunidades de vecinos se organicen. La información de gastos comunes, reuniones y documentos la
-        publica la directiva de cada comunidad, que es responsable de su exactitud. Uniluva no es una administración de edificios ni procesa pagos.
+        Uniluva es una agenda para que las familias se organicen y repartan sus actividades. Los recordatorios dependen de tu dispositivo y de tu
+        calendario: no reemplazan indicaciones médicas, legales ni plazos oficiales.
       </p>
-      <h2>Convivencia</h2>
+      <h2>Tu familia</h2>
       <p>
-        No publiques contenido ofensivo, discriminatorio o que exponga datos de otras personas sin su autorización. La directiva puede quitar a
-        miembros de la comunidad y eliminar contenido.
+        Quien crea una familia es su administrador/a y puede invitar o quitar integrantes. Comparte el enlace de invitación solo con personas de
+        confianza.
       </p>
-      <h2>Oficios</h2>
-      <p>
-        Las recomendaciones de oficios son opiniones de vecinos. Uniluva no contrata, garantiza ni se hace responsable de los trabajos realizados.
-      </p>
+      <h2>Uso responsable</h2>
+      <p>No uses Uniluva para registrar datos de otras personas sin su autorización ni para fines ilícitos.</p>
     </Legal>
   );
 }

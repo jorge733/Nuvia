@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { getUser } from "@/lib/community";
+import { getUser } from "@/lib/family";
 import { Flash } from "@/components/ui";
 import { SubmitButton } from "@/components/submit-button";
 import { sendMagicLink } from "./actions";

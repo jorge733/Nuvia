@@ -1,14 +1,38 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { getUser } from "@/lib/community";
+import { getUser } from "@/lib/family";
 
 const FEATURES = [
-  { icon: "💳", title: "Gastos comunes", text: "Cuánto debes, cuándo vence y el detalle del mes. Informa tu pago con el comprobante." },
-  { icon: "📅", title: "Reuniones", text: "La próxima asamblea, la tabla y el acta. Confirma asistencia y agrégala a tu calendario." },
-  { icon: "📁", title: "Documentos", text: "Reglamento, actas, presupuestos y contratos siempre a mano, sin buscar en el correo." },
-  { icon: "📣", title: "Reclamos y sugerencias", text: "Con seguimiento visible: recibido, en revisión, resuelto. Las sugerencias se pueden apoyar." },
-  { icon: "✉️", title: "Contacto con la administración", text: "Mensajes privados que no se pierden en el grupo de WhatsApp." },
-  { icon: "💬", title: "Chats de la comunidad", text: "El grupo de WhatsApp y el de ventas, solo para vecinos verificados." },
+  {
+    icon: "🙋",
+    title: "Cada cosa tiene un responsable",
+    text: "“Llevar a la Sofi al dentista” no es solo una hora: alguien se encarga. Si no puede, pide relevo y otro toma la posta.",
+  },
+  {
+    icon: "⚖️",
+    title: "Balance del hogar",
+    text: "Mira cuánto organiza cada uno en la semana. El trabajo invisible se vuelve visible, y se reparte mejor.",
+  },
+  {
+    icon: "👵",
+    title: "Toda la familia, incluso sin app",
+    text: "Niños, abuelos y mascotas aparecen en la agenda aunque no tengan cuenta. Nadie queda fuera.",
+  },
+  {
+    icon: "🔒",
+    title: "Lo tuyo y lo de todos",
+    text: "Cada actividad puede ser familiar, solo tuya, o aparecer como “ocupado” sin detalles.",
+  },
+  {
+    icon: "☀️",
+    title: "Hoy en familia",
+    text: "Sin grillas llenas de colores: qué pasa hoy, quién se encarga y qué falta por resolver.",
+  },
+  {
+    icon: "📅",
+    title: "En tu calendario de siempre",
+    text: "Conéctala a Google Calendar o al del iPhone y recibe los avisos donde ya los ves.",
+  },
 ];
 
 export default async function Home() {
@@ -26,20 +50,17 @@ export default async function Home() {
       </header>
 
       <section className="max-w-2xl">
-        <p className="mb-3 text-sm font-semibold uppercase tracking-wide text-accent">
-          Edificios · Condominios · Pasajes · Vecindarios
-        </p>
-        <h1 className="text-4xl font-bold leading-tight tracking-tight sm:text-5xl">Tu comunidad, en un solo lugar.</h1>
+        <p className="mb-3 text-sm font-semibold uppercase tracking-wide text-accent">Agenda familiar y personal</p>
+        <h1 className="text-4xl font-bold leading-tight tracking-tight sm:text-5xl">En tu familia, todos cuentan.</h1>
         <p className="mt-4 text-lg text-muted">
-          Gastos comunes, la próxima reunión, todos los documentos, reclamos y los oficios de confianza que recomiendan tus
-          vecinos. Sin PDFs perdidos ni grupos de WhatsApp desordenados.
+          La agenda donde cada cosa tiene quién se encargue, nadie carga solo con todo y el trabajo que no se ve, por fin se ve.
         </p>
         <div className="mt-8 flex flex-wrap gap-3">
           <Link href="/ingresar?siguiente=/crear" className="btn-primary">
-            Crear mi comunidad
+            Crear la agenda de mi familia
           </Link>
           <Link href="/ingresar?siguiente=/unirse" className="btn-secondary">
-            Tengo un código de invitación
+            Tengo una invitación
           </Link>
         </div>
       </section>
@@ -57,11 +78,11 @@ export default async function Home() {
       </section>
 
       <section className="card mt-6 bg-accent-soft sm:p-8">
-        <p className="text-sm font-semibold uppercase tracking-wide text-accent">Oficios recomendados por vecinos</p>
+        <p className="text-sm font-semibold uppercase tracking-wide text-accent">El sello Uniluva</p>
         <h2 className="mt-2 text-2xl font-bold tracking-tight">No necesitas ser famoso para ser importante.</h2>
         <p className="mt-2 max-w-2xl text-muted">
-          El gásfiter que arregló el calefont del 304, la electricista que recomienda el pasaje de al lado. Uniluva le da
-          visibilidad a quienes trabajan bien, con recomendaciones reales de vecinos verificados de tu comuna.
+          Quien recuerda el control del niño, quien compra el regalo, quien va a buscar a la abuela. En Uniluva, todo lo que haces por tu familia
+          cuenta y se agradece.
         </p>
       </section>
 

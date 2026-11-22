@@ -3,9 +3,9 @@ import Link from "next/link";
 export function AppHeader({ children }: { children?: React.ReactNode }) {
   return (
     <header className="sticky top-0 z-20 border-b border-line bg-bg/90 backdrop-blur">
-      <div className="mx-auto flex h-14 w-full max-w-5xl items-center justify-between gap-3 px-4">
+      <div className="mx-auto flex h-14 w-full max-w-3xl items-center justify-between gap-3 px-4">
         <div className="flex min-w-0 items-center gap-3">
-          <Link href="/inicio" className="shrink-0 text-lg font-bold tracking-tight">
+          <Link href="/inicio?lista=1" className="shrink-0 text-lg font-bold tracking-tight">
             Uniluva<span className="text-accent">.</span>
           </Link>
           {children}

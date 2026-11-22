@@ -5,9 +5,8 @@ import "./globals.css";
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: { default: "Uniluva — Tu comunidad en un solo lugar", template: "%s · Uniluva" },
-  description:
-    "Gastos comunes, reuniones, documentos, reclamos y oficios recomendados por tus vecinos. Para edificios, condominios, pasajes y vecindarios.",
+  title: { default: "Uniluva — Agenda familiar", template: "%s · Uniluva" },
+  description: "La agenda familiar y personal donde cada cosa tiene quién se encargue y todos cuentan.",
   applicationName: "Uniluva",
   robots: { index: false, follow: false },
 };

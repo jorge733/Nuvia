@@ -7,10 +7,6 @@ export async function siteUrl() {
   return `${h.get("x-forwarded-proto") ?? "https"}://${h.get("host")}`;
 }
 
-export async function inviteLink(code: string) {
-  return `${await siteUrl()}/unirse?codigo=${code}`;
-}
-
 export function qrSvg(text: string) {
   return QRCode.toString(text, { type: "svg", margin: 1, errorCorrectionLevel: "M", color: { dark: "#000000", light: "#ffffff" } });
 }

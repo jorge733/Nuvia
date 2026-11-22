@@ -2,30 +2,29 @@
 
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { parseUnitList } from "@/lib/units";
-import { text } from "@/lib/community";
+import { requireUser, text } from "@/lib/family";
 
-export async function createCommunity(formData: FormData) {
+const KINDS = ["adulto", "nino", "adulto_mayor", "mascota"];
+
+export async function createFamily(formData: FormData) {
+  await requireUser();
   const name = text(formData, "name");
-  const comuna = text(formData, "comuna");
-  const kind = text(formData, "kind");
-  if (name.length < 2 || comuna.length < 2) redirect(`/crear?error=${encodeURIComponent("Completa el nombre y la comuna")}`);
-  if (!["edificio", "condominio", "pasaje", "vecindario"].includes(kind)) redirect("/crear?error=Tipo%20no%20v%C3%A1lido");
+  const myName = text(formData, "my_name");
+  if (name.length < 2 || !myName) redirect(`/crear?error=${encodeURIComponent("Completa el nombre de la familia y cómo te llaman")}`);
 
-  const units = parseUnitList(text(formData, "units"));
-  if (units.length > 2000) redirect(`/crear?error=${encodeURIComponent("Máximo 2.000 unidades")}`);
+  const members = Array.from({ length: 6 }, (_, i) => ({
+    name: text(formData, `m_name_${i}`).slice(0, 40),
+    kind: KINDS.includes(text(formData, `m_kind_${i}`)) ? text(formData, `m_kind_${i}`) : "adulto",
+    color: text(formData, `m_color_${i}`) || "gris",
+  })).filter((m) => m.name);
 
   const supabase = await createClient();
-  const { data, error } = await supabase.rpc("create_community", {
-    p_name: name,
-    p_kind: kind,
-    p_comuna: comuna,
-    p_address: text(formData, "address") || null,
-    p_region: text(formData, "region") || null,
-    p_unit_labels: units,
-    p_my_unit: text(formData, "my_unit") || null,
+  const { data, error } = await supabase.rpc("create_family", {
+    p_name: name.slice(0, 60),
+    p_my_name: myName.slice(0, 40),
+    p_my_color: text(formData, "my_color") || "violeta",
+    p_members: members,
   });
-
-  if (error || !data) redirect(`/crear?error=${encodeURIComponent("No se pudo crear la comunidad. Revisa los datos.")}`);
-  redirect(`/c/${data}/admin?ok=${encodeURIComponent("¡Comunidad creada! Ahora invita a tus vecinos.")}`);
+  if (error || !data) redirect(`/crear?error=${encodeURIComponent("No se pudo crear la familia. Inténtalo de nuevo.")}`);
+  redirect(`/f/${data}?ok=${encodeURIComponent("¡Listo! Esta es la agenda de tu familia.")}&bienvenida=1`);
 }

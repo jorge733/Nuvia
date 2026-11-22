@@ -1,71 +1,62 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { requireUser } from "@/lib/community";
+import { requireUser } from "@/lib/family";
 import { createClient } from "@/lib/supabase/server";
 import { AppHeader } from "@/components/app-header";
-import { Badge, Flash } from "@/components/ui";
-import { KIND_LABEL, ROLE_LABEL } from "@/lib/format";
+import { Flash } from "@/components/ui";
+import { MemberAvatar } from "@/components/member-avatar";
 
-export const metadata = { title: "Mis comunidades" };
+export const metadata = { title: "Mis familias" };
 
-type Row = {
-  role: string;
-  status: string;
-  units: { label: string } | null;
-  communities: { id: string; name: string; kind: string; comuna: string } | null;
-};
+type Row = { id: string; name: string; color: string; kind: "adulto"; families: { id: string; name: string } | null };
 
 export default async function Inicio({ searchParams }: PageProps<"/inicio">) {
   const sp = await searchParams;
   const user = await requireUser();
   const supabase = await createClient();
   const [{ data }, { data: profile }] = await Promise.all([
-    supabase
-      .from("memberships")
-      .select("role, status, units(label), communities(id, name, kind, comuna)")
-      .eq("user_id", user.id)
-      .neq("status", "rechazado")
-      .order("created_at")
-      .returns<Row[]>(),
+    supabase.from("family_members").select("id, name, color, kind, families(id, name)").eq("user_id", user.id).order("created_at").returns<Row[]>(),
     supabase.from("profiles").select("full_name").eq("id", user.id).maybeSingle(),
   ]);
-
-  const rows = (data ?? []).filter((r) => r.communities);
   if (!profile?.full_name) redirect("/perfil?bienvenida=1");
-  // Con una sola comunidad activa, ir directo a ella (salvo que se pida ver la lista).
-  if (rows.length === 1 && rows[0].status === "activo" && !sp.lista) redirect(`/c/${rows[0].communities!.id}`);
+
+  const rows = (data ?? []).filter((r) => r.families);
+  if (rows.length === 1 && !sp.lista) redirect(`/f/${rows[0].families!.id}`);
 
   return (
     <>
       <AppHeader />
-      <main className="mx-auto w-full max-w-3xl px-4 py-8">
+      <main className="mx-auto w-full max-w-xl px-4 py-8">
         <Flash ok={typeof sp.ok === "string" ? sp.ok : undefined} error={typeof sp.error === "string" ? sp.error : undefined} />
         <h1 className="text-2xl font-bold tracking-tight">Hola, {profile.full_name.split(" ")[0]}</h1>
-        <p className="mt-1 text-muted">{rows.length ? "Elige una comunidad." : "Todavía no perteneces a ninguna comunidad."}</p>
+        <p className="mt-1 text-muted">{rows.length ? "Elige una agenda familiar." : "Empecemos por tu familia."}</p>
 
         <div className="mt-6 space-y-3">
           {rows.map((r) => (
-            <Link key={r.communities!.id} href={`/c/${r.communities!.id}`} className="card flex items-center justify-between gap-3 hover:border-accent">
+            <Link key={r.families!.id} href={`/f/${r.families!.id}`} className="card flex items-center gap-3 hover:border-accent">
+              <MemberAvatar member={r} size={36} />
               <div className="min-w-0">
-                <div className="truncate font-semibold">{r.communities!.name}</div>
-                <div className="text-sm text-muted">
-                  {KIND_LABEL[r.communities!.kind]} · {r.communities!.comuna}
-                  {r.units ? ` · ${r.units.label}` : ""}
-                </div>
+                <div className="truncate font-semibold">{r.families!.name}</div>
+                <div className="text-sm text-muted">Eres {r.name}</div>
               </div>
-              {r.status === "pendiente" ? <Badge tone="warn">Esperando aprobación</Badge> : <Badge>{ROLE_LABEL[r.role]}</Badge>}
             </Link>
           ))}
         </div>
 
         <div className="mt-8 grid gap-3 sm:grid-cols-2">
-          <Link href="/unirse" className="card hover:border-accent">
-            <div className="font-semibold">Unirme con un código</div>
-            <p className="mt-1 text-sm text-muted">Tu administración o comité te lo entrega, o escanea el QR de tu edificio.</p>
-          </Link>
           <Link href="/crear" className="card hover:border-accent">
-            <div className="font-semibold">Crear una comunidad</div>
-            <p className="mt-1 text-sm text-muted">Para administradores, comités o vecinos que quieren organizar su pasaje.</p>
+            <div className="text-2xl" aria-hidden>
+              🏡
+            </div>
+            <div className="mt-2 font-semibold">Crear la agenda de mi familia</div>
+            <p className="mt-1 text-sm text-muted">Agrega a quienes viven contigo, aunque no usen la app: niños, abuelos o mascotas.</p>
+          </Link>
+          <Link href="/unirse" className="card hover:border-accent">
+            <div className="text-2xl" aria-hidden>
+              🔗
+            </div>
+            <div className="mt-2 font-semibold">Unirme con una invitación</div>
+            <p className="mt-1 text-sm text-muted">Alguien de tu familia te envió un enlace o un código.</p>
           </Link>
         </div>
       </main>

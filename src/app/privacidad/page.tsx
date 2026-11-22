@@ -12,24 +12,23 @@ export default function Privacidad() {
       </p>
       <h2>Qué datos tratamos</h2>
       <p>
-        Tu correo electrónico, nombre, teléfono (opcional), la comunidad y unidad a la que perteneces, tus gastos comunes, comprobantes de pago,
-        reclamos, sugerencias y recomendaciones de oficios que publiques.
+        Tu correo electrónico, nombre y teléfono (opcional); los integrantes de tu familia que agregues (nombre, tipo y, si lo indicas, teléfono);
+        y las actividades, relevos y tareas que registres en la agenda.
       </p>
       <h2>Para qué</h2>
-      <p>
-        Solo para operar la plataforma de tu comunidad: mostrarte tus gastos comunes, reuniones y documentos, y permitir la comunicación con la
-        administración y tus vecinos. No vendemos tus datos ni los usamos para publicidad.
-      </p>
+      <p>Solo para que tú y tu familia organicen su agenda. No vendemos tus datos ni los usamos para publicidad.</p>
       <h2>Quién los ve</h2>
       <p>
-        Tus vecinos aprobados ven tu nombre en reclamos públicos y recomendaciones. Tus montos de gasto común, comprobantes, teléfono y mensajes
-        privados solo los ve la directiva de tu comunidad (administración y comité).
+        Las actividades familiares las ven los integrantes de tu familia que usan la app. Las actividades marcadas como “Solo yo” solo las ves tú, y
+        las marcadas como “Ocupado” aparecen para tu familia sin título ni detalles.
       </p>
-      <h2>Datos de terceros (oficios)</h2>
+      <h2>Niños y personas sin cuenta</h2>
       <p>
-        Quien recomienda a un trabajador declara contar con su autorización para publicar su nombre y teléfono. El trabajador puede pedir que
-        retiremos sus datos en cualquier momento.
+        Puedes registrar a niños, adultos mayores u otras personas que no usan la app. Al hacerlo, declaras tener su autorización o la de su
+        representante legal. Registra solo los datos necesarios.
       </p>
+      <h2>Enlace de calendario</h2>
+      <p>El enlace para suscribirte desde Google o Apple Calendar es personal y secreto. Puedes renovarlo cuando quieras desde tu perfil.</p>
       <h2>Tus derechos</h2>
       <p>
         Puedes solicitar acceso, rectificación, supresión, oposición y portabilidad de tus datos, y eliminar tu cuenta, escribiendo a

@@ -1,15 +1,30 @@
 import Link from "next/link";
-import { requireUser } from "@/lib/community";
+import { requireUser } from "@/lib/family";
+import { createClient } from "@/lib/supabase/server";
 import { AppHeader } from "@/components/app-header";
 import { Field, Flash } from "@/components/ui";
 import { SubmitButton } from "@/components/submit-button";
-import { createCommunity } from "./actions";
+import { ColorPicker } from "@/components/color-picker";
+import { createFamily } from "./actions";
 
-export const metadata = { title: "Crear comunidad" };
+export const metadata = { title: "Crear agenda familiar" };
+
+const ROWS = [
+  { placeholder: "Ej: Pedro", kind: "adulto", color: "azul" },
+  { placeholder: "Ej: Sofi", kind: "nino", color: "verde" },
+  { placeholder: "Ej: Tata", kind: "adulto_mayor", color: "ambar" },
+  { placeholder: "Ej: Luna", kind: "mascota", color: "gris" },
+  { placeholder: "", kind: "nino", color: "rosa" },
+  { placeholder: "", kind: "adulto", color: "turquesa" },
+];
 
 export default async function Crear({ searchParams }: PageProps<"/crear">) {
-  await requireUser();
+  const user = await requireUser();
   const sp = await searchParams;
+  const supabase = await createClient();
+  const { data: profile } = await supabase.from("profiles").select("full_name").eq("id", user.id).maybeSingle();
+  const firstName = profile?.full_name?.split(" ")[0] ?? "";
+
   return (
     <>
       <AppHeader />
@@ -17,46 +32,47 @@ export default async function Crear({ searchParams }: PageProps<"/crear">) {
         <Link href="/inicio?lista=1" className="link text-sm">
           ← Volver
         </Link>
-        <h1 className="mt-3 text-2xl font-bold tracking-tight">Crear una comunidad</h1>
-        <p className="mt-1 text-muted">Quedarás como administrador/a. Después podrás invitar a tus vecinos con un código o un QR.</p>
-
+        <h1 className="mt-3 text-2xl font-bold tracking-tight">La agenda de tu familia</h1>
+        <p className="mt-1 text-muted">Después podrás invitar a los demás adultos con un enlace.</p>
         <div className="mt-6">
           <Flash error={typeof sp.error === "string" ? sp.error : undefined} />
         </div>
-        <form action={createCommunity} className="card space-y-4">
-          <Field label="Nombre">
-            <input className="input" name="name" required minLength={2} maxLength={80} placeholder="Edificio Los Aromos / Pasaje Las Rosas" />
-          </Field>
-          <Field label="Tipo">
-            <select className="input" name="kind" defaultValue="edificio">
-              <option value="edificio">Edificio</option>
-              <option value="condominio">Condominio</option>
-              <option value="pasaje">Pasaje</option>
-              <option value="vecindario">Vecindario / junta de vecinos</option>
-            </select>
-          </Field>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Comuna" hint="Se usa para mostrar oficios recomendados en tu zona.">
-              <input className="input" name="comuna" required minLength={2} maxLength={60} placeholder="Ñuñoa" />
+
+        <form action={createFamily} className="space-y-5">
+          <div className="card space-y-4">
+            <Field label="Nombre de la familia">
+              <input className="input" name="name" required minLength={2} maxLength={60} placeholder="Familia Pérez Soto" />
             </Field>
-            <Field label="Región">
-              <input className="input" name="region" maxLength={60} placeholder="Metropolitana" />
+            <Field label="¿Cómo te llaman en tu familia?" hint="Puede ser tu nombre o algo como “Mamá” o “Papá”.">
+              <input className="input" name="my_name" required maxLength={40} defaultValue={firstName} />
             </Field>
+            <div>
+              <span className="label">Tu color</span>
+              <ColorPicker name="my_color" defaultValue="violeta" />
+            </div>
           </div>
-          <Field label="Dirección">
-            <input className="input" name="address" maxLength={160} placeholder="Av. Ejemplo 1234" />
-          </Field>
-          <Field
-            label="Unidades (opcional)"
-            hint="Departamentos o números de casa separados por coma o salto de línea. También puedes usar rangos como 101-110. Puedes agregarlas después."
-          >
-            <textarea className="input min-h-24" name="units" placeholder={"101-110, 201-210\no bien: 12, 14, 16, 18"} />
-          </Field>
-          <Field label="Tu unidad (opcional)">
-            <input className="input" name="my_unit" maxLength={30} placeholder="304" />
-          </Field>
+
+          <div className="card">
+            <h2 className="font-semibold">¿Quiénes más son parte?</h2>
+            <p className="mt-1 text-sm text-muted">Agrega a todos, también a quienes no usarán la app. Lo puedes completar después.</p>
+            <div className="mt-4 space-y-2">
+              {ROWS.map((r, i) => (
+                <div key={i} className="flex gap-2">
+                  <input className="input flex-1" name={`m_name_${i}`} maxLength={40} placeholder={r.placeholder || "Nombre"} aria-label={`Nombre ${i + 1}`} />
+                  <select className="input w-40" name={`m_kind_${i}`} defaultValue={r.kind} aria-label={`Tipo ${i + 1}`}>
+                    <option value="adulto">Adulto/a</option>
+                    <option value="nino">Niño/a</option>
+                    <option value="adulto_mayor">Adulto/a mayor</option>
+                    <option value="mascota">Mascota</option>
+                  </select>
+                  <input type="hidden" name={`m_color_${i}`} value={r.color} />
+                </div>
+              ))}
+            </div>
+          </div>
+
           <SubmitButton className="btn-primary w-full" pendingText="Creando…">
-            Crear comunidad
+            Crear agenda familiar
           </SubmitButton>
         </form>
       </main>
