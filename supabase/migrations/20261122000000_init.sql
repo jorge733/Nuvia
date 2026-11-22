@@ -292,6 +292,9 @@ create trigger on_auth_user_created
   after insert on auth.users
   for each row execute function public.handle_new_user();
 
+-- Perfiles para usuarios que ya existían antes de esta migración.
+insert into public.profiles (id) select id from auth.users on conflict (id) do nothing;
+
 create or replace function public.touch_updated_at()
 returns trigger language plpgsql as $$
 begin
