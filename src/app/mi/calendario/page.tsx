@@ -65,7 +65,7 @@ export default async function MiCalendario({ searchParams }: PageProps<"/mi/cale
                     familyId={o.space.id}
                     o={o}
                     byId={byId}
-                    tag={hasFamilies ? { label: o.space.isPersonal ? "Personal" : o.space.name, personal: o.space.isPersonal } : undefined}
+                    tag={hasFamilies ? { label: o.space.isPersonal ? "Solo yo" : o.space.name, personal: o.space.isPersonal } : undefined}
                   />
                 ))}
               </div>

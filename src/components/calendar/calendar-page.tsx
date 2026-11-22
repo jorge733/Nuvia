@@ -58,7 +58,7 @@ export function CalendarPage({
         ? `${formatDay(range.first, { day: "numeric", month: "short" })} – ${formatDay(range.last, { day: "numeric", month: "short" })}`
         : capitalize(formatDay(anchor, { weekday: "long", day: "numeric" }));
   const eyebrow = view === "mes" ? String(y) : capitalize(formatDay(anchor, { month: "long", year: "numeric" }));
-  const newHref = (day: string, hour: number) => `${newBase}?fecha=${day}&hora=${String(hour).padStart(2, "0")}:00`;
+  const newHref = (day: string, hour: number) => `${newBase}${newBase.includes("?") ? "&" : "?"}fecha=${day}&hora=${String(hour).padStart(2, "0")}:00`;
 
   return (
     <div>

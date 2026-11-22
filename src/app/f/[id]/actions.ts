@@ -8,7 +8,9 @@ import { dayKey, formatWhen, fromLocal, isDayKey, keyParts, RECURRENCE_LABEL } f
 
 const VISIBILITIES = ["familia", "privado", "ocupado"];
 
-function parseEvent(formData: FormData, memberIds: Set<string>) {
+type ParseOpts = { visibility?: string; responsibleKey?: string; participantsKey?: string };
+
+function parseEvent(formData: FormData, memberIds: Set<string>, opts: ParseOpts = {}) {
   const title = text(formData, "title").slice(0, 120);
   const date = text(formData, "date");
   const start = text(formData, "start");
@@ -17,8 +19,8 @@ function parseEvent(formData: FormData, memberIds: Set<string>) {
   const category = text(formData, "category");
   const recurrence = text(formData, "recurrence");
   const until = text(formData, "recur_until");
-  const visibility = text(formData, "visibility");
-  const responsible = text(formData, "responsible");
+  const visibility = opts.visibility ?? text(formData, "visibility");
+  const responsible = text(formData, opts.responsibleKey ?? "responsible");
 
   if (!title) return { error: "Escribe qué hay que hacer" } as const;
   if (!isDayKey(date)) return { error: "Elige una fecha" } as const;
@@ -52,30 +54,46 @@ function parseEvent(formData: FormData, memberIds: Set<string>) {
       // Los eventos privados no tienen responsable familiar.
       responsible_id: vis === "familia" && memberIds.has(responsible) ? responsible : null,
     },
-    participants: formData.getAll("participants").map(String).filter((p) => memberIds.has(p)),
+    participants: formData.getAll(opts.participantsKey ?? "participants").map(String).filter((p) => memberIds.has(p)),
     day: date,
   } as const;
 }
 
-export async function createEvent(familyId: string, formData: FormData) {
+/**
+ * Crear desde el formulario único. "¿Quién lo ve?" decide dónde se guarda:
+ * `dest` = "<espacio>:<visibilidad>" (Solo yo → agenda personal; Familia / Ocupado → esa familia).
+ */
+export async function createEvent(formData: FormData) {
+  const [familyId, chosen] = text(formData, "dest").split(":");
+  const date = text(formData, "date");
+  if (!/^[0-9a-f-]{36}$/.test(familyId ?? "")) back(`/mi/nuevo${isDayKey(date) ? `?fecha=${date}` : ""}`, { error: "Elige quién lo ve" });
+  const retry = `/mi/nuevo?para=${familyId}${isDayKey(date) ? `&fecha=${date}` : ""}`;
+
   const { supabase, user, members, family } = await getFamily(familyId);
-  const parsed = parseEvent(formData, new Set(members.map((m) => m.id)));
-  if ("error" in parsed) back(`/f/${familyId}/nuevo?fecha=${text(formData, "date")}`, { error: parsed.error! });
+  const visibility = family.is_personal ? "privado" : chosen === "ocupado" ? "ocupado" : "familia";
+  const parsed = parseEvent(formData, new Set(members.map((m) => m.id)), {
+    visibility,
+    responsibleKey: `responsible_${familyId}`,
+    participantsKey: `participants_${familyId}`,
+  });
+  if ("error" in parsed) back(retry, { error: parsed.error! });
 
   const { data, error } = await supabase
     .from("events")
     .insert({ ...parsed.row, family_id: familyId, created_by: user.id })
     .select("id")
     .single();
-  if (error || !data) back(`/f/${familyId}/nuevo`, { error: "No se pudo guardar. Inténtalo de nuevo." });
+  if (error || !data) back(retry, { error: "No se pudo guardar. Inténtalo de nuevo." });
   if (parsed.participants.length) {
     await supabase.from("event_participants").insert(parsed.participants.map((member_id) => ({ event_id: data.id, member_id })));
   }
   revalidatePath(`/f/${familyId}`, "layout");
+  revalidatePath("/mi", "layout");
   const today = dayKey(new Date());
   const base = family.is_personal ? "/mi" : `/f/${familyId}`;
   const dest = parsed.day === today ? base : `${base}/semana?d=${parsed.day}`;
-  back(dest, { ok: `“${parsed.row.title}” quedó agendado`, link: `/f/${familyId}/e/${data.id}` });
+  const who = family.is_personal ? " · solo tú lo ves" : visibility === "ocupado" ? ` · ${family.name} ve que estás ocupado/a` : ` · ${family.name}`;
+  back(dest, { ok: `“${parsed.row.title}” quedó agendado${who}`, link: `/f/${familyId}/e/${data.id}` });
 }
 
 export async function updateEvent(familyId: string, eventId: string, formData: FormData) {
@@ -156,7 +174,7 @@ export async function takeOccurrence(familyId: string, eventId: string, startIso
   back(safePath(from, `/f/${familyId}`), error ? { error: "No se pudo asignar" } : { ok: "¡Gracias! Ahora te encargas tú 💜" });
 }
 
-// Agregar escribiendo: "Dentista Sofi mañana 16:00". El destino viene del formulario (Mi agenda o una familia).
+// Agregar escribiendo: "Dentista Sofi mañana 16:00". El destino viene del formulario ("Solo yo" o una familia).
 export async function quickAdd(from: string, formData: FormData) {
   const raw = text(formData, "q").slice(0, 200);
   const spaceId = text(formData, "space");

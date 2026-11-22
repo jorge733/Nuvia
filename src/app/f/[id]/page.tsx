@@ -85,7 +85,7 @@ export default async function Hoy({ params, searchParams }: PageProps<"/f/[id]">
             <Sparkles className="size-3.5" /> Primeros pasos
           </p>
           <div className="mt-4 grid gap-3 sm:grid-cols-3">
-            <Link href={`/f/${id}/nuevo`} className="rounded-2xl bg-surface-2 p-4 transition hover:bg-line">
+            <Link href={`/mi/nuevo?para=${id}`} className="rounded-2xl bg-surface-2 p-4 transition hover:bg-line">
               <CalendarPlus className="size-5 text-accent" />
               <p className="mt-2 text-sm font-semibold">Agrega lo primero de la semana</p>
             </Link>
@@ -154,7 +154,7 @@ export default async function Hoy({ params, searchParams }: PageProps<"/f/[id]">
       )}
 
       <section>
-        <SectionHeader title="Hoy" href={`/f/${id}/nuevo`} linkText="＋ Agregar" />
+        <SectionHeader title="Hoy" href={`/mi/nuevo?para=${id}`} linkText="＋ Agregar" />
         {todayList.length ? (
           <div className="stagger card divide-y divide-line p-1">
             {todayList.map((o) => (
@@ -167,7 +167,7 @@ export default async function Hoy({ params, searchParams }: PageProps<"/f/[id]">
       </section>
 
       <section>
-        <SectionHeader title="Mañana" href={`/f/${id}/nuevo?fecha=${tomorrow}`} linkText="＋ Agregar" />
+        <SectionHeader title="Mañana" href={`/mi/nuevo?para=${id}&fecha=${tomorrow}`} linkText="＋ Agregar" />
         {tomorrowList.length ? (
           <div className="stagger card divide-y divide-line p-1">
             {tomorrowList.map((o) => (

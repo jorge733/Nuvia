@@ -93,7 +93,7 @@ export default async function Semana({ params, searchParams }: PageProps<"/f/[id
                   {capitalize(formatDay(d, { weekday: "long", day: "numeric" }))}
                   {["Hoy", "Mañana"].includes(rel) && <span className="ml-2 font-sans text-xs font-bold text-muted uppercase">{rel}</span>}
                 </h2>
-                <Link href={`/f/${id}/nuevo?fecha=${d}`} className="btn-ghost size-9 min-h-9 px-0" aria-label={`Agregar el ${d}`}>
+                <Link href={`/mi/nuevo?para=${id}&fecha=${d}`} className="btn-ghost size-9 min-h-9 px-0" aria-label={`Agregar el ${d}`}>
                   <Plus className="size-4" />
                 </Link>
               </div>

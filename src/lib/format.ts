@@ -33,9 +33,9 @@ export const KIND_LABEL: Record<string, string> = {
 export const KIND_EMOJI: Record<string, string> = { adulto: "", nino: "", adulto_mayor: "", mascota: "🐾" };
 
 export const VISIBILITY_LABEL: Record<string, { label: string; hint: string }> = {
-  familia: { label: "Familia", hint: "Toda la familia lo ve" },
+  familia: { label: "Toda la familia", hint: "Ven los detalles y alguien se encarga" },
+  ocupado: { label: "Solo que estoy ocupado/a", hint: "Ven el bloque, sin detalles" },
   privado: { label: "Solo yo", hint: "Nadie más lo ve" },
-  ocupado: { label: "Ocupado", hint: "La familia ve que estás ocupado/a, sin detalles" },
 };
 
 export function whatsappShare(text: string) {

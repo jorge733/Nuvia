@@ -1,33 +1,12 @@
-import Link from "next/link";
-import { getFamily, getMySpaces } from "@/lib/family";
-import { isDayKey, todayKey } from "@/lib/time";
-import { EventForm } from "@/components/event-form";
-import { Flash, PageTitle } from "@/components/ui";
-import { SpaceTabs } from "@/components/space-tabs";
-import { createEvent } from "../actions";
+import { redirect } from "next/navigation";
+import { isDayKey } from "@/lib/time";
 
-export const metadata = { title: "Agregar" };
-
+// Agregar vive en un solo lugar (/mi/nuevo); desde una familia llega con esa familia ya marcada.
 export default async function Nuevo({ params, searchParams }: PageProps<"/f/[id]/nuevo">) {
   const { id } = await params;
   const sp = await searchParams;
-  const [{ members, me, family }, { spaces }] = await Promise.all([getFamily(id), getMySpaces()]);
-  const fecha = isDayKey(sp.fecha) ? sp.fecha : todayKey();
-  const home = family.is_personal ? "/mi" : `/f/${id}`;
-  const hora = typeof sp.hora === "string" && /^\d{2}:\d{2}$/.test(sp.hora) ? sp.hora : undefined;
-  const query = [isDayKey(sp.fecha) ? `fecha=${sp.fecha}` : "", hora ? `hora=${hora}` : ""].filter(Boolean).join("&");
-
-  return (
-    <div className="mx-auto max-w-2xl">
-      <Link href={home} className="btn-ghost -ml-3 min-h-9 py-1.5">
-        ← Volver
-      </Link>
-      <div className="mt-3">
-        <Flash error={typeof sp.error === "string" ? sp.error : undefined} />
-      </div>
-      <PageTitle sub={family.is_personal ? "Solo para ti. Nadie más lo ve." : "Elige quién se encarga. Si no puede, podrá pedir relevo."}>Agregar</PageTitle>
-      <SpaceTabs spaces={spaces} current={id} query={query ? `?${query}` : ""} />
-      <EventForm action={createEvent.bind(null, id)} members={members} me={me} personal={family.is_personal} defaultDate={fecha} defaultTime={hora} submitLabel="Guardar" cancelHref={home} />
-    </div>
-  );
+  const q = new URLSearchParams({ para: id });
+  if (isDayKey(sp.fecha)) q.set("fecha", sp.fecha);
+  if (typeof sp.hora === "string" && /^\d{2}:\d{2}$/.test(sp.hora)) q.set("hora", sp.hora);
+  redirect(`/mi/nuevo?${q}`);
 }

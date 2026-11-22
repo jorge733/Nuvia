@@ -35,7 +35,7 @@ export default async function MiAgenda({ searchParams }: PageProps<"/mi">) {
   const tomorrowList = days.get(tomorrow) ?? [];
   const nextDays = Array.from({ length: 12 }, (_, i) => addDays(today, i + 2)).filter((d) => days.get(d)?.length);
   const pendingToday = todayList.filter((o) => !o.done).length;
-  const tag = (o: MyOccurrence) => ({ label: o.space.isPersonal ? "Personal" : o.space.name, personal: o.space.isPersonal });
+  const tag = (o: MyOccurrence) => ({ label: o.space.isPersonal ? "Solo yo" : o.space.name, personal: o.space.isPersonal });
 
   const row = (o: MyOccurrence, opts: { showDay?: boolean; done?: boolean } = {}) => (
     <OccurrenceRow
@@ -80,7 +80,7 @@ export default async function MiAgenda({ searchParams }: PageProps<"/mi">) {
       </div>
 
       {personalId && (
-        <QuickAdd from="/mi" defaultSpace={personalId} spaces={spaces.map((s) => ({ id: s.id, name: s.isPersonal ? "Mi agenda" : s.name }))} />
+        <QuickAdd from="/mi" defaultSpace={personalId} spaces={spaces.map((s) => ({ id: s.id, name: s.isPersonal ? "Solo yo" : s.name }))} />
       )}
 
       <section>

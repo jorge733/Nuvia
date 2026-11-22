@@ -75,7 +75,7 @@ export function buildDigests(rows: DigestRow[], today: string): Digest[] {
         allDay: r.all_day,
         title: r.title,
         emoji: CATEGORIES[r.category]?.emoji ?? "📌",
-        where: r.is_personal ? "Personal" : r.family_name,
+        where: r.is_personal ? "Solo yo" : r.family_name,
         location: r.location,
         personal: r.is_personal,
       });

@@ -76,7 +76,7 @@ export default async function MiSemana({ searchParams }: PageProps<"/mi/semana">
                       familyId={o.space.id}
                       o={o}
                       byId={byId}
-                      tag={hasFamilies ? { label: o.space.isPersonal ? "Personal" : o.space.name, personal: o.space.isPersonal } : undefined}
+                      tag={hasFamilies ? { label: o.space.isPersonal ? "Solo yo" : o.space.name, personal: o.space.isPersonal } : undefined}
                     />
                   ))}
                 </div>

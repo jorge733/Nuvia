@@ -57,12 +57,12 @@ export default async function Calendario({ params, searchParams }: PageProps<"/f
         items={items}
         basePath={`/f/${id}/calendario`}
         listHref={`/f/${id}/semana`}
-        newBase={`/f/${id}/nuevo`}
+        newBase={`/mi/nuevo?para=${id}`}
         selectedDay={
           <section className="mt-6">
             <div className="mb-3 flex items-center justify-between px-1">
               <h2 className="text-lg font-semibold">{capitalize(formatDay(anchor))}</h2>
-              <Link href={`/f/${id}/nuevo?fecha=${anchor}`} className="btn-ghost min-h-9 py-1.5 text-accent">
+              <Link href={`/mi/nuevo?para=${id}&fecha=${anchor}`} className="btn-ghost min-h-9 py-1.5 text-accent">
                 <Plus className="size-4" /> Agregar
               </Link>
             </div>

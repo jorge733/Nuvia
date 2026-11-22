@@ -24,7 +24,7 @@ export function OccurrenceRow({
   byId: Record<string, Member>;
   showDay?: string;
   action?: React.ReactNode;
-  /** Etiqueta de origen (en "Mi agenda"): "Personal" o el nombre de la familia. */
+  /** Etiqueta de origen (en "Mi agenda"): "Solo yo" o el nombre de la familia. */
   tag?: { label: string; personal: boolean };
 }) {
   const cat = CATEGORIES[o.event.category] ?? CATEGORIES.otro;

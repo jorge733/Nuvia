@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Clock, Lock, Users } from "lucide-react";
 import type { AgendaEvent } from "@/lib/agenda";
 import type { Member } from "@/lib/family";
 import { CATEGORIES, VISIBILITY_LABEL } from "@/lib/format";
@@ -20,11 +21,111 @@ function dateChips() {
   ];
 }
 
+/** Un lugar donde puede quedar la actividad (agenda personal o una familia). */
+export type Destination = { id: string; name: string; isPersonal: boolean; members: Member[]; me: Member };
+
+function ResponsibleChips({ members, me, name, event }: { members: Member[]; me: Member; name: string; event?: AgendaEvent }) {
+  // Las mascotas pueden ser "para quién" (veterinario), pero no responsables.
+  const canBeResponsible = members.filter((m) => m.kind !== "mascota");
+  return (
+    <fieldset>
+      <legend className="label">¿Quién se encarga?</legend>
+      <div className="flex flex-wrap gap-2">
+        {canBeResponsible.map((m) => (
+          <label key={m.id} className="cursor-pointer">
+            <input type="radio" name={name} value={m.id} defaultChecked={event ? event.responsible_id === m.id : m.id === me.id} className="peer sr-only" />
+            <span className="inline-flex items-center gap-2 rounded-full border border-line py-1 pr-3 pl-1 text-sm peer-checked:border-accent peer-checked:bg-accent-soft peer-checked:font-semibold peer-focus-visible:ring-2 peer-focus-visible:ring-accent">
+              <MemberAvatar member={m} size={26} />
+              {m.id === me.id ? "Yo" : m.name}
+            </span>
+          </label>
+        ))}
+        <label className="cursor-pointer">
+          <input type="radio" name={name} value="" defaultChecked={event ? !event.responsible_id : false} className="peer sr-only" />
+          <span className="inline-flex items-center gap-2 rounded-full border border-dashed border-line py-1 pr-3 pl-1 text-sm text-muted peer-checked:border-sun peer-checked:bg-sun-soft peer-checked:text-sun peer-focus-visible:ring-2 peer-focus-visible:ring-accent">
+            <MemberAvatar member={null} size={26} />
+            Que alguien lo tome
+          </span>
+        </label>
+      </div>
+    </fieldset>
+  );
+}
+
+function ParticipantChips({ members, me, name, selected }: { members: Member[]; me: Member; name: string; selected: Set<string> }) {
+  return (
+    <fieldset>
+      <legend className="label">¿Para quién es?</legend>
+      <div className="flex flex-wrap gap-2">
+        {members.map((m) => (
+          <label key={m.id} className="cursor-pointer">
+            <input type="checkbox" name={name} value={m.id} defaultChecked={selected.has(m.id)} className="peer sr-only" />
+            <span className="inline-flex items-center gap-2 rounded-full border border-line py-1 pr-3 pl-1 text-sm peer-checked:border-accent peer-checked:bg-accent-soft peer-checked:font-semibold peer-focus-visible:ring-2 peer-focus-visible:ring-accent">
+              <MemberAvatar member={m} size={24} />
+              {m.id === me.id ? "Yo" : m.name}
+            </span>
+          </label>
+        ))}
+      </div>
+    </fieldset>
+  );
+}
+
+function ChoiceCard({ name, value, checked, Icon, label, hint }: { name: string; value: string; checked: boolean; Icon: typeof Lock; label: string; hint: string }) {
+  return (
+    <label className="flex cursor-pointer gap-3 rounded-2xl border border-line p-3 has-[:checked]:border-accent has-[:checked]:bg-accent-soft has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-accent">
+      <input type="radio" name={name} value={value} defaultChecked={checked} className="sr-only" />
+      <Icon className="mt-0.5 size-4 shrink-0 text-accent" aria-hidden />
+      <span className="min-w-0">
+        <span className="block text-sm font-semibold">{label}</span>
+        <span className="block text-xs text-muted">{hint}</span>
+      </span>
+    </label>
+  );
+}
+
+/** "¿Quién lo ve?" al crear: una sola pregunta que también decide dónde se guarda. */
+function WhoSees({ destinations, defaultDest }: { destinations: Destination[]; defaultDest: string }) {
+  const personal = destinations.find((d) => d.isPersonal);
+  const families = destinations.filter((d) => !d.isPersonal);
+  if (!families.length) {
+    return <input type="hidden" name="dest" value={`${personal?.id}:privado`} />;
+  }
+  return (
+    <fieldset>
+      <legend className="label">¿Quién lo ve?</legend>
+      <div className="grid gap-2 sm:grid-cols-3">
+        {personal && <ChoiceCard name="dest" value={`${personal.id}:privado`} checked={defaultDest === `${personal.id}:privado`} Icon={Lock} label="Solo yo" hint="Nadie más lo ve" />}
+        {families.map((f) => (
+          <ChoiceCard key={`${f.id}:familia`} name="dest" value={`${f.id}:familia`} checked={defaultDest === `${f.id}:familia`} Icon={Users} label={f.name} hint="Todos ven los detalles y alguien se encarga" />
+        ))}
+        {families.map((f) => (
+          <ChoiceCard
+            key={`${f.id}:ocupado`}
+            name="dest"
+            value={`${f.id}:ocupado`}
+            checked={defaultDest === `${f.id}:ocupado`}
+            Icon={Clock}
+            label="Que estoy ocupado/a"
+            hint={`${f.name} ve el bloque, sin detalles`}
+          />
+        ))}
+      </div>
+      {/* Muestra los campos de la familia elegida sin JavaScript. */}
+      <style>
+        {`[data-show]{display:none}` + families.map((f) => `form:has(input[name="dest"][value="${f.id}:familia"]:checked) [data-show="${f.id}"]{display:block}`).join("")}
+      </style>
+    </fieldset>
+  );
+}
+
 export function EventForm({
   action,
-  members,
+  members = [],
   me,
   event,
+  destinations,
+  defaultDest = "",
   defaultDate,
   defaultTime,
   submitLabel,
@@ -32,9 +133,13 @@ export function EventForm({
   personal = false,
 }: {
   action: (formData: FormData) => Promise<void>;
-  members: Member[];
-  me: Member;
+  /** Al editar: integrantes del espacio del evento. */
+  members?: Member[];
+  me?: Member;
   event?: AgendaEvent;
+  /** Al crear: todos los lugares posibles y cuál viene marcado ("<id>:<visibilidad>"). */
+  destinations?: Destination[];
+  defaultDest?: string;
   defaultDate: string;
   /** Hora sugerida (al tocar un horario en el calendario). */
   defaultTime?: string;
@@ -46,8 +151,9 @@ export function EventForm({
   const start = event ? new Date(event.starts_at) : null;
   const end = event?.ends_at ? new Date(event.ends_at) : null;
   const participants = new Set(event?.participant_ids ?? []);
-  // Las mascotas pueden ser "para quién" (veterinario), pero no responsables.
-  const canBeResponsible = members.filter((m) => m.kind !== "mascota");
+  const creating = !!destinations;
+  const families = (destinations ?? []).filter((d) => !d.isPersonal);
+  const editingFamily = !creating && !personal && !!me;
   const hasExtras = !!(event && (event.recurrence !== "none" || event.location || event.notes || event.participant_ids.length || event.visibility !== "familia"));
 
   return (
@@ -71,35 +177,19 @@ export function EventForm({
           <p className="hint">Si no pones hora, queda para todo el día.</p>
         </div>
 
-        {!personal && (
-          <fieldset>
-            <legend className="label">¿Quién se encarga?</legend>
-            <div className="flex flex-wrap gap-2">
-              {canBeResponsible.map((m) => (
-                <label key={m.id} className="cursor-pointer">
-                  <input type="radio" name="responsible" value={m.id} defaultChecked={event ? event.responsible_id === m.id : m.id === me.id} className="peer sr-only" />
-                  <span className="inline-flex items-center gap-2 rounded-full border border-line py-1 pr-3 pl-1 text-sm peer-checked:border-accent peer-checked:bg-accent-soft peer-checked:font-semibold peer-focus-visible:ring-2 peer-focus-visible:ring-accent">
-                    <MemberAvatar member={m} size={26} />
-                    {m.id === me.id ? "Yo" : m.name}
-                  </span>
-                </label>
-              ))}
-              <label className="cursor-pointer">
-                <input type="radio" name="responsible" value="" defaultChecked={event ? !event.responsible_id : false} className="peer sr-only" />
-                <span className="inline-flex items-center gap-2 rounded-full border border-dashed border-line py-1 pr-3 pl-1 text-sm text-muted peer-checked:border-sun peer-checked:bg-sun-soft peer-checked:text-sun peer-focus-visible:ring-2 peer-focus-visible:ring-accent">
-                  <MemberAvatar member={null} size={26} />
-                  Que alguien lo tome
-                </span>
-              </label>
-            </div>
-          </fieldset>
-        )}
+        {creating && <WhoSees destinations={destinations} defaultDest={defaultDest} />}
+        {families.map((f) => (
+          <div key={f.id} data-show={f.id}>
+            <ResponsibleChips members={f.members} me={f.me} name={`responsible_${f.id}`} />
+          </div>
+        ))}
+        {editingFamily && <ResponsibleChips members={members} me={me} name="responsible" event={event} />}
       </div>
 
       <details className="card" open={hasExtras}>
         <summary className="flex cursor-pointer list-none items-center justify-between font-semibold">
           Más opciones
-          <span className="text-sm font-normal text-muted">tipo, repetir, para quién, lugar…</span>
+          <span className="text-sm font-normal text-muted">{families.length || editingFamily ? "tipo, repetir, para quién, lugar…" : "tipo, repetir, lugar, notas…"}</span>
         </summary>
         <div className="mt-5 space-y-5">
           <fieldset>
@@ -133,35 +223,25 @@ export function EventForm({
             </Field>
           </div>
 
-          {!personal && (
+          {families.map((f) => (
+            <div key={f.id} data-show={f.id}>
+              <ParticipantChips members={f.members} me={f.me} name={`participants_${f.id}`} selected={new Set()} />
+            </div>
+          ))}
+
+          {editingFamily && (
             <>
-              <fieldset>
-                <legend className="label">¿Para quién es?</legend>
-                <div className="flex flex-wrap gap-2">
-                  {members.map((m) => (
-                    <label key={m.id} className="cursor-pointer">
-                      <input type="checkbox" name="participants" value={m.id} defaultChecked={participants.has(m.id)} className="peer sr-only" />
-                      <span className="inline-flex items-center gap-2 rounded-full border border-line py-1 pr-3 pl-1 text-sm peer-checked:border-accent peer-checked:bg-accent-soft peer-checked:font-semibold peer-focus-visible:ring-2 peer-focus-visible:ring-accent">
-                        <MemberAvatar member={m} size={24} />
-                        {m.id === me.id ? "Yo" : m.name}
-                      </span>
-                    </label>
-                  ))}
-                </div>
-              </fieldset>
+              <ParticipantChips members={members} me={me} name="participants" selected={participants} />
 
               <fieldset>
                 <legend className="label">¿Quién lo ve?</legend>
-                <div className="grid gap-2 sm:grid-cols-3">
-                  {Object.entries(VISIBILITY_LABEL).map(([k, v]) => (
-                    <label key={k} className="flex cursor-pointer gap-2 rounded-2xl border border-line p-3 has-[:checked]:border-accent has-[:checked]:bg-accent-soft">
-                      <input type="radio" name="visibility" value={k} defaultChecked={(event?.visibility ?? "familia") === k} className="mt-0.5 accent-[var(--accent)]" />
-                      <span>
-                        <span className="block text-sm font-medium">{v.label}</span>
-                        <span className="block text-xs text-muted">{v.hint}</span>
-                      </span>
-                    </label>
-                  ))}
+                <div className="grid gap-2 sm:grid-cols-2">
+                  {Object.entries(VISIBILITY_LABEL)
+                    // "Solo yo" ahora vive en tu agenda personal; aquí solo se muestra si ya estaba así.
+                    .filter(([k]) => k !== "privado" || event?.visibility === "privado")
+                    .map(([k, v]) => (
+                      <ChoiceCard key={k} name="visibility" value={k} checked={(event?.visibility ?? "familia") === k} Icon={k === "familia" ? Users : k === "ocupado" ? Clock : Lock} label={v.label} hint={v.hint} />
+                    ))}
                 </div>
               </fieldset>
             </>
@@ -176,7 +256,7 @@ export function EventForm({
         </div>
       </details>
 
-      {personal && <input type="hidden" name="visibility" value="privado" />}
+      {!creating && personal && <input type="hidden" name="visibility" value="privado" />}
 
       <div className="flex gap-3">
         <SubmitButton className="btn-primary flex-1">{submitLabel}</SubmitButton>

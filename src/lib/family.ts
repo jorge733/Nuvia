@@ -85,3 +85,9 @@ export const getMySpaces = cache(async () => {
     .sort((a, b) => Number(b.isPersonal) - Number(a.isPersonal));
   return { supabase, user, spaces, personalId: (personalId as string | null) ?? spaces.find((s) => s.isPersonal)?.id ?? null };
 });
+
+/** A dónde lleva "Familia" en la barra: la única familia, la lista o crear una. */
+export function familyHubHref(spaces: Space[]) {
+  const families = spaces.filter((s) => !s.isPersonal);
+  return families.length === 1 ? `/f/${families[0].id}` : families.length ? "/inicio?lista=1" : "/crear";
+}

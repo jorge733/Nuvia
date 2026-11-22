@@ -28,7 +28,7 @@ export function QuickAdd({ from, spaces, defaultSpace }: { from: string; spaces:
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 px-3 pt-1 pb-1.5 text-xs text-muted">
         {spaces.length > 1 ? (
           <label className="inline-flex items-center gap-1.5">
-            Agregar en
+            ¿Quién lo ve?
             <select name="space" defaultValue={defaultSpace} className="rounded-full bg-surface-2 px-2.5 py-1 font-semibold text-fg outline-none">
               {spaces.map((s) => (
                 <option key={s.id} value={s.id}>

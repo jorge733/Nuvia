@@ -4,12 +4,14 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { CalendarDays, Plus, Sun, UserRound, Users } from "lucide-react";
 
-export function MyNav({ familyHref }: { familyHref: string }) {
+/** Barra única de la app: lo tuyo primero y la familia como una sección más. */
+export function MyNav({ familyHref, addHref = "/mi/nuevo" }: { familyHref: string; addHref?: string }) {
   const pathname = usePathname();
+  const inFamily = pathname.startsWith("/f/") || pathname.startsWith("/inicio") || pathname.startsWith("/crear");
   const items = [
-    { href: "/mi", label: "Mi agenda", Icon: Sun, active: pathname === "/mi" },
+    { href: "/mi", label: "Hoy", Icon: Sun, active: pathname === "/mi" },
     { href: "/mi/calendario", label: "Calendario", Icon: CalendarDays, active: pathname.startsWith("/mi/calendario") || pathname.startsWith("/mi/semana") },
-    { href: familyHref, label: "Familia", Icon: Users, active: false },
+    { href: familyHref, label: "Familia", Icon: Users, active: inFamily },
     { href: "/perfil", label: "Perfil", Icon: UserRound, active: pathname.startsWith("/perfil") },
   ];
   const mobile = [items[0], items[1], null, items[2], items[3]];
@@ -29,7 +31,7 @@ export function MyNav({ familyHref }: { familyHref: string }) {
               {label}
             </Link>
           ))}
-          <Link href="/mi/nuevo" className="spin-plus btn-primary ml-auto min-h-10 py-2">
+          <Link href={addHref} className="spin-plus btn-primary ml-auto min-h-10 py-2">
             <Plus className="size-4" /> Agregar
           </Link>
         </div>
@@ -52,7 +54,7 @@ export function MyNav({ familyHref }: { familyHref: string }) {
                 {it.label}
               </Link>
             ) : (
-              <Link key="nuevo" href="/mi/nuevo" className="spin-plus mx-auto -my-3 grid size-14 place-items-center rounded-full bg-accent text-accent-fg shadow-soft ring-4 ring-bg transition active:scale-95" aria-label="Agregar actividad">
+              <Link key="nuevo" href={addHref} className="spin-plus mx-auto -my-3 grid size-14 place-items-center rounded-full bg-accent text-accent-fg shadow-soft ring-4 ring-bg transition active:scale-95" aria-label="Agregar actividad">
                 <Plus className="size-7" strokeWidth={2.4} />
               </Link>
             ),
