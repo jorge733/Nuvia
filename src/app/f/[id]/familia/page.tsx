@@ -92,7 +92,7 @@ export default async function Familia({ params, searchParams }: PageProps<"/f/[i
         </ul>
 
         <div className="mt-3">
-          <Details summary="＋ Agregar integrante sin cuenta">
+          <Details summary="Agregar integrante sin cuenta">
             <p className="-mt-2 mb-4 text-sm text-muted">Niños, abuelos o mascotas: aparecen en la agenda aunque no usen la app.</p>
             <form action={addMember.bind(null, id)} className="space-y-4">
               <div className="grid gap-4 sm:grid-cols-2">
