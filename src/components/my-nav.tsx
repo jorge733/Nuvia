@@ -8,7 +8,7 @@ export function MyNav({ familyHref }: { familyHref: string }) {
   const pathname = usePathname();
   const items = [
     { href: "/mi", label: "Mi agenda", Icon: Sun, active: pathname === "/mi" },
-    { href: "/mi/semana", label: "Semana", Icon: CalendarDays, active: pathname.startsWith("/mi/semana") },
+    { href: "/mi/calendario", label: "Calendario", Icon: CalendarDays, active: pathname.startsWith("/mi/calendario") || pathname.startsWith("/mi/semana") },
     { href: familyHref, label: "Familia", Icon: Users, active: false },
     { href: "/perfil", label: "Perfil", Icon: UserRound, active: pathname.startsWith("/perfil") },
   ];

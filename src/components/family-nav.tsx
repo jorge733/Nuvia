@@ -7,14 +7,14 @@ import { CalendarDays, HandHeart, Plus, Scale, Sun, Users } from "lucide-react";
 export function FamilyNav({ id, openReliefs }: { id: string; openReliefs: number }) {
   const pathname = usePathname();
   const base = `/f/${id}`;
-  const items = [
+  const items: { href: string; label: string; Icon: typeof Sun; badge?: number; also?: string }[] = [
     { href: base, label: "Hoy", Icon: Sun },
-    { href: `${base}/semana`, label: "Semana", Icon: CalendarDays },
+    { href: `${base}/calendario`, label: "Calendario", Icon: CalendarDays, also: `${base}/semana` },
     { href: `${base}/relevos`, label: "Relevos", Icon: HandHeart, badge: openReliefs },
     { href: `${base}/balance`, label: "Balance", Icon: Scale },
     { href: `${base}/familia`, label: "Familia", Icon: Users },
   ];
-  const isActive = (href: string) => (href === base ? pathname === base : pathname.startsWith(href));
+  const isActive = (href: string) => (href === base ? pathname === base : pathname.startsWith(href) || items.some((i) => i.href === href && i.also && pathname.startsWith(i.also)));
   const mobile = [items[0], items[1], null, items[2], items[3]];
 
   return (

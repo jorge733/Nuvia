@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
+import { CalendarHeader } from "@/components/calendar/header";
+import { Plus } from "lucide-react";
 import { getMySpaces } from "@/lib/family";
 import { groupByDay } from "@/lib/agenda";
 import { loadMine, type MyOccurrence } from "@/lib/mine";
@@ -24,23 +25,15 @@ export default async function MiSemana({ searchParams }: PageProps<"/mi/semana">
   return (
     <div>
       <Flash ok={typeof sp.ok === "string" ? sp.ok : undefined} error={typeof sp.error === "string" ? sp.error : undefined} link={sp.abrir} />
-      <div className="mb-5 flex items-end justify-between gap-3">
-        <div>
-          <p className="eyebrow">{capitalize(formatDay(monday, { month: "long", year: "numeric" }))}</p>
-          <h1 className="text-3xl font-semibold sm:text-4xl">Mi semana</h1>
-        </div>
-        <div className="flex items-center gap-1">
-          <Link href={`/mi/semana?d=${addDays(monday, -7)}`} className="btn-ghost size-11 px-0" aria-label="Semana anterior">
-            <ChevronLeft className="size-5" />
-          </Link>
-          <Link href="/mi/semana" className="btn-secondary min-h-10 px-4 py-1.5">
-            Hoy
-          </Link>
-          <Link href={`/mi/semana?d=${addDays(monday, 7)}`} className="btn-ghost size-11 px-0" aria-label="Semana siguiente">
-            <ChevronRight className="size-5" />
-          </Link>
-        </div>
-      </div>
+      <CalendarHeader
+        title={`${formatDay(monday, { day: "numeric", month: "short" })} – ${formatDay(addDays(monday, 6), { day: "numeric", month: "short" })}`}
+        eyebrow={capitalize(formatDay(monday, { month: "long", year: "numeric" }))}
+        view="lista"
+        prevHref={`/mi/semana?d=${addDays(monday, -7)}`}
+        nextHref={`/mi/semana?d=${addDays(monday, 7)}`}
+        todayHref={`/mi/semana`}
+        viewHref={(v) => (v === "lista" ? `/mi/semana?d=${monday}` : `/mi/calendario?vista=${v}&d=${monday}`)}
+      />
 
       <div className="card mb-6 grid grid-cols-7 gap-1 p-2">
         {week.map((d, i) => {

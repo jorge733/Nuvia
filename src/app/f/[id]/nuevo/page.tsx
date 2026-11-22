@@ -14,6 +14,8 @@ export default async function Nuevo({ params, searchParams }: PageProps<"/f/[id]
   const [{ members, me, family }, { spaces }] = await Promise.all([getFamily(id), getMySpaces()]);
   const fecha = isDayKey(sp.fecha) ? sp.fecha : todayKey();
   const home = family.is_personal ? "/mi" : `/f/${id}`;
+  const hora = typeof sp.hora === "string" && /^\d{2}:\d{2}$/.test(sp.hora) ? sp.hora : undefined;
+  const query = [isDayKey(sp.fecha) ? `fecha=${sp.fecha}` : "", hora ? `hora=${hora}` : ""].filter(Boolean).join("&");
 
   return (
     <div className="mx-auto max-w-2xl">
@@ -24,8 +26,8 @@ export default async function Nuevo({ params, searchParams }: PageProps<"/f/[id]
         <Flash error={typeof sp.error === "string" ? sp.error : undefined} />
       </div>
       <PageTitle sub={family.is_personal ? "Solo para ti. Nadie más lo ve." : "Elige quién se encarga. Si no puede, podrá pedir relevo."}>Agregar</PageTitle>
-      <SpaceTabs spaces={spaces} current={id} query={isDayKey(sp.fecha) ? `?fecha=${sp.fecha}` : ""} />
-      <EventForm action={createEvent.bind(null, id)} members={members} me={me} personal={family.is_personal} defaultDate={fecha} submitLabel="Guardar" cancelHref={home} />
+      <SpaceTabs spaces={spaces} current={id} query={query ? `?${query}` : ""} />
+      <EventForm action={createEvent.bind(null, id)} members={members} me={me} personal={family.is_personal} defaultDate={fecha} defaultTime={hora} submitLabel="Guardar" cancelHref={home} />
     </div>
   );
 }

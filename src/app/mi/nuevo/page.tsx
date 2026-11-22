@@ -8,5 +8,7 @@ export default async function MiNuevo({ searchParams }: PageProps<"/mi/nuevo">) 
   const { personalId, spaces } = await getMySpaces();
   const target = personalId ?? spaces[0]?.id;
   if (!target) redirect("/crear");
-  redirect(`/f/${target}/nuevo${isDayKey(sp.fecha) ? `?fecha=${sp.fecha}` : ""}`);
+  const hora = typeof sp.hora === "string" && /^\d{2}:\d{2}$/.test(sp.hora) ? sp.hora : null;
+  const query = [isDayKey(sp.fecha) ? `fecha=${sp.fecha}` : "", hora ? `hora=${hora}` : ""].filter(Boolean).join("&");
+  redirect(`/f/${target}/nuevo${query ? `?${query}` : ""}`);
 }

@@ -26,6 +26,7 @@ export function EventForm({
   me,
   event,
   defaultDate,
+  defaultTime,
   submitLabel,
   cancelHref,
   personal = false,
@@ -35,6 +36,8 @@ export function EventForm({
   me: Member;
   event?: AgendaEvent;
   defaultDate: string;
+  /** Hora sugerida (al tocar un horario en el calendario). */
+  defaultTime?: string;
   submitLabel: string;
   cancelHref: string;
   /** Agenda personal: sin responsable, participantes ni visibilidad. */
@@ -59,7 +62,7 @@ export function EventForm({
           <DateField defaultValue={start ? dayKey(start) : defaultDate} chips={dateChips()} />
           <div className="mt-3 grid grid-cols-2 gap-3">
             <Field label="Desde">
-              <input className="input" type="time" name="start" defaultValue={start && !event?.all_day ? timeOf(start) : ""} />
+              <input className="input" type="time" name="start" defaultValue={start && !event?.all_day ? timeOf(start) : (defaultTime ?? "")} />
             </Field>
             <Field label="Hasta (opcional)">
               <input className="input" type="time" name="end" defaultValue={end ? timeOf(end) : ""} />

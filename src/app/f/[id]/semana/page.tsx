@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
+import { CalendarHeader } from "@/components/calendar/header";
+import { Plus } from "lucide-react";
 import { getFamily } from "@/lib/family";
 import { groupByDay, loadAgenda } from "@/lib/agenda";
 import { addDays, capitalize, formatDay, isDayKey, keyParts, relativeDay, startOfDay, startOfWeek, todayKey } from "@/lib/time";
@@ -30,31 +31,21 @@ export default async function Semana({ params, searchParams }: PageProps<"/f/[id
   const days = groupByDay(list);
   const week = Array.from({ length: 7 }, (_, i) => addDays(monday, i));
   const q = (d: string, v = ver) => `/f/${id}/semana?d=${d}${v === "yo" ? "&ver=yo" : ""}`;
-  const monthLabel = capitalize(formatDay(monday, { month: "long", year: "numeric" }));
 
   return (
     <div>
       <Flash ok={typeof sp.ok === "string" && sp.ok ? sp.ok : undefined} error={typeof sp.error === "string" ? sp.error : undefined} link={sp.abrir} />
 
-      <div className="mb-5 flex items-end justify-between gap-3">
-        <div>
-          <p className="eyebrow">{monthLabel}</p>
-          <h1 className="text-3xl font-semibold sm:text-4xl">Semana</h1>
-        </div>
-        <div className="flex items-center gap-1">
-          <Link href={q(addDays(monday, -7))} className="btn-ghost size-11 px-0" aria-label="Semana anterior">
-            <ChevronLeft className="size-5" />
-          </Link>
-          <Link href={q(today)} className="btn-secondary min-h-10 px-4 py-1.5">
-            Hoy
-          </Link>
-          <Link href={q(addDays(monday, 7))} className="btn-ghost size-11 px-0" aria-label="Semana siguiente">
-            <ChevronRight className="size-5" />
-          </Link>
-        </div>
-      </div>
+      <CalendarHeader
+        title={`${formatDay(monday, { day: "numeric", month: "short" })} – ${formatDay(addDays(monday, 6), { day: "numeric", month: "short" })}`}
+        eyebrow={capitalize(formatDay(monday, { month: "long", year: "numeric" }))}
+        view="lista"
+        prevHref={`/f/${id}/semana?d=${addDays(monday, -7)}`}
+        nextHref={`/f/${id}/semana?d=${addDays(monday, 7)}`}
+        todayHref={`/f/${id}/semana`}
+        viewHref={(v) => (v === "lista" ? `/f/${id}/semana?d=${monday}` : `/f/${id}/calendario?vista=${v}&d=${monday}`)}
+      />
 
-      {/* Tira de días con puntos del color de quien se encarga */}
       <div className="card mb-5 grid grid-cols-7 gap-1 p-2">
         {week.map((d, i) => {
           const items = days.get(d) ?? [];

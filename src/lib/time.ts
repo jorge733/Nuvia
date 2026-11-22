@@ -206,3 +206,9 @@ export function shortDay(key: string, today = todayKey()) {
   if (diff === 1) return "Mañana";
   return formatDay(key, { weekday: "short", day: "numeric" }).replace(".", "").replace(",", "");
 }
+
+/** Minutos desde la medianoche en Chile, ahora. */
+export function minutesNow() {
+  const p = localParts(new Date(nowMs()));
+  return p.hh * 60 + p.mi;
+}
