@@ -5,6 +5,7 @@ import { groupByDay } from "@/lib/agenda";
 import { loadMine, type MyOccurrence } from "@/lib/mine";
 import { addDays, capitalize, formatDay, isDayKey, keyParts, relativeDay, startOfDay, startOfWeek, todayKey } from "@/lib/time";
 import { OccurrenceRow } from "@/components/occurrence-row";
+import { Flash } from "@/components/ui";
 
 export const metadata = { title: "Mi semana" };
 
@@ -22,6 +23,7 @@ export default async function MiSemana({ searchParams }: PageProps<"/mi/semana">
 
   return (
     <div>
+      <Flash ok={typeof sp.ok === "string" ? sp.ok : undefined} error={typeof sp.error === "string" ? sp.error : undefined} link={sp.abrir} />
       <div className="mb-5 flex items-end justify-between gap-3">
         <div>
           <p className="eyebrow">{capitalize(formatDay(monday, { month: "long", year: "numeric" }))}</p>

@@ -8,6 +8,7 @@ import { addDays, capitalize, formatDay, nowMs, relativeDay, shortDay, startOfDa
 import { Empty, Flash, SectionHeader } from "@/components/ui";
 import { DoneButton } from "@/components/done-button";
 import { OccurrenceRow } from "@/components/occurrence-row";
+import { QuickAdd } from "@/components/quick-add";
 import { toggleDone } from "@/app/f/[id]/actions";
 
 function greeting(hour: number) {
@@ -18,7 +19,7 @@ function greeting(hour: number) {
 
 export default async function MiAgenda({ searchParams }: PageProps<"/mi">) {
   const sp = await searchParams;
-  const { supabase, user, spaces } = await getMySpaces();
+  const { supabase, user, spaces, personalId } = await getMySpaces();
   const { data: profile } = await supabase.from("profiles").select("full_name").eq("id", user.id).maybeSingle();
   if (!profile?.full_name) redirect("/perfil?bienvenida=1");
 
@@ -57,7 +58,7 @@ export default async function MiAgenda({ searchParams }: PageProps<"/mi">) {
   return (
     <div className="space-y-8">
       <div>
-        <Flash ok={typeof sp.ok === "string" ? sp.ok : undefined} error={typeof sp.error === "string" ? sp.error : undefined} />
+        <Flash ok={typeof sp.ok === "string" ? sp.ok : undefined} error={typeof sp.error === "string" ? sp.error : undefined} link={sp.abrir} />
         <header className="rise hero-glow relative overflow-hidden rounded-[2rem] p-6 text-white shadow-soft sm:p-8" style={{ background: "var(--hero)" }}>
           <div className="float-slow pointer-events-none absolute -top-16 -right-10 size-56 rounded-full bg-white/10" aria-hidden />
           <p className="text-sm font-semibold text-white/80">{capitalize(formatDay(today))}</p>
@@ -77,6 +78,10 @@ export default async function MiAgenda({ searchParams }: PageProps<"/mi">) {
           </div>
         </header>
       </div>
+
+      {personalId && (
+        <QuickAdd from="/mi" defaultSpace={personalId} spaces={spaces.map((s) => ({ id: s.id, name: s.isPersonal ? "Mi agenda" : s.name }))} />
+      )}
 
       <section>
         <SectionHeader title="Hoy" href="/mi/nuevo" linkText="＋ Agregar" />

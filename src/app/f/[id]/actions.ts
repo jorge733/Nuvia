@@ -2,16 +2,17 @@
 
 import { revalidatePath } from "next/cache";
 import { back, getFamily, safePath, text } from "@/lib/family";
+import { guessCategory, parseQuick } from "@/lib/quick";
 import { CATEGORIES } from "@/lib/format";
-import { dayKey, fromLocal, isDayKey, keyParts, RECURRENCE_LABEL } from "@/lib/time";
+import { dayKey, formatWhen, fromLocal, isDayKey, keyParts, RECURRENCE_LABEL } from "@/lib/time";
 
 const VISIBILITIES = ["familia", "privado", "ocupado"];
 
 function parseEvent(formData: FormData, memberIds: Set<string>) {
   const title = text(formData, "title").slice(0, 120);
   const date = text(formData, "date");
-  const allDay = formData.get("all_day") === "on";
   const start = text(formData, "start");
+  const allDay = formData.get("all_day") === "on" || !start;
   const end = text(formData, "end");
   const category = text(formData, "category");
   const recurrence = text(formData, "recurrence");
@@ -21,7 +22,7 @@ function parseEvent(formData: FormData, memberIds: Set<string>) {
 
   if (!title) return { error: "Escribe qué hay que hacer" } as const;
   if (!isDayKey(date)) return { error: "Elige una fecha" } as const;
-  if (!allDay && !/^\d{2}:\d{2}$/.test(start)) return { error: "Indica la hora o marca “Todo el día”" } as const;
+  if (!allDay && !/^\d{2}:\d{2}$/.test(start)) return { error: "La hora no es válida" } as const;
   if (end && !/^\d{2}:\d{2}$/.test(end)) return { error: "Hora de término no válida" } as const;
   if (!allDay && end && end <= start) return { error: "La hora de término debe ser después del inicio" } as const;
   if (until && (!isDayKey(until) || until < date)) return { error: "La fecha de término de la repetición no es válida" } as const;
@@ -41,7 +42,7 @@ function parseEvent(formData: FormData, memberIds: Set<string>) {
       title,
       notes: text(formData, "notes").slice(0, 2000) || null,
       location: text(formData, "location").slice(0, 160) || null,
-      category: category in CATEGORIES ? category : "otro",
+      category: category in CATEGORIES ? category : guessCategory(title),
       starts_at: startsAt.toISOString(),
       ends_at: endsAt?.toISOString() ?? null,
       all_day: allDay,
@@ -74,7 +75,7 @@ export async function createEvent(familyId: string, formData: FormData) {
   const today = dayKey(new Date());
   const base = family.is_personal ? "/mi" : `/f/${familyId}`;
   const dest = parsed.day === today ? base : `${base}/semana?d=${parsed.day}`;
-  back(dest, { ok: `“${parsed.row.title}” quedó agendado` });
+  back(dest, { ok: `“${parsed.row.title}” quedó agendado`, link: `/f/${familyId}/e/${data.id}` });
 }
 
 export async function updateEvent(familyId: string, eventId: string, formData: FormData) {
@@ -153,4 +154,51 @@ export async function takeOccurrence(familyId: string, eventId: string, startIso
     : await supabase.from("events").update({ responsible_id: me.id }).eq("id", eventId).eq("family_id", familyId);
   revalidatePath(`/f/${familyId}`, "layout");
   back(safePath(from, `/f/${familyId}`), error ? { error: "No se pudo asignar" } : { ok: "¡Gracias! Ahora te encargas tú 💜" });
+}
+
+// Agregar escribiendo: "Dentista Sofi mañana 16:00". El destino viene del formulario (Mi agenda o una familia).
+export async function quickAdd(from: string, formData: FormData) {
+  const raw = text(formData, "q").slice(0, 200);
+  const spaceId = text(formData, "space");
+  const backTo = safePath(from, "/mi");
+  if (!raw) back(backTo, { error: "Escribe qué quieres agendar" });
+  if (!/^[0-9a-f-]{36}$/.test(spaceId)) back(backTo, { error: "Elige dónde agregarlo" });
+
+  const { supabase, user, members, me, family } = await getFamily(spaceId);
+  const others = family.is_personal ? [] : members.filter((m) => m.id !== me.id);
+  const r = parseQuick(raw, dayKey(new Date()), others);
+  const { y, m, d } = keyParts(r.date);
+  const [sh, sm] = r.start ? r.start.split(":").map(Number) : [0, 0];
+  const startsAt = fromLocal(y, m, d, sh, sm);
+  let endsAt: Date | null = null;
+  if (r.end) {
+    const [eh, em] = r.end.split(":").map(Number);
+    endsAt = fromLocal(y, m, d, eh, em);
+  }
+
+  const { data, error } = await supabase
+    .from("events")
+    .insert({
+      family_id: spaceId,
+      created_by: user.id,
+      title: r.title,
+      category: r.category,
+      starts_at: startsAt.toISOString(),
+      ends_at: endsAt?.toISOString() ?? null,
+      all_day: r.allDay,
+      visibility: family.is_personal ? "privado" : "familia",
+      recurrence: r.recurrence,
+      responsible_id: family.is_personal ? null : me.id,
+    })
+    .select("id")
+    .single();
+  if (error || !data) back(backTo, { error: "No se pudo agendar. Inténtalo de nuevo." });
+  if (r.participantIds.length) {
+    await supabase.from("event_participants").insert(r.participantIds.map((member_id) => ({ event_id: data.id, member_id })));
+  }
+  revalidatePath(`/f/${spaceId}`, "layout");
+  revalidatePath("/mi", "layout");
+  const repeat = r.recurrence !== "none" ? ` · ${RECURRENCE_LABEL[r.recurrence].toLowerCase()}` : "";
+  const where = family.is_personal ? "" : ` · ${family.name}`;
+  back(backTo, { ok: `Agendado: ${r.title} · ${formatWhen(startsAt, r.allDay, endsAt)}${repeat}${where}`, link: `/f/${spaceId}/e/${data.id}` });
 }

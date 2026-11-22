@@ -2,15 +2,21 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { CircleCheck, CircleAlert, Plus } from "lucide-react";
 
-export function Flash({ ok, error }: { ok?: string; error?: string }) {
+export function Flash({ ok, error, link }: { ok?: string; error?: string; link?: unknown }) {
   if (!ok && !error) return null;
+  const href = typeof link === "string" && link.startsWith("/f/") ? link : null;
   return (
     <div
       role={error ? "alert" : "status"}
       className={`rise mb-5 flex items-start gap-3 rounded-2xl px-4 py-3 text-sm font-medium ${error ? "bg-danger-soft text-danger" : "bg-ok-soft text-ok"}`}
     >
       {error ? <CircleAlert className="mt-px size-4 shrink-0" /> : <CircleCheck className="mt-px size-4 shrink-0" />}
-      <span>{error ?? ok}</span>
+      <span className="flex-1">{error ?? ok}</span>
+      {href && !error && (
+        <Link href={href} className="shrink-0 font-bold underline underline-offset-2">
+          Ver o editar
+        </Link>
+      )}
     </div>
   );
 }

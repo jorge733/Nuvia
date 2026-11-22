@@ -34,7 +34,7 @@ export default async function Semana({ params, searchParams }: PageProps<"/f/[id
 
   return (
     <div>
-      <Flash ok={typeof sp.ok === "string" && sp.ok ? sp.ok : undefined} error={typeof sp.error === "string" ? sp.error : undefined} />
+      <Flash ok={typeof sp.ok === "string" && sp.ok ? sp.ok : undefined} error={typeof sp.error === "string" ? sp.error : undefined} link={sp.abrir} />
 
       <div className="mb-5 flex items-end justify-between gap-3">
         <div>

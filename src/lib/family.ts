@@ -53,8 +53,9 @@ export function text(formData: FormData, key: string) {
   return String(formData.get(key) ?? "").trim();
 }
 
-export function back(path: string, msg: { ok?: string; error?: string }): never {
-  const q = msg.error ? `error=${encodeURIComponent(msg.error)}` : `ok=${encodeURIComponent(msg.ok ?? "Listo")}`;
+export function back(path: string, msg: { ok?: string; error?: string; link?: string }): never {
+  let q = msg.error ? `error=${encodeURIComponent(msg.error)}` : `ok=${encodeURIComponent(msg.ok ?? "Listo")}`;
+  if (msg.link && !msg.error) q += `&abrir=${encodeURIComponent(msg.link)}`;
   redirect(`${path}${path.includes("?") ? "&" : "?"}${q}`);
 }
 

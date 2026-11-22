@@ -8,6 +8,7 @@ import { Empty, Flash, SectionHeader } from "@/components/ui";
 import { SubmitButton } from "@/components/submit-button";
 import { DoneButton } from "@/components/done-button";
 import { OccurrenceRow } from "@/components/occurrence-row";
+import { QuickAdd } from "@/components/quick-add";
 import { takeOccurrence, takeRelief, toggleDone } from "./actions";
 
 function greeting(hour: number) {
@@ -50,7 +51,7 @@ export default async function Hoy({ params, searchParams }: PageProps<"/f/[id]">
   return (
     <div className="space-y-8">
       <div>
-        <Flash ok={typeof sp.ok === "string" ? sp.ok : undefined} error={typeof sp.error === "string" ? sp.error : undefined} />
+        <Flash ok={typeof sp.ok === "string" ? sp.ok : undefined} error={typeof sp.error === "string" ? sp.error : undefined} link={sp.abrir} />
 
         <header className="rise hero-glow relative overflow-hidden rounded-[2rem] p-6 text-white shadow-soft sm:p-8" style={{ background: "var(--hero)" }}>
           <div className="float-slow pointer-events-none absolute -top-16 -right-10 size-56 rounded-full bg-white/10" aria-hidden />
@@ -75,6 +76,8 @@ export default async function Hoy({ params, searchParams }: PageProps<"/f/[id]">
           </div>
         </header>
       </div>
+
+      <QuickAdd from={self} defaultSpace={id} spaces={[{ id, name: family.name }]} />
 
       {sp.bienvenida === "1" && (
         <section className="card rise">
