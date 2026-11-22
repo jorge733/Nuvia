@@ -4,7 +4,7 @@ import { siteUrl } from "@/lib/site";
 import { AppHeader } from "@/components/app-header";
 import { Field, Flash } from "@/components/ui";
 import { SubmitButton } from "@/components/submit-button";
-import { createCalendarLink, renewCalendarLink, saveProfile } from "./actions";
+import { createCalendarLink, renewCalendarLink, saveProfile, setDailyEmail } from "./actions";
 
 export const metadata = { title: "Mi perfil" };
 
@@ -13,7 +13,7 @@ export default async function Perfil({ searchParams }: PageProps<"/perfil">) {
   const sp = await searchParams;
   const supabase = await createClient();
   const [{ data: profile }, { data: tokenRow }] = await Promise.all([
-    supabase.from("profiles").select("full_name, phone").eq("id", user.id).maybeSingle(),
+    supabase.from("profiles").select("full_name, phone, daily_email").eq("id", user.id).maybeSingle(),
     supabase.from("calendar_tokens").select("token").eq("user_id", user.id).maybeSingle(),
   ]);
   const welcome = sp.bienvenida === "1";
@@ -41,6 +41,24 @@ export default async function Perfil({ searchParams }: PageProps<"/perfil">) {
           )}
           <SubmitButton className="btn-primary w-full">{welcome ? "Continuar" : "Guardar"}</SubmitButton>
         </form>
+
+        {!welcome && (
+          <section className="card mt-6">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h2 className="text-xl font-semibold">Resumen diario por correo</h2>
+                <p className="mt-1 text-sm text-muted">
+                  Cada mañana, entre las 7 y las 8, lo que te toca hoy y los relevos donde tu familia necesita una mano. Solo llega si hay algo.
+                </p>
+              </div>
+            </div>
+            <form action={setDailyEmail.bind(null, !profile?.daily_email)} className="mt-4">
+              <SubmitButton className={profile?.daily_email ? "btn-secondary w-full" : "btn-primary w-full"} pendingText="…">
+                {profile?.daily_email ? "Activado · Desactivar" : "Activar resumen diario"}
+              </SubmitButton>
+            </form>
+          </section>
+        )}
 
         {!welcome && (
           <section className="card mt-6">

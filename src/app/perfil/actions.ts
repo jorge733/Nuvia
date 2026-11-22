@@ -32,3 +32,10 @@ export async function renewCalendarLink() {
   const { error } = await supabase.from("calendar_tokens").insert({ user_id: user.id });
   redirect(`/perfil?${error ? `error=${encodeURIComponent("No se pudo renovar el enlace")}` : `ok=${encodeURIComponent("Enlace renovado. El anterior ya no funciona.")}`}`);
 }
+
+export async function setDailyEmail(on: boolean) {
+  const user = await requireUser();
+  const supabase = await createClient();
+  const { error } = await supabase.from("profiles").update({ daily_email: on }).eq("id", user.id);
+  redirect(`/perfil?${error ? `error=${encodeURIComponent("No se pudo guardar")}` : `ok=${encodeURIComponent(on ? "Resumen diario activado" : "Resumen diario desactivado")}`}`);
+}

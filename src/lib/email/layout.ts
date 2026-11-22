@@ -13,6 +13,10 @@ export type EmailContent = {
   button?: { label: string; url: string };
   note?: string;
   footer: string;
+  /** Enlace al final del pie (ej.: darse de baja). */
+  footerLink?: { label: string; url: string };
+  /** Muestra "¿No funciona el botón?" con el enlace completo (por defecto, sí). */
+  fallback?: boolean;
 };
 
 export function renderEmail(c: EmailContent) {
@@ -22,7 +26,7 @@ export function renderEmail(c: EmailContent) {
           <a href="${esc(c.button.url)}" target="_blank" style="display:block;padding:16px 28px;font-family:${SANS};font-size:16px;font-weight:bold;color:#ffffff;text-decoration:none;border-radius:999px;">${esc(c.button.label)}</a>
         </td></tr></table>`
     : "";
-  const fallback = c.button
+  const fallback = c.button && c.fallback !== false
     ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:28px;"><tr><td style="border-top:1px solid #eae2d6;font-size:0;line-height:0;">&nbsp;</td></tr></table>
        <p style="margin:20px 0 0;font-family:${SANS};font-size:13px;line-height:1.6;color:#6f675c;">¿No funciona el botón? Copia este enlace en tu navegador:<br>
        <a href="${esc(c.button.url)}" style="color:#5b3fd9;word-break:break-all;">${esc(c.button.url)}</a></p>`
@@ -52,13 +56,25 @@ export function renderEmail(c: EmailContent) {
     ${fallback}
   </td></tr>
   <tr><td align="center" style="padding:28px 16px 0;font-family:${SANS};font-size:12px;line-height:1.6;color:#8a8278;">
-    <em style="font-family:${SERIF};font-size:14px;color:#6f675c;">En tu familia, todos cuentan.</em><br><br>${esc(c.footer)}
+    <em style="font-family:${SERIF};font-size:14px;color:#6f675c;">En tu familia, todos cuentan.</em><br><br>${esc(c.footer)}${
+      c.footerLink ? ` <a href="${esc(c.footerLink.url)}" style="color:#6f675c;text-decoration:underline;">${esc(c.footerLink.label)}</a>` : ""
+    }
   </td></tr>
 </table></td></tr></table></body></html>`;
 }
 
 export function renderText(c: EmailContent) {
-  return [c.heading, "", c.intro, c.button ? `\n${c.button.label}: ${c.button.url}` : "", c.note ? `\n${c.note}` : "", "", "—", "Uniluva · En tu familia, todos cuentan."].join("\n");
+  return [
+    c.heading,
+    "",
+    c.intro,
+    c.button ? `\n${c.button.label}: ${c.button.url}` : "",
+    c.note ? `\n${c.note}` : "",
+    "",
+    "—",
+    "Uniluva · En tu familia, todos cuentan.",
+    c.footerLink ? `${c.footerLink.label}: ${c.footerLink.url}` : "",
+  ].join("\n");
 }
 
 export { esc };

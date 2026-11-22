@@ -12,6 +12,7 @@ Uniluva es una agenda donde cada actividad tiene **quién se encargue**, nadie c
 - **Mi agenda.** Cada cuenta tiene un espacio personal (creado automáticamente) y una vista que junta lo propio con lo que le toca en cada familia.
 - **Personal y familiar.** Cada actividad es *Familia*, *Solo yo* o *Ocupado* (la familia ve el bloque sin detalles).
 - **Hoy en familia.** La pantalla principal muestra lo de hoy, quién se encarga, lo que necesita relevo y lo que nadie ha tomado.
+- **Resumen diario por correo.** Cada mañana, "Tu día en Uniluva" con lo que te toca y los relevos abiertos (Vercel Cron + Resend). Se desactiva con un clic.
 - **Tu calendario de siempre.** Enlace de suscripción (ICS) para Google Calendar, Apple Calendar u Outlook, con avisos.
 
 ## Tecnología
@@ -23,7 +24,8 @@ Uniluva es una agenda donde cada actividad tiene **quién se encargue**, nadie c
 ## Puesta en marcha
 
 1. En Supabase → **SQL Editor**, ejecuta en orden los archivos de `supabase/migrations/`:
-   `20261123000000_agenda.sql` y `20261124000000_mi_agenda.sql`.
+   `20261123000000_agenda.sql`, `20261124000000_mi_agenda.sql` y `20261125000000_resumen_diario.sql`
+   (este último muestra el valor para la variable `CRON_SECRET`).
    (Si el proyecto tenía la versión anterior de comunidades, el primero la elimina.)
 2. En **Authentication → URL Configuration**, agrega como Redirect URLs `https://www.uniluva.com/auth/confirm`,
    `https://*.vercel.app/auth/confirm` y `http://localhost:3000/auth/confirm`.
@@ -39,6 +41,14 @@ npm run lint
 La URL y la clave *publishable* de Supabase vienen por defecto en `src/lib/supabase/env.ts` (son públicas por diseño);
 las variables `NEXT_PUBLIC_SUPABASE_URL` y `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` las reemplazan si existen.
 `NEXT_PUBLIC_SITE_URL` define el dominio de los enlaces de invitación y de calendario.
+
+Variables secretas en Vercel (nunca en el repositorio):
+
+| Variable | Para qué |
+|---|---|
+| `RESEND_API_KEY` | Enviar correos con Resend |
+| `SEND_EMAIL_HOOK_SECRET` | Verificar el Send Email Hook de Supabase (correos de ingreso) |
+| `CRON_SECRET` | Autorizar el resumen diario (`/api/cron/resumen`) |
 
 ## Estructura
 
