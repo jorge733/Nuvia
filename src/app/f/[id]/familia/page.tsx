@@ -62,7 +62,7 @@ export default async function Familia({ params, searchParams }: PageProps<"/f/[i
                       </Field>
                     </div>
                     {m.kind !== "mascota" && (
-                      <Field label="Teléfono (opcional)" hint="Para enviarle recordatorios por WhatsApp más adelante.">
+                      <Field label="Teléfono (opcional)">
                         <input className="input" name="phone" type="tel" maxLength={30} defaultValue={m.phone ?? ""} placeholder="+56 9 1234 5678" />
                       </Field>
                     )}

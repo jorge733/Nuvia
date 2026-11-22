@@ -80,6 +80,5 @@ src/app/
 
 ## Próximos pasos
 
-- Recordatorios por WhatsApp para abuelos y adultos sin app.
 - Plantillas de Chile: vacaciones escolares, controles del niño sano, vencimientos de carnet, licencia, permiso de circulación y revisión técnica.
 - Resumen “Tu semana en familia” por correo cada domingo.
