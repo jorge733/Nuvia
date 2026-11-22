@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getFamily } from "@/lib/family";
 import { AppHeader } from "@/components/app-header";
 import { FamilyNav } from "@/components/family-nav";
+import { AvatarStack } from "@/components/member-avatar";
 
 export async function generateMetadata({ params }: LayoutProps<"/f/[id]">) {
   const { id } = await params;
@@ -11,7 +12,7 @@ export async function generateMetadata({ params }: LayoutProps<"/f/[id]">) {
 
 export default async function FamilyLayout({ children, params }: LayoutProps<"/f/[id]">) {
   const { id } = await params;
-  const { family, supabase } = await getFamily(id);
+  const { family, supabase, members, me } = await getFamily(id);
   const { count } = await supabase
     .from("relief_requests")
     .select("id", { count: "exact", head: true })
@@ -21,25 +22,14 @@ export default async function FamilyLayout({ children, params }: LayoutProps<"/f
 
   return (
     <>
-      <AppHeader>
-        <span className="text-line" aria-hidden>
-          /
-        </span>
-        <Link href={`/f/${id}`} className="truncate text-sm font-medium text-muted hover:text-fg">
-          {family.name}
+      <AppHeader userInitial={me.name.charAt(0).toUpperCase()}>
+        <Link href={`/f/${id}/familia`} className="hidden min-w-0 items-center gap-2 rounded-full py-1 pr-3 pl-1 transition hover:bg-surface-2 min-[420px]:flex">
+          <AvatarStack members={members} size={24} max={4} />
+          <span className="truncate text-sm font-semibold text-muted">{family.name}</span>
         </Link>
       </AppHeader>
       <FamilyNav id={id} openReliefs={count ?? 0} />
-      <main className="mx-auto w-full max-w-3xl px-4 pt-6 pb-28 sm:pb-12">{children}</main>
-      <Link
-        href={`/f/${id}/nuevo`}
-        className="fixed right-4 bottom-20 z-30 inline-flex h-14 items-center gap-2 rounded-full bg-accent px-5 font-semibold text-accent-fg shadow-lg transition hover:opacity-90 active:scale-95 sm:bottom-8"
-      >
-        <span className="text-xl leading-none" aria-hidden>
-          ＋
-        </span>
-        Agregar
-      </Link>
+      <main className="mx-auto w-full max-w-3xl px-4 pt-4 pb-32 sm:pt-6 sm:pb-16">{children}</main>
     </>
   );
 }

@@ -1,42 +1,51 @@
 @import "tailwindcss";
 
+/* Uniluva · cálido y sereno */
 :root {
-  --bg: #f6f5f2;
+  --bg: #faf6f0;
   --surface: #ffffff;
-  --surface-2: #f0eee9;
-  --fg: #1c1b1a;
-  --muted: #6b6862;
-  --line: #e4e1da;
-  --accent: #5b3fe0;
+  --surface-2: #f3ede4;
+  --fg: #1f1b16;
+  --muted: #6f675c;
+  --line: #eae2d6;
+  --accent: #5b3fd9;
   --accent-fg: #ffffff;
-  --accent-soft: #ece8fd;
-  --ok: #1f7a4d;
-  --ok-soft: #e3f3ea;
-  --warn: #9a5b00;
-  --warn-soft: #fbf0dc;
-  --danger: #b42318;
-  --danger-soft: #fdeceb;
+  --accent-soft: #eee9ff;
+  --sun: #f2763a;
+  --sun-soft: #ffeadf;
+  --ok: #2e8a5b;
+  --ok-soft: #e2f3e9;
+  --warn: #b45309;
+  --warn-soft: #fdf0dd;
+  --danger: #c2412d;
+  --danger-soft: #fde9e5;
   --wa: #128c4b;
+  --shadow: 0 1px 2px rgb(31 27 22 / 0.04), 0 10px 30px -14px rgb(31 27 22 / 0.18);
+  --hero: linear-gradient(135deg, #5b3fd9 0%, #8a5cf0 55%, #f2763a 130%);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #121211;
-    --surface: #1b1a19;
-    --surface-2: #252422;
-    --fg: #f1efea;
-    --muted: #a5a29b;
-    --line: #2f2d2a;
-    --accent: #a593ff;
-    --accent-fg: #15121f;
-    --accent-soft: #2a2443;
-    --ok: #5fcf96;
-    --ok-soft: #173326;
+    --bg: #15120f;
+    --surface: #1f1b17;
+    --surface-2: #2a251f;
+    --fg: #f4eee6;
+    --muted: #a99f92;
+    --line: #36302a;
+    --accent: #a898ff;
+    --accent-fg: #17122b;
+    --accent-soft: #2b2546;
+    --sun: #ff9a63;
+    --sun-soft: #3b251a;
+    --ok: #63cf97;
+    --ok-soft: #17321f;
     --warn: #f0b45a;
     --warn-soft: #3a2a12;
-    --danger: #ff8a80;
-    --danger-soft: #3b1a18;
+    --danger: #ff8a7a;
+    --danger-soft: #3d1c17;
     --wa: #4ad089;
+    --shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 10px 30px -14px rgb(0 0 0 / 0.6);
+    --hero: linear-gradient(135deg, #3b2a92 0%, #5b3fd9 55%, #c4552a 130%);
   }
 }
 
@@ -50,6 +59,8 @@
   --color-accent: var(--accent);
   --color-accent-fg: var(--accent-fg);
   --color-accent-soft: var(--accent-soft);
+  --color-sun: var(--sun);
+  --color-sun-soft: var(--sun-soft);
   --color-ok: var(--ok);
   --color-ok-soft: var(--ok-soft);
   --color-warn: var(--warn);
@@ -58,42 +69,83 @@
   --color-danger-soft: var(--danger-soft);
   --color-wa: var(--wa);
   --font-sans: var(--font-geist-sans), system-ui, sans-serif;
+  --font-display: var(--font-fraunces), Georgia, serif;
+  --shadow-soft: var(--shadow);
 }
 
 body {
   background: var(--bg);
   color: var(--fg);
+  -webkit-tap-highlight-color: transparent;
+}
+
+h1,
+h2,
+.font-display {
+  font-family: var(--font-display);
+  font-optical-sizing: auto;
+  letter-spacing: -0.01em;
 }
 
 @layer components {
-  .btn, .btn-primary, .btn-secondary, .btn-danger, .btn-wa {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition active:scale-[.98] disabled:opacity-50;
+  .btn,
+  .btn-primary,
+  .btn-secondary,
+  .btn-ghost,
+  .btn-danger,
+  .btn-wa,
+  .btn-sun {
+    @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition select-none active:scale-[.97] disabled:opacity-50;
   }
   .btn-primary {
-    @apply bg-accent text-accent-fg hover:opacity-90;
+    @apply bg-accent text-accent-fg shadow-soft hover:brightness-110;
+  }
+  .btn-sun {
+    @apply bg-sun text-white shadow-soft hover:brightness-105;
   }
   .btn-secondary {
-    @apply border border-line bg-surface text-fg hover:bg-surface-2;
+    @apply bg-surface-2 text-fg hover:bg-line;
+  }
+  .btn-ghost {
+    @apply text-muted hover:bg-surface-2 hover:text-fg;
   }
   .btn-danger {
-    @apply border border-line bg-surface text-danger hover:bg-danger-soft;
+    @apply bg-danger-soft text-danger hover:brightness-95;
   }
   .btn-wa {
-    @apply bg-wa text-white hover:opacity-90;
+    @apply bg-wa text-white hover:brightness-110;
   }
   .card {
-    @apply rounded-2xl border border-line bg-surface p-4 sm:p-5;
+    @apply rounded-3xl bg-surface p-5 shadow-soft;
   }
   .input {
-    @apply w-full rounded-xl border border-line bg-surface px-3 py-2.5 text-base text-fg outline-none placeholder:text-muted focus:border-accent focus:ring-2 focus:ring-accent/25;
+    @apply w-full rounded-2xl border border-line bg-surface px-4 py-3 text-base text-fg outline-none transition placeholder:text-muted/70 focus:border-accent focus:ring-4 focus:ring-accent/15;
   }
   .label {
-    @apply mb-1 block text-sm font-medium;
+    @apply mb-1.5 block text-sm font-semibold;
   }
   .hint {
     @apply mt-1 text-xs text-muted;
   }
   .link {
-    @apply font-medium text-accent underline-offset-2 hover:underline;
+    @apply font-semibold text-accent underline-offset-4 hover:underline;
+  }
+  .chip {
+    @apply inline-flex items-center gap-1.5 rounded-full border border-line bg-surface px-3.5 py-2 text-sm transition;
+  }
+  .eyebrow {
+    @apply text-xs font-semibold uppercase tracking-[.14em] text-muted;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .rise {
+    animation: rise 0.35s ease-out both;
+  }
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
   }
 }

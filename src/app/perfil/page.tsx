@@ -24,7 +24,7 @@ export default async function Perfil({ searchParams }: PageProps<"/perfil">) {
     <>
       <AppHeader />
       <main className="mx-auto w-full max-w-md px-4 py-8">
-        <h1 className="text-2xl font-bold tracking-tight">{welcome ? "¡Bienvenido/a a Uniluva!" : "Mi perfil"}</h1>
+        <h1 className="text-4xl font-semibold">{welcome ? "¡Bienvenido/a a Uniluva!" : "Mi perfil"}</h1>
         <p className="mt-1 text-muted">{welcome ? "¿Cuál es tu nombre?" : user.email}</p>
         <div className="mt-6">
           <Flash ok={typeof sp.ok === "string" ? sp.ok : undefined} error={typeof sp.error === "string" ? sp.error : undefined} />
@@ -44,7 +44,7 @@ export default async function Perfil({ searchParams }: PageProps<"/perfil">) {
 
         {!welcome && (
           <section className="card mt-6">
-            <h2 className="font-semibold">📅 Ver Uniluva en tu calendario</h2>
+            <h2 className="text-xl font-semibold">Ver Uniluva en tu calendario</h2>
             <p className="mt-1 text-sm text-muted">
               Suscríbete desde Google Calendar o el calendario de tu iPhone y recibe ahí los avisos. Se actualiza solo, cada pocas horas.
             </p>
@@ -78,6 +78,12 @@ export default async function Perfil({ searchParams }: PageProps<"/perfil">) {
               </form>
             )}
           </section>
+        )}
+
+        {!welcome && (
+          <form action="/auth/salir" method="post" className="mt-6">
+            <button className="btn-secondary w-full">Cerrar sesión</button>
+          </form>
         )}
 
         <p className="mt-6 text-xs text-muted">Para eliminar tu cuenta y tus datos, escríbenos a privacidad@uniluva.com. Lo hacemos en un máximo de 30 días.</p>

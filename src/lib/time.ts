@@ -198,3 +198,11 @@ export const RECURRENCE_LABEL: Record<string, string> = {
 export function nowMs() {
   return Date.now();
 }
+
+/** Etiqueta corta para listas: "Hoy", "Mañana" o "mar 24". */
+export function shortDay(key: string, today = todayKey()) {
+  const diff = diffDays(key, today);
+  if (diff === 0) return "Hoy";
+  if (diff === 1) return "Mañana";
+  return formatDay(key, { weekday: "short", day: "numeric" }).replace(".", "").replace(",", "");
+}

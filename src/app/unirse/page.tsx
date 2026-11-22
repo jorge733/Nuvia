@@ -27,10 +27,10 @@ export default async function Unirse({ searchParams }: PageProps<"/unirse">) {
     <>
       <AppHeader />
       <main className="mx-auto w-full max-w-md px-4 py-8">
-        <Link href="/inicio?lista=1" className="link text-sm">
+        <Link href="/inicio?lista=1" className="btn-ghost -ml-3 min-h-9 py-1.5">
           ← Volver
         </Link>
-        <h1 className="mt-3 text-2xl font-bold tracking-tight">{preview ? `Únete a ${preview.name}` : "Unirme a una familia"}</h1>
+        <h1 className="mt-3 text-4xl font-semibold">{preview ? `Únete a ${preview.name}` : "Unirme a una familia"}</h1>
         <div className="mt-6">
           <Flash error={error ?? (codigo && !preview ? "No encontramos una familia con ese código." : undefined)} />
         </div>

@@ -1,6 +1,7 @@
 import Link from "next/link";
+import { HandHeart } from "lucide-react";
 import { getFamily } from "@/lib/family";
-import { addDays, dayKey, formatWhen, relativeDay, startOfDay, todayKey } from "@/lib/time";
+import { addDays, dayKey, formatWhen, shortDay, startOfDay, todayKey } from "@/lib/time";
 import { loadAgenda } from "@/lib/agenda";
 import { Empty, Flash, PageTitle, SectionHeader } from "@/components/ui";
 import { SubmitButton } from "@/components/submit-button";
@@ -53,19 +54,19 @@ export default async function Relevos({ params, searchParams }: PageProps<"/f/[i
 
       <SectionHeader title="Pendientes" />
       {open.length ? (
-        <div className="card divide-y divide-line p-0 sm:p-0">
+        <div className="card divide-y divide-line p-1">
           {open.map((o) => (
             <div key={o.key}>
               <OccurrenceRow
                 familyId={id}
                 o={o}
                 byId={byId}
-                showDay={relativeDay(o.day, today)}
+                showDay={shortDay(o.day, today)}
                 action={
                   o.relief!.requested_by !== me.id ? (
                     <form action={takeRelief.bind(null, id, o.relief!.id, self)}>
-                      <SubmitButton className="btn-primary px-3 py-2 text-xs" pendingText="…">
-                        Yo me encargo
+                      <SubmitButton className="btn-sun min-h-9 px-4 py-1.5 text-xs" pendingText="…">
+                        Yo voy
                       </SubmitButton>
                     </form>
                   ) : (
@@ -73,12 +74,12 @@ export default async function Relevos({ params, searchParams }: PageProps<"/f/[i
                   )
                 }
               />
-              {o.relief!.reason && <p className="-mt-1 px-4 pb-3 pl-[5.5rem] text-sm text-muted">“{o.relief!.reason}”</p>}
+              {o.relief!.reason && <p className="-mt-1 px-4 pb-3 pl-[6.5rem] text-sm text-muted">“{o.relief!.reason}”</p>}
             </div>
           ))}
         </div>
       ) : (
-        <Empty>No hay relevos pendientes. 💜</Empty>
+        <Empty icon={<HandHeart className="size-8" />}>No hay relevos pendientes. Todo está cubierto.</Empty>
       )}
 
       {thanks.size > 0 && (
@@ -105,7 +106,7 @@ export default async function Relevos({ params, searchParams }: PageProps<"/f/[i
       <section className="mt-8">
         <SectionHeader title="Últimos 30 días" />
         {history?.length ? (
-          <ul className="card divide-y divide-line p-0 sm:p-0">
+          <ul className="card divide-y divide-line p-1">
             {history.map((r) => (
               <li key={r.id} className="flex items-center gap-3 px-4 py-3 text-sm">
                 <MemberAvatar member={r.taken_by ? byId[r.taken_by] : null} size={28} />
@@ -120,7 +121,7 @@ export default async function Relevos({ params, searchParams }: PageProps<"/f/[i
                     </Link>
                   )}
                 </div>
-                {r.resolved_at && <span className="shrink-0 text-xs text-muted">{relativeDay(dayKey(new Date(r.resolved_at)), today)}</span>}
+                {r.resolved_at && <span className="shrink-0 text-xs text-muted">{shortDay(dayKey(new Date(r.resolved_at)), today)}</span>}
               </li>
             ))}
           </ul>

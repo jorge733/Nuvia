@@ -1,23 +1,21 @@
 import Link from "next/link";
+import { Logo } from "./logo";
 
-export function AppHeader({ children }: { children?: React.ReactNode }) {
+export function AppHeader({ children, userInitial }: { children?: React.ReactNode; userInitial?: string }) {
   return (
-    <header className="sticky top-0 z-20 border-b border-line bg-bg/90 backdrop-blur">
-      <div className="mx-auto flex h-14 w-full max-w-3xl items-center justify-between gap-3 px-4">
+    <header className="sticky top-0 z-30 bg-bg/85 backdrop-blur-xl">
+      <div className="mx-auto flex h-16 w-full max-w-3xl items-center justify-between gap-3 px-4">
         <div className="flex min-w-0 items-center gap-3">
-          <Link href="/inicio?lista=1" className="shrink-0 text-lg font-bold tracking-tight">
-            Uniluva<span className="text-accent">.</span>
-          </Link>
+          <Logo href="/inicio?lista=1" />
           {children}
         </div>
-        <nav className="flex items-center gap-1 text-sm">
-          <Link href="/perfil" className="rounded-lg px-3 py-2 text-muted hover:bg-surface-2 hover:text-fg">
-            Mi perfil
-          </Link>
-          <form action="/auth/salir" method="post">
-            <button className="rounded-lg px-3 py-2 text-muted hover:bg-surface-2 hover:text-fg">Salir</button>
-          </form>
-        </nav>
+        <Link
+          href="/perfil"
+          className="grid size-10 shrink-0 place-items-center rounded-full bg-surface-2 text-sm font-semibold text-fg transition hover:bg-line"
+          aria-label="Mi perfil"
+        >
+          {userInitial ?? "Yo"}
+        </Link>
       </div>
     </header>
   );

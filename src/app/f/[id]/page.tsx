@@ -1,11 +1,18 @@
 import Link from "next/link";
+import { CalendarPlus, Check, HandHeart, Sparkles, UserPlus } from "lucide-react";
 import { getFamily } from "@/lib/family";
 import { groupByDay, loadAgenda, type Occurrence } from "@/lib/agenda";
-import { addDays, capitalize, formatDay, nowMs, relativeDay, startOfDay, todayKey } from "@/lib/time";
+import { addDays, capitalize, formatDay, nowMs, relativeDay, shortDay, startOfDay, todayKey } from "@/lib/time";
 import { Empty, Flash, SectionHeader } from "@/components/ui";
 import { SubmitButton } from "@/components/submit-button";
 import { OccurrenceRow } from "@/components/occurrence-row";
 import { takeOccurrence, takeRelief, toggleDone } from "./actions";
+
+function greeting(hour: number) {
+  if (hour < 12) return "Buenos días";
+  if (hour < 20) return "Buenas tardes";
+  return "Buenas noches";
+}
 
 export default async function Hoy({ params, searchParams }: PageProps<"/f/[id]">) {
   const { id } = await params;
@@ -17,6 +24,7 @@ export default async function Hoy({ params, searchParams }: PageProps<"/f/[id]">
   const days = groupByDay(list);
   const self = `/f/${id}`;
   const now = nowMs();
+  const hour = Number(new Intl.DateTimeFormat("en-US", { timeZone: "America/Santiago", hour: "numeric", hourCycle: "h23" }).format(now));
 
   const needRelief = list.filter((o) => o.relief?.status === "abierto" && (o.end ?? o.start).getTime() >= now);
   const unassigned = list.filter(
@@ -26,73 +34,93 @@ export default async function Hoy({ params, searchParams }: PageProps<"/f/[id]">
   const tomorrow = addDays(today, 1);
   const tomorrowList = days.get(tomorrow) ?? [];
   const nextDays = Array.from({ length: 5 }, (_, i) => addDays(today, i + 2)).filter((d) => days.get(d)?.length);
-  const mineToday = todayList.filter((o) => o.responsibleId === me.id && !o.done).length;
+  const mineToday = todayList.filter((o) => o.responsibleId === me.id);
+  const doneToday = todayList.filter((o) => o.done).length;
 
   const doneButton = (o: Occurrence) =>
     o.event.masked ? null : (
       <form action={toggleDone.bind(null, id, o.event.id, o.start.toISOString(), o.done, self)}>
         <SubmitButton
-          className={`flex h-9 w-9 items-center justify-center rounded-full border text-sm ${o.done ? "border-ok bg-ok-soft text-ok" : "border-line text-muted hover:border-ok hover:text-ok"}`}
-          pendingText="…"
+          className={`grid size-10 place-items-center rounded-full border-2 transition ${o.done ? "border-ok bg-ok text-white" : "border-line text-line hover:border-ok hover:text-ok"}`}
+          pendingText="·"
         >
-          ✓<span className="sr-only">{o.done ? "Marcar pendiente" : "Marcar hecho"}</span>
+          <Check className="size-5" strokeWidth={3} />
+          <span className="sr-only">{o.done ? "Marcar pendiente" : "Marcar hecho"}</span>
         </SubmitButton>
       </form>
     );
 
   return (
-    <div>
-      <Flash ok={typeof sp.ok === "string" ? sp.ok : undefined} error={typeof sp.error === "string" ? sp.error : undefined} />
+    <div className="space-y-8">
+      <div>
+        <Flash ok={typeof sp.ok === "string" ? sp.ok : undefined} error={typeof sp.error === "string" ? sp.error : undefined} />
 
-      <header className="mb-6">
-        <p className="text-sm text-muted">{capitalize(formatDay(today))}</p>
-        <h1 className="text-3xl font-bold tracking-tight">Hola, {me.name}</h1>
-        <p className="mt-1 text-muted">
-          {todayList.length === 0
-            ? "Hoy no hay nada agendado. Un buen día para respirar."
-            : mineToday > 0
-              ? `Hoy te encargas de ${mineToday} ${mineToday === 1 ? "cosa" : "cosas"}.`
-              : "Hoy no tienes nada a tu cargo."}
-        </p>
-      </header>
+        <header className="rise relative overflow-hidden rounded-[2rem] p-6 text-white shadow-soft sm:p-8" style={{ background: "var(--hero)" }}>
+          <div className="pointer-events-none absolute -top-16 -right-10 size-56 rounded-full bg-white/10" aria-hidden />
+          <div className="pointer-events-none absolute -bottom-20 right-24 size-40 rounded-full bg-white/10" aria-hidden />
+          <p className="text-sm font-semibold text-white/80">{capitalize(formatDay(today))}</p>
+          <h1 className="mt-1 text-4xl font-semibold sm:text-5xl">
+            {greeting(hour)}, {me.name}
+          </h1>
+          <p className="mt-3 max-w-md text-white/85">
+            {todayList.length === 0
+              ? "Hoy no hay nada agendado. Un buen día para respirar."
+              : mineToday.length > 0
+                ? `Hoy te encargas de ${mineToday.length} ${mineToday.length === 1 ? "cosa" : "cosas"}. Lo demás está repartido.`
+                : "Hoy no tienes nada a tu cargo. Tu familia lo tiene cubierto."}
+          </p>
+          <div className="mt-5 flex flex-wrap gap-2 text-sm font-semibold">
+            <span className="rounded-full bg-white/15 px-3 py-1.5 backdrop-blur">
+              {todayList.length} hoy{todayList.length ? ` · ${doneToday} hechas` : ""}
+            </span>
+            {needRelief.length > 0 && <span className="rounded-full bg-white px-3 py-1.5 text-sun">{needRelief.length} {needRelief.length === 1 ? "necesita" : "necesitan"} relevo</span>}
+            {unassigned.length > 0 && <span className="rounded-full bg-white/15 px-3 py-1.5 backdrop-blur">{unassigned.length} sin responsable</span>}
+          </div>
+        </header>
+      </div>
 
       {sp.bienvenida === "1" && (
-        <section className="card mb-6 bg-accent-soft">
-          <h2 className="font-semibold">Primeros pasos</h2>
-          <ol className="mt-2 space-y-2 text-sm">
-            <li>
-              1. <Link href={`/f/${id}/nuevo`} className="link">Agrega lo primero que tu familia tiene que hacer esta semana</Link> y elige quién se encarga.
-            </li>
-            <li>
-              2. <Link href={`/f/${id}/familia`} className="link">Invita a los demás adultos</Link> con un enlace por WhatsApp.
-            </li>
-            <li>
-              3. <Link href="/perfil" className="link">Conecta Uniluva a tu calendario</Link> para recibir los avisos en el celular.
-            </li>
-          </ol>
+        <section className="card rise">
+          <p className="eyebrow flex items-center gap-1.5">
+            <Sparkles className="size-3.5" /> Primeros pasos
+          </p>
+          <div className="mt-4 grid gap-3 sm:grid-cols-3">
+            <Link href={`/f/${id}/nuevo`} className="rounded-2xl bg-surface-2 p-4 transition hover:bg-line">
+              <CalendarPlus className="size-5 text-accent" />
+              <p className="mt-2 text-sm font-semibold">Agrega lo primero de la semana</p>
+            </Link>
+            <Link href={`/f/${id}/familia`} className="rounded-2xl bg-surface-2 p-4 transition hover:bg-line">
+              <UserPlus className="size-5 text-accent" />
+              <p className="mt-2 text-sm font-semibold">Invita a los demás adultos</p>
+            </Link>
+            <Link href="/perfil" className="rounded-2xl bg-surface-2 p-4 transition hover:bg-line">
+              <HandHeart className="size-5 text-accent" />
+              <p className="mt-2 text-sm font-semibold">Conecta tu calendario</p>
+            </Link>
+          </div>
         </section>
       )}
 
       {needRelief.length > 0 && (
-        <section className="mb-6">
-          <SectionHeader title="🙋 Necesitan relevo" />
-          <div className="card divide-y divide-line border-warn/40 p-0 sm:p-0">
+        <section>
+          <SectionHeader title="Necesitan relevo" count={needRelief.length} />
+          <div className="card divide-y divide-line p-1 ring-2 ring-sun/40">
             {needRelief.map((o) => (
               <OccurrenceRow
                 key={o.key}
                 familyId={id}
                 o={o}
                 byId={byId}
-                showDay={relativeDay(o.day, today)}
+                showDay={shortDay(o.day, today)}
                 action={
                   o.relief!.requested_by !== me.id ? (
                     <form action={takeRelief.bind(null, id, o.relief!.id, self)}>
-                      <SubmitButton className="btn-primary px-3 py-2 text-xs" pendingText="…">
-                        Yo me encargo
+                      <SubmitButton className="btn-sun min-h-9 px-4 py-1.5 text-xs" pendingText="…">
+                        Yo voy
                       </SubmitButton>
                     </form>
                   ) : (
-                    <span className="pt-1 text-xs text-muted">Lo pediste tú</span>
+                    <span className="text-xs text-muted">Lo pediste tú</span>
                   )
                 }
               />
@@ -102,19 +130,19 @@ export default async function Hoy({ params, searchParams }: PageProps<"/f/[id]">
       )}
 
       {unassigned.length > 0 && (
-        <section className="mb-6">
-          <SectionHeader title="Sin responsable" />
-          <div className="card divide-y divide-line p-0 sm:p-0">
+        <section>
+          <SectionHeader title="Sin responsable" count={unassigned.length} />
+          <div className="card divide-y divide-line p-1">
             {unassigned.map((o) => (
               <OccurrenceRow
                 key={o.key}
                 familyId={id}
                 o={o}
                 byId={byId}
-                showDay={relativeDay(o.day, today)}
+                showDay={shortDay(o.day, today)}
                 action={
                   <form action={takeOccurrence.bind(null, id, o.event.id, o.start.toISOString(), o.event.recurrence !== "none", self)}>
-                    <SubmitButton className="btn-secondary px-3 py-2 text-xs" pendingText="…">
+                    <SubmitButton className="btn-secondary min-h-9 px-4 py-1.5 text-xs" pendingText="…">
                       Me encargo
                     </SubmitButton>
                   </form>
@@ -125,28 +153,23 @@ export default async function Hoy({ params, searchParams }: PageProps<"/f/[id]">
         </section>
       )}
 
-      <section className="mb-6">
-        <SectionHeader title="Hoy" />
+      <section>
+        <SectionHeader title="Hoy" href={`/f/${id}/nuevo`} linkText="＋ Agregar" />
         {todayList.length ? (
-          <div className="card divide-y divide-line p-0 sm:p-0">
+          <div className="card divide-y divide-line p-1">
             {todayList.map((o) => (
               <OccurrenceRow key={o.key} familyId={id} o={o} byId={byId} action={doneButton(o)} />
             ))}
           </div>
         ) : (
-          <Empty>
-            Nada para hoy.{" "}
-            <Link href={`/f/${id}/nuevo`} className="link">
-              Agregar algo
-            </Link>
-          </Empty>
+          <Empty icon={<Sun />}>Nada para hoy.</Empty>
         )}
       </section>
 
-      <section className="mb-6">
+      <section>
         <SectionHeader title="Mañana" href={`/f/${id}/nuevo?fecha=${tomorrow}`} linkText="＋ Agregar" />
         {tomorrowList.length ? (
-          <div className="card divide-y divide-line p-0 sm:p-0">
+          <div className="card divide-y divide-line p-1">
             {tomorrowList.map((o) => (
               <OccurrenceRow key={o.key} familyId={id} o={o} byId={byId} />
             ))}
@@ -157,12 +180,12 @@ export default async function Hoy({ params, searchParams }: PageProps<"/f/[id]">
       </section>
 
       {nextDays.length > 0 && (
-        <section className="mb-6">
+        <section>
           <SectionHeader title="Próximos días" href={`/f/${id}/semana`} linkText="Ver semana" />
-          <div className="space-y-3">
+          <div className="space-y-4">
             {nextDays.map((d) => (
-              <div key={d} className="card p-0 sm:p-0">
-                <p className="border-b border-line px-4 py-2 text-sm font-semibold">{relativeDay(d, today)}</p>
+              <div key={d} className="card p-1">
+                <p className="px-4 pt-3 pb-1 text-sm font-bold text-muted">{relativeDay(d, today)}</p>
                 <div className="divide-y divide-line">
                   {days.get(d)!.map((o) => (
                     <OccurrenceRow key={o.key} familyId={id} o={o} byId={byId} />
@@ -175,14 +198,27 @@ export default async function Hoy({ params, searchParams }: PageProps<"/f/[id]">
       )}
 
       {members.length === 1 && (
-        <Link href={`/f/${id}/familia`} className="card flex items-center justify-between bg-accent-soft hover:border-accent">
+        <Link href={`/f/${id}/familia`} className="card flex items-center gap-4 transition hover:ring-2 hover:ring-accent/30">
+          <span className="grid size-12 shrink-0 place-items-center rounded-full bg-accent-soft text-accent">
+            <UserPlus className="size-5" />
+          </span>
           <span>
             <span className="block font-semibold">Agrega a tu familia</span>
             <span className="text-sm text-muted">Uniluva brilla cuando todos se reparten las cosas.</span>
           </span>
-          <span aria-hidden>→</span>
         </Link>
       )}
     </div>
+  );
+}
+
+function Sun() {
+  return (
+    <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden>
+      <circle cx="20" cy="20" r="8" fill="var(--sun)" fillOpacity=".5" />
+      {Array.from({ length: 8 }, (_, i) => (
+        <rect key={i} x="19" y="3" width="2" height="6" rx="1" fill="var(--sun)" fillOpacity=".4" transform={`rotate(${i * 45} 20 20)`} />
+      ))}
+    </svg>
   );
 }

@@ -20,16 +20,16 @@ export default async function Familia({ params, searchParams }: PageProps<"/f/[i
   return (
     <div>
       <Flash ok={typeof sp.ok === "string" ? sp.ok : undefined} error={typeof sp.error === "string" ? sp.error : undefined} />
-      <PageTitle sub={`${members.length} ${members.length === 1 ? "integrante" : "integrantes"}`}>{family.name}</PageTitle>
+      <PageTitle eyebrow="Tu familia" sub={`${members.length} ${members.length === 1 ? "integrante" : "integrantes"}. Todos cuentan, usen o no la app.`}>{family.name}</PageTitle>
 
       <section className="mb-8">
         <SectionHeader title="Integrantes" />
         <ul className="space-y-2">
           {members.map((m) => (
             <li key={m.id}>
-              <details className="card group p-0 sm:p-0">
-                <summary className="flex cursor-pointer list-none items-center gap-3 px-4 py-3">
-                  <MemberAvatar member={m} size={36} />
+              <details className="card group p-0">
+                <summary className="flex cursor-pointer list-none items-center gap-3 px-5 py-4">
+                  <MemberAvatar member={m} size={44} />
                   <div className="min-w-0 flex-1">
                     <p className="font-semibold">
                       {m.name} {m.id === me.id && <span className="text-xs font-normal text-muted">(tú)</span>}
@@ -39,11 +39,11 @@ export default async function Familia({ params, searchParams }: PageProps<"/f/[i
                     </p>
                   </div>
                   {m.role === "admin" && m.user_id && <Badge tone="accent">Admin</Badge>}
-                  <span className="text-muted transition group-open:rotate-45" aria-hidden>
+                  <span className="grid size-8 place-items-center rounded-full bg-surface-2 text-muted transition group-open:rotate-45" aria-hidden>
                     ＋
                   </span>
                 </summary>
-                <div className="border-t border-line px-4 py-4">
+                <div className="border-t border-line px-5 py-5">
                   <form action={updateMember.bind(null, id, m.id)} className="space-y-4">
                     <div className="grid gap-4 sm:grid-cols-2">
                       <Field label="Nombre">
@@ -126,7 +126,7 @@ export default async function Familia({ params, searchParams }: PageProps<"/f/[i
           {open.length ? ` (${open.map((m) => m.name).join(", ")})` : ""} o crear uno nuevo.
         </p>
         <div className="mt-4 grid items-center gap-4 sm:grid-cols-[160px_1fr]">
-          <div className="mx-auto w-40 overflow-hidden rounded-xl bg-white p-2" dangerouslySetInnerHTML={{ __html: svg }} />
+          <div className="mx-auto w-40 overflow-hidden rounded-2xl bg-white p-2" dangerouslySetInnerHTML={{ __html: svg }} />
           <div className="space-y-3">
             <a
               className="btn-wa w-full"

@@ -29,10 +29,10 @@ export default async function Crear({ searchParams }: PageProps<"/crear">) {
     <>
       <AppHeader />
       <main className="mx-auto w-full max-w-xl px-4 py-8">
-        <Link href="/inicio?lista=1" className="link text-sm">
+        <Link href="/inicio?lista=1" className="btn-ghost -ml-3 min-h-9 py-1.5">
           ← Volver
         </Link>
-        <h1 className="mt-3 text-2xl font-bold tracking-tight">La agenda de tu familia</h1>
+        <h1 className="mt-3 text-4xl font-semibold">La agenda de tu familia</h1>
         <p className="mt-1 text-muted">Después podrás invitar a los demás adultos con un enlace.</p>
         <div className="mt-6">
           <Flash error={typeof sp.error === "string" ? sp.error : undefined} />

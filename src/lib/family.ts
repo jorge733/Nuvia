@@ -21,6 +21,13 @@ export const getUser = cache(async () => {
   return data.user;
 });
 
+/** Misma verificación que el proxy (evita bucles de redirección si difieren). */
+export async function hasSession() {
+  const supabase = await createClient();
+  const { data } = await supabase.auth.getClaims();
+  return !!data?.claims;
+}
+
 export async function requireUser() {
   const user = await getUser();
   if (!user) redirect("/ingresar");

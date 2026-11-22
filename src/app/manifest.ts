@@ -7,8 +7,8 @@ export default function manifest(): MetadataRoute.Manifest {
     description: "Agenda familiar y personal: responsables, relevos y balance del hogar.",
     start_url: "/inicio",
     display: "standalone",
-    background_color: "#f6f5f2",
-    theme_color: "#5b3fe0",
+    background_color: "#faf6f0",
+    theme_color: "#5b3fd9",
     lang: "es-CL",
     icons: [{ src: "/icon.svg", sizes: "any", type: "image/svg+xml" }],
   };

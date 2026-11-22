@@ -15,7 +15,7 @@ export default async function Nuevo({ params, searchParams }: PageProps<"/f/[id]
 
   return (
     <div className="mx-auto max-w-2xl">
-      <Link href={`/f/${id}`} className="link text-sm">
+      <Link href={`/f/${id}`} className="btn-ghost -ml-3 min-h-9 py-1.5">
         ← Volver
       </Link>
       <div className="mt-3">
