@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getFamily } from "@/lib/family";
 import { AppHeader } from "@/components/app-header";
 import { FamilyNav } from "@/components/family-nav";
+import { MyNav } from "@/components/my-nav";
 import { AvatarStack } from "@/components/member-avatar";
 
 export async function generateMetadata({ params }: LayoutProps<"/f/[id]">) {
@@ -13,6 +14,15 @@ export async function generateMetadata({ params }: LayoutProps<"/f/[id]">) {
 export default async function FamilyLayout({ children, params }: LayoutProps<"/f/[id]">) {
   const { id } = await params;
   const { family, supabase, members, me } = await getFamily(id);
+  if (family.is_personal) {
+    return (
+      <>
+        <AppHeader userInitial={me.name.charAt(0).toUpperCase()} />
+        <MyNav familyHref="/inicio?lista=1" />
+        <main className="mx-auto w-full max-w-3xl px-4 pt-4 pb-32 sm:pt-6 sm:pb-16">{children}</main>
+      </>
+    );
+  }
   const { count } = await supabase
     .from("relief_requests")
     .select("id", { count: "exact", head: true })

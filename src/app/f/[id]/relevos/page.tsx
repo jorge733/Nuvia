@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import Link from "next/link";
 import { HandHeart } from "lucide-react";
 import { getFamily } from "@/lib/family";
@@ -24,7 +25,8 @@ type Row = {
 export default async function Relevos({ params, searchParams }: PageProps<"/f/[id]/relevos">) {
   const { id } = await params;
   const sp = await searchParams;
-  const { supabase, me, byId } = await getFamily(id);
+  const { supabase, me, byId, family } = await getFamily(id);
+  if (family.is_personal) redirect("/mi");
   const today = todayKey();
   const self = `/f/${id}/relevos`;
 

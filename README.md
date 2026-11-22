@@ -9,6 +9,7 @@ Uniluva es una agenda donde cada actividad tiene **quién se encargue**, nadie c
 - **Responsables y relevos.** Cada actividad tiene un responsable. Si no puede, pide relevo y la familia lo ve: otro toma la posta con un clic (también se puede avisar por WhatsApp).
 - **Balance del hogar.** Cuánto organiza cada integrante en la semana, cuántas cosas hizo y cuántos relevos tomó. Avisa con cariño cuando una sola persona carga con la mayoría.
 - **Toda la familia, incluso sin cuenta.** Niños, abuelos y mascotas son perfiles de la agenda aunque no usen la app. Los adultos invitados pueden reclamar su perfil al unirse.
+- **Mi agenda.** Cada cuenta tiene un espacio personal (creado automáticamente) y una vista que junta lo propio con lo que le toca en cada familia.
 - **Personal y familiar.** Cada actividad es *Familia*, *Solo yo* o *Ocupado* (la familia ve el bloque sin detalles).
 - **Hoy en familia.** La pantalla principal muestra lo de hoy, quién se encarga, lo que necesita relevo y lo que nadie ha tomado.
 - **Tu calendario de siempre.** Enlace de suscripción (ICS) para Google Calendar, Apple Calendar u Outlook, con avisos.
@@ -21,8 +22,9 @@ Uniluva es una agenda donde cada actividad tiene **quién se encargue**, nadie c
 
 ## Puesta en marcha
 
-1. En Supabase → **SQL Editor**, ejecuta `supabase/migrations/20261123000000_agenda.sql`.
-   (Si el proyecto tenía la versión anterior de comunidades, el script la elimina primero.)
+1. En Supabase → **SQL Editor**, ejecuta en orden los archivos de `supabase/migrations/`:
+   `20261123000000_agenda.sql` y `20261124000000_mi_agenda.sql`.
+   (Si el proyecto tenía la versión anterior de comunidades, el primero la elimina.)
 2. En **Authentication → URL Configuration**, agrega como Redirect URLs `https://www.uniluva.com/auth/confirm`,
    `https://*.vercel.app/auth/confirm` y `http://localhost:3000/auth/confirm`.
 3. Ejecuta:
@@ -46,6 +48,7 @@ src/lib/time.ts               Fechas en hora de Chile y repeticiones
 src/lib/agenda.ts             Carga de la agenda (repeticiones, relevos, hechos)
 src/lib/family.ts             Contexto de la familia y utilidades de acciones
 src/app/
+  mi/                         Mi agenda: lo personal + lo que me toca en cada familia
   inicio/, crear/, unirse/    Familias: crear, invitar y unirse
   f/[id]/                     Hoy
   f/[id]/semana/              Semana (toda la familia / solo lo mío)

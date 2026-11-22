@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { House, Link2 } from "lucide-react";
+import { House, Link2, Lock } from "lucide-react";
 import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/family";
 import { createClient } from "@/lib/supabase/server";
@@ -9,20 +9,20 @@ import { MemberAvatar } from "@/components/member-avatar";
 
 export const metadata = { title: "Mis familias" };
 
-type Row = { id: string; name: string; color: string; kind: "adulto"; families: { id: string; name: string } | null };
+type Row = { id: string; name: string; color: string; kind: "adulto"; families: { id: string; name: string; is_personal: boolean } | null };
 
 export default async function Inicio({ searchParams }: PageProps<"/inicio">) {
   const sp = await searchParams;
   const user = await requireUser();
   const supabase = await createClient();
   const [{ data }, { data: profile }] = await Promise.all([
-    supabase.from("family_members").select("id, name, color, kind, families(id, name)").eq("user_id", user.id).order("created_at").returns<Row[]>(),
+    supabase.from("family_members").select("id, name, color, kind, families(id, name, is_personal)").eq("user_id", user.id).order("created_at").returns<Row[]>(),
     supabase.from("profiles").select("full_name").eq("id", user.id).maybeSingle(),
   ]);
   if (!profile?.full_name) redirect("/perfil?bienvenida=1");
 
-  const rows = (data ?? []).filter((r) => r.families);
-  if (rows.length === 1 && !sp.lista) redirect(`/f/${rows[0].families!.id}`);
+  if (!sp.lista) redirect("/mi");
+  const rows = (data ?? []).filter((r) => r.families && !r.families.is_personal);
 
   return (
     <>
@@ -31,9 +31,18 @@ export default async function Inicio({ searchParams }: PageProps<"/inicio">) {
         <Flash ok={typeof sp.ok === "string" ? sp.ok : undefined} error={typeof sp.error === "string" ? sp.error : undefined} />
         <p className="eyebrow">Bienvenido/a</p>
         <h1 className="mt-1 text-4xl font-semibold">Hola, {profile.full_name.split(" ")[0]}</h1>
-        <p className="mt-2 text-muted">{rows.length ? "Elige una agenda familiar." : "Empecemos por tu familia."}</p>
+        <p className="mt-2 text-muted">{rows.length ? "Elige una agenda." : "Tu agenda personal ya está lista. ¿Sumamos a tu familia?"}</p>
 
         <div className="mt-6 space-y-3">
+          <Link href="/mi" className="card flex items-center gap-4 transition hover:ring-2 hover:ring-accent/30">
+            <span className="grid size-12 shrink-0 place-items-center rounded-full bg-accent-soft text-accent">
+              <Lock className="size-5" />
+            </span>
+            <div className="min-w-0">
+              <div className="truncate font-display text-xl font-semibold">Mi agenda</div>
+              <div className="text-sm text-muted">Lo tuyo y lo que te toca en cada familia</div>
+            </div>
+          </Link>
           {rows.map((r) => (
             <Link key={r.families!.id} href={`/f/${r.families!.id}`} className="card flex items-center gap-4 transition hover:ring-2 hover:ring-accent/30">
               <MemberAvatar member={r} size={48} />

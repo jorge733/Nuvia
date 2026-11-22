@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import Link from "next/link";
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { getFamily } from "@/lib/family";
@@ -14,7 +15,8 @@ const LETTERS = ["L", "M", "M", "J", "V", "S", "D"];
 export default async function Semana({ params, searchParams }: PageProps<"/f/[id]/semana">) {
   const { id } = await params;
   const sp = await searchParams;
-  const { supabase, me, byId, user } = await getFamily(id);
+  const { supabase, me, byId, user, family } = await getFamily(id);
+  if (family.is_personal) redirect(`/mi/semana${isDayKey(sp.d) ? `?d=${sp.d}` : ""}`);
 
   const today = todayKey();
   const monday = startOfWeek(isDayKey(sp.d) ? sp.d : today);

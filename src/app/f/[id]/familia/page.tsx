@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { getFamily } from "@/lib/family";
 import { siteUrl, qrSvg } from "@/lib/site";
 import { KIND_LABEL, whatsappShare } from "@/lib/format";
@@ -13,6 +14,7 @@ export default async function Familia({ params, searchParams }: PageProps<"/f/[i
   const { id } = await params;
   const sp = await searchParams;
   const { family, members, me, isAdmin } = await getFamily(id);
+  if (family.is_personal) redirect("/mi");
   const link = `${await siteUrl()}/unirse?codigo=${family.invite_code}`;
   const svg = await qrSvg(link);
   const open = members.filter((m) => !m.user_id && m.kind !== "mascota" && m.kind !== "nino");

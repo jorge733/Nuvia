@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import Link from "next/link";
 import { ChevronLeft, ChevronRight, HandHeart, Heart, Scale } from "lucide-react";
 import { getFamily } from "@/lib/family";
@@ -12,7 +13,8 @@ export const metadata = { title: "Balance del hogar" };
 export default async function Balance({ params, searchParams }: PageProps<"/f/[id]/balance">) {
   const { id } = await params;
   const sp = await searchParams;
-  const { supabase, members } = await getFamily(id);
+  const { supabase, members, family } = await getFamily(id);
+  if (family.is_personal) redirect("/mi");
 
   const today = todayKey();
   const monday = startOfWeek(isDayKey(sp.d) ? sp.d : today);

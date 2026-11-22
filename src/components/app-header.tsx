@@ -6,7 +6,7 @@ export function AppHeader({ children, userInitial }: { children?: React.ReactNod
     <header className="sticky top-0 z-30 bg-bg/85 backdrop-blur-xl">
       <div className="mx-auto flex h-16 w-full max-w-3xl items-center justify-between gap-3 px-4">
         <div className="flex min-w-0 items-center gap-3">
-          <Logo href="/inicio?lista=1" />
+          <Logo href="/mi" />
           {children}
         </div>
         <Link

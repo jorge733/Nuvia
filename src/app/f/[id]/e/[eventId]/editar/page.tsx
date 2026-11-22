@@ -12,7 +12,7 @@ export const metadata = { title: "Editar" };
 export default async function Editar({ params, searchParams }: PageProps<"/f/[id]/e/[eventId]/editar">) {
   const { id, eventId } = await params;
   const sp = await searchParams;
-  const { supabase, members, me } = await getFamily(id);
+  const { supabase, members, me, family } = await getFamily(id);
 
   const [{ data: ev }, { data: parts }] = await Promise.all([
     supabase.from("events").select("*").eq("id", eventId).eq("family_id", id).maybeSingle(),
@@ -34,6 +34,7 @@ export default async function Editar({ params, searchParams }: PageProps<"/f/[id
         action={updateEvent.bind(null, id, eventId)}
         members={members}
         me={me}
+        personal={family.is_personal}
         event={event}
         defaultDate={todayKey()}
         submitLabel="Guardar cambios"

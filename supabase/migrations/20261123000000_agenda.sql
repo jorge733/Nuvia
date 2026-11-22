@@ -349,6 +349,7 @@ create or replace function public.join_family(p_code text, p_member_id uuid defa
 returns uuid language plpgsql security definer set search_path = '' as $$
 declare
   fid uuid;
+  claimed int;
 begin
   if auth.uid() is null then raise exception 'Debes iniciar sesión'; end if;
   select f.id into fid from public.families f where f.invite_code = upper(trim(p_code));
@@ -361,8 +362,9 @@ begin
     perform set_config('uniluva.joining', '1', true);
     update public.family_members set user_id = auth.uid()
     where id = p_member_id and family_id = fid and user_id is null;
+    get diagnostics claimed = row_count;
     perform set_config('uniluva.joining', '', true);
-    if not found then raise exception 'Ese perfil ya no está disponible'; end if;
+    if claimed = 0 then raise exception 'Ese perfil ya no está disponible'; end if;
   else
     if nullif(trim(p_name), '') is null then raise exception 'Escribe tu nombre'; end if;
     insert into public.family_members (family_id, user_id, name, kind, color)

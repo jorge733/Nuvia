@@ -17,12 +17,15 @@ export function OccurrenceRow({
   byId,
   showDay,
   action,
+  tag,
 }: {
   familyId: string;
   o: Occurrence;
   byId: Record<string, Member>;
   showDay?: string;
   action?: React.ReactNode;
+  /** Etiqueta de origen (en "Mi agenda"): "Personal" o el nombre de la familia. */
+  tag?: { label: string; personal: boolean };
 }) {
   const cat = CATEGORIES[o.event.category] ?? CATEGORIES.otro;
   const responsible = o.responsibleId ? byId[o.responsibleId] : null;
@@ -30,7 +33,7 @@ export function OccurrenceRow({
   const masked = o.event.masked;
   const needsRelief = o.relief?.status === "abierto";
   const unassigned = !responsible && !needsRelief && !masked && o.event.visibility === "familia";
-  const stripe = needsRelief || unassigned ? "var(--sun)" : masked || o.event.visibility !== "familia" ? "var(--line)" : memberHex(responsible);
+  const stripe = tag?.personal ? "var(--accent)" : needsRelief || unassigned ? "var(--sun)" : masked || o.event.visibility !== "familia" ? "var(--line)" : memberHex(responsible);
 
   const body = (
     <>
@@ -46,13 +49,16 @@ export function OccurrenceRow({
             {masked ? "·" : cat.emoji}
           </span>
           <span className={`mt-0.5 line-clamp-2 font-semibold break-words ${o.done ? "text-muted line-through decoration-2" : ""}`}>{o.event.title}</span>
-          {o.event.visibility === "privado" && <Lock className="mt-1 size-3.5 shrink-0 text-muted" aria-label="Solo yo" />}
+          {o.event.visibility === "privado" && !tag?.personal && <Lock className="mt-1 size-3.5 shrink-0 text-muted" aria-label="Solo yo" />}
           {o.event.recurrence !== "none" && !masked && <Repeat className="mt-1 size-3.5 shrink-0 text-muted" aria-label="Se repite" />}
         </div>
         {masked ? (
           <p className="mt-1 pl-9 text-xs text-muted">Ocupado · sin detalles</p>
         ) : (
           <div className="mt-2 flex flex-wrap items-center gap-1.5 pl-9">
+            {tag && (
+              <span className={`rounded-full px-2.5 py-1 text-[11px] font-bold ${tag.personal ? "bg-accent-soft text-accent" : "bg-surface-2 text-muted"}`}>{tag.label}</span>
+            )}
             {needsRelief ? (
               <span className="inline-flex items-center gap-1 rounded-full bg-sun-soft px-2.5 py-1 text-xs font-bold text-sun">Necesita relevo</span>
             ) : (

@@ -57,7 +57,7 @@ function parseEvent(formData: FormData, memberIds: Set<string>) {
 }
 
 export async function createEvent(familyId: string, formData: FormData) {
-  const { supabase, user, members } = await getFamily(familyId);
+  const { supabase, user, members, family } = await getFamily(familyId);
   const parsed = parseEvent(formData, new Set(members.map((m) => m.id)));
   if ("error" in parsed) back(`/f/${familyId}/nuevo?fecha=${text(formData, "date")}`, { error: parsed.error! });
 
@@ -72,7 +72,8 @@ export async function createEvent(familyId: string, formData: FormData) {
   }
   revalidatePath(`/f/${familyId}`, "layout");
   const today = dayKey(new Date());
-  const dest = parsed.day === today ? `/f/${familyId}` : `/f/${familyId}/semana?d=${parsed.day}`;
+  const base = family.is_personal ? "/mi" : `/f/${familyId}`;
+  const dest = parsed.day === today ? base : `${base}/semana?d=${parsed.day}`;
   back(dest, { ok: `“${parsed.row.title}” quedó agendado` });
 }
 
@@ -93,10 +94,10 @@ export async function updateEvent(familyId: string, eventId: string, formData: F
 }
 
 export async function deleteEvent(familyId: string, eventId: string) {
-  const { supabase } = await getFamily(familyId);
+  const { supabase, family } = await getFamily(familyId);
   const { error, count } = await supabase.from("events").delete({ count: "exact" }).eq("id", eventId).eq("family_id", familyId);
   revalidatePath(`/f/${familyId}`, "layout");
-  back(`/f/${familyId}/semana`, error || !count ? { error: "No se pudo eliminar" } : { ok: "Eliminado" });
+  back(family.is_personal ? "/mi/semana" : `/f/${familyId}/semana`, error || !count ? { error: "No se pudo eliminar" } : { ok: "Eliminado" });
 }
 
 export async function skipOccurrence(familyId: string, eventId: string, startIso: string) {

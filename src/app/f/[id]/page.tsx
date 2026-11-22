@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import Link from "next/link";
 import { CalendarPlus, Check, HandHeart, Sparkles, UserPlus } from "lucide-react";
 import { getFamily } from "@/lib/family";
@@ -17,7 +18,8 @@ function greeting(hour: number) {
 export default async function Hoy({ params, searchParams }: PageProps<"/f/[id]">) {
   const { id } = await params;
   const sp = await searchParams;
-  const { supabase, me, byId, members } = await getFamily(id);
+  const { supabase, me, byId, members, family } = await getFamily(id);
+  if (family.is_personal) redirect("/mi");
 
   const today = todayKey();
   const list = await loadAgenda(supabase, id, startOfDay(today), startOfDay(addDays(today, 14)));

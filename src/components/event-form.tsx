@@ -15,6 +15,7 @@ export function EventForm({
   defaultDate,
   submitLabel,
   cancelHref,
+  personal = false,
 }: {
   action: (formData: FormData) => Promise<void>;
   members: Member[];
@@ -23,6 +24,8 @@ export function EventForm({
   defaultDate: string;
   submitLabel: string;
   cancelHref: string;
+  /** Agenda personal: sin responsable, participantes ni visibilidad. */
+  personal?: boolean;
 }) {
   const start = event ? new Date(event.starts_at) : null;
   const end = event?.ends_at ? new Date(event.ends_at) : null;
@@ -85,6 +88,9 @@ export function EventForm({
         </div>
       </div>
 
+      {personal ? (
+        <input type="hidden" name="visibility" value="privado" />
+      ) : (
       <div className="card space-y-5">
         <fieldset>
           <legend className="label">¿Quién se encarga?</legend>
@@ -139,6 +145,8 @@ export function EventForm({
           </div>
         </fieldset>
       </div>
+
+      )}
 
       <details className="card" open={!!(event?.location || event?.notes)}>
         <summary className="cursor-pointer font-medium">Lugar y notas</summary>
