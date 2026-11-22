@@ -97,9 +97,19 @@ export async function createEvent(formData: FormData) {
 }
 
 export async function updateEvent(familyId: string, eventId: string, formData: FormData) {
-  const { supabase, members } = await getFamily(familyId);
-  const parsed = parseEvent(formData, new Set(members.map((m) => m.id)));
+  const { supabase, members, family } = await getFamily(familyId);
   const editPath = `/f/${familyId}/e/${eventId}/editar`;
+
+  // Con "¿Quién lo ve?" (solo quien la creó): puede quedarse aquí o cambiar de lugar.
+  const destRaw = text(formData, "dest");
+  if (destRaw) {
+    const [targetId, chosen] = destRaw.split(":");
+    if (!/^[0-9a-f-]{36}$/.test(targetId ?? "")) back(editPath, { error: "Elige quién lo ve" });
+    if (targetId !== familyId) return moveEvent(familyId, eventId, targetId, chosen, formData);
+  }
+
+  const opts = destRaw ? destOpts(familyId, family.is_personal ? "privado" : destRaw.split(":")[1]) : {};
+  const parsed = parseEvent(formData, new Set(members.map((m) => m.id)), opts);
   if ("error" in parsed) back(editPath, { error: parsed.error! });
 
   const { error } = await supabase.from("events").update(parsed.row).eq("id", eventId).eq("family_id", familyId);
@@ -109,7 +119,52 @@ export async function updateEvent(familyId: string, eventId: string, formData: F
     await supabase.from("event_participants").insert(parsed.participants.map((member_id) => ({ event_id: eventId, member_id })));
   }
   revalidatePath(`/f/${familyId}`, "layout");
+  revalidatePath("/mi", "layout");
   back(`/f/${familyId}/e/${eventId}`, { ok: "Cambios guardados" });
+}
+
+function destOpts(familyId: string, chosen: string | undefined): ParseOpts {
+  return {
+    visibility: chosen === "ocupado" ? "ocupado" : chosen === "privado" ? "privado" : "familia",
+    responsibleKey: `responsible_${familyId}`,
+    participantsKey: `participants_${familyId}`,
+  };
+}
+
+/**
+ * Pasar una actividad entre "Solo yo" y una familia (o entre familias).
+ * La base no deja cambiar family_id, así que se copia al destino (con sus días omitidos) y se borra la original.
+ * Los "hecho" y relevos anteriores eran de la otra agenda y no se trasladan.
+ */
+async function moveEvent(fromId: string, eventId: string, targetId: string, chosen: string | undefined, formData: FormData) {
+  const editPath = `/f/${fromId}/e/${eventId}/editar`;
+  const [{ supabase, user }, target] = await Promise.all([getFamily(fromId), getFamily(targetId)]);
+  const { data: original } = await supabase.from("events").select("created_by, recur_interval").eq("id", eventId).eq("family_id", fromId).maybeSingle();
+  if (!original) back(editPath, { error: "No se encontró la actividad" });
+  if (original.created_by !== user.id) back(editPath, { error: "Solo quien la creó puede cambiarla de lugar" });
+
+  const opts = destOpts(targetId, target.family.is_personal ? "privado" : chosen);
+  const parsed = parseEvent(formData, new Set(target.members.map((m) => m.id)), opts);
+  if ("error" in parsed) back(editPath, { error: parsed.error! });
+
+  const { data: created, error } = await supabase
+    .from("events")
+    .insert({ ...parsed.row, recur_interval: original.recur_interval ?? 1, family_id: targetId, created_by: user.id })
+    .select("id")
+    .single();
+  if (error || !created) back(editPath, { error: "No se pudo cambiar de lugar" });
+  const { data: skips } = await supabase.from("event_skips").select("occurrence_start").eq("event_id", eventId);
+  await Promise.all([
+    parsed.participants.length ? supabase.from("event_participants").insert(parsed.participants.map((member_id) => ({ event_id: created.id, member_id }))) : null,
+    skips?.length ? supabase.from("event_skips").insert(skips.map((k) => ({ event_id: created.id, occurrence_start: k.occurrence_start }))) : null,
+  ]);
+  await supabase.from("events").delete().eq("id", eventId).eq("family_id", fromId);
+
+  revalidatePath(`/f/${fromId}`, "layout");
+  revalidatePath(`/f/${targetId}`, "layout");
+  revalidatePath("/mi", "layout");
+  const where = target.family.is_personal ? "Ahora solo tú lo ves" : opts.visibility === "ocupado" ? `${target.family.name} ve que estás ocupado/a` : `Ahora está en ${target.family.name}`;
+  back(`/f/${targetId}/e/${created.id}`, { ok: `Cambios guardados · ${where}` });
 }
 
 export async function deleteEvent(familyId: string, eventId: string) {

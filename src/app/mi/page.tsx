@@ -1,6 +1,8 @@
+import type { ReactNode } from "react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ChevronRight, House, Plus } from "lucide-react";
+import { SubmitButton } from "@/components/submit-button";
 import { getMySpaces } from "@/lib/family";
 import { groupByDay } from "@/lib/agenda";
 import { loadMine, type MyOccurrence } from "@/lib/mine";
@@ -9,7 +11,7 @@ import { Empty, Flash, SectionHeader } from "@/components/ui";
 import { DoneButton } from "@/components/done-button";
 import { OccurrenceRow } from "@/components/occurrence-row";
 import { QuickAdd } from "@/components/quick-add";
-import { toggleDone } from "@/app/f/[id]/actions";
+import { takeOccurrence, takeRelief, toggleDone } from "@/app/f/[id]/actions";
 
 function greeting(hour: number) {
   if (hour < 12) return "Buenos días";
@@ -24,11 +26,20 @@ export default async function MiAgenda({ searchParams }: PageProps<"/mi">) {
   if (!profile?.full_name) redirect("/perfil?bienvenida=1");
 
   const today = todayKey();
-  const { items, byId } = await loadMine(supabase, user.id, spaces, startOfDay(today), startOfDay(addDays(today, 14)));
-  const days = groupByDay(items) as Map<string, MyOccurrence[]>;
   const now = nowMs();
+  const loaded = await loadMine(supabase, user.id, spaces, startOfDay(today), startOfDay(addDays(today, 14)), { now, needsUntil: startOfDay(addDays(today, 7)) });
+  const { byId } = loaded;
   const hour = Number(new Intl.DateTimeFormat("en-US", { timeZone: "America/Santiago", hour: "numeric", hourCycle: "h23" }).format(now));
   const families = spaces.filter((s) => !s.isPersonal);
+
+  // Filtro: todo, solo lo personal o una familia.
+  const ver = typeof sp.ver === "string" ? sp.ver : "";
+  const filter = ver === "yo" ? spaces.find((s) => s.isPersonal) : families.find((f) => f.id === ver);
+  const keep = (o: MyOccurrence) => !filter || o.space.id === filter.id;
+  const items = loaded.items.filter(keep);
+  const needs = loaded.needs.filter(keep);
+  const days = groupByDay(items) as Map<string, MyOccurrence[]>;
+  const self = filter ? `/mi?ver=${ver}` : "/mi";
 
   const todayList = days.get(today) ?? [];
   const tomorrow = addDays(today, 1);
@@ -37,7 +48,7 @@ export default async function MiAgenda({ searchParams }: PageProps<"/mi">) {
   const pendingToday = todayList.filter((o) => !o.done).length;
   const tag = (o: MyOccurrence) => ({ label: o.space.isPersonal ? "Solo yo" : o.space.name, personal: o.space.isPersonal });
 
-  const row = (o: MyOccurrence, opts: { showDay?: boolean; done?: boolean } = {}) => (
+  const row = (o: MyOccurrence, opts: { showDay?: boolean; done?: boolean; action?: ReactNode } = {}) => (
     <OccurrenceRow
       key={o.key}
       familyId={o.space.id}
@@ -46,11 +57,12 @@ export default async function MiAgenda({ searchParams }: PageProps<"/mi">) {
       tag={families.length ? tag(o) : undefined}
       showDay={opts.showDay ? shortDay(o.day, today) : undefined}
       action={
-        opts.done ? (
-          <form action={toggleDone.bind(null, o.space.id, o.event.id, o.start.toISOString(), o.done, "/mi")}>
+        opts.action ??
+        (opts.done ? (
+          <form action={toggleDone.bind(null, o.space.id, o.event.id, o.start.toISOString(), o.done, self)}>
             <DoneButton done={o.done} />
           </form>
-        ) : undefined
+        ) : undefined)
       }
     />
   );
@@ -70,17 +82,67 @@ export default async function MiAgenda({ searchParams }: PageProps<"/mi">) {
               ? "Hoy tienes el día libre. Disfrútalo."
               : pendingToday === 0
                 ? "Ya hiciste todo lo de hoy. ¡Bien!"
-                : `Hoy tienes ${pendingToday} ${pendingToday === 1 ? "cosa pendiente" : "cosas pendientes"}${families.length ? ", entre lo tuyo y lo de tu familia" : ""}.`}
+                : `Hoy tienes ${pendingToday} ${pendingToday === 1 ? "cosa pendiente" : "cosas pendientes"}${families.length && !filter ? ", entre lo tuyo y lo de tu familia" : ""}.`}
           </p>
           <div className="mt-5 flex flex-wrap gap-2 text-sm font-semibold">
             <span className="rounded-full bg-white/15 px-3 py-1.5 backdrop-blur">{todayList.length} hoy</span>
             <span className="rounded-full bg-white/15 px-3 py-1.5 backdrop-blur">{tomorrowList.length} mañana</span>
+            {needs.length > 0 && (
+              <a href="#te-necesitan" className="rounded-full bg-white px-3 py-1.5 text-sun">
+                {needs.length} {needs.length === 1 ? "espera" : "esperan"} a alguien
+              </a>
+            )}
           </div>
         </header>
       </div>
 
       {personalId && (
         <QuickAdd from="/mi" defaultSpace={personalId} spaces={spaces.map((s) => ({ id: s.id, name: s.isPersonal ? "Solo yo" : s.name }))} />
+      )}
+
+      {families.length > 0 && (
+        <nav className="-mx-4 -mb-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none]" aria-label="Mostrar">
+          {[{ key: "", label: "Todo" }, { key: "yo", label: "Solo yo" }, ...families.map((f) => ({ key: f.id, label: f.name }))].map((c) => {
+            const active = c.key === (filter ? ver : "");
+            return (
+              <Link
+                key={c.key || "todo"}
+                href={c.key ? `/mi?ver=${c.key}` : "/mi"}
+                aria-current={active ? "true" : undefined}
+                className={`shrink-0 rounded-full px-4 py-2 text-sm font-semibold transition ${active ? "bg-fg text-bg" : "bg-surface-2 text-muted hover:text-fg"}`}
+              >
+                {c.label}
+              </Link>
+            );
+          })}
+        </nav>
+      )}
+
+      {needs.length > 0 && (
+        <section id="te-necesitan" className="scroll-mt-32">
+          <SectionHeader title="Tu familia te necesita" count={needs.length} />
+          <div className="stagger card divide-y divide-line p-1 ring-2 ring-sun/40">
+            {needs.map((o) =>
+              row(o, {
+                showDay: true,
+                action:
+                  o.relief?.status === "abierto" ? (
+                    <form action={takeRelief.bind(null, o.space.id, o.relief.id, self)}>
+                      <SubmitButton className="btn-sun min-h-9 px-4 py-1.5 text-xs" pendingText="…">
+                        Yo voy
+                      </SubmitButton>
+                    </form>
+                  ) : (
+                    <form action={takeOccurrence.bind(null, o.space.id, o.event.id, o.start.toISOString(), o.event.recurrence !== "none", self)}>
+                      <SubmitButton className="btn-secondary min-h-9 px-4 py-1.5 text-xs" pendingText="…">
+                        Me encargo
+                      </SubmitButton>
+                    </form>
+                  ),
+              }),
+            )}
+          </div>
+        </section>
       )}
 
       <section>

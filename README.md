@@ -9,9 +9,9 @@ Uniluva es una agenda donde cada actividad tiene **quién se encargue**, nadie c
 - **Responsables y relevos.** Cada actividad tiene un responsable. Si no puede, pide relevo y la familia lo ve: otro toma la posta con un clic (también se puede avisar por WhatsApp).
 - **Balance del hogar.** Cuánto organiza cada integrante en la semana, cuántas cosas hizo y cuántos relevos tomó. Avisa con cariño cuando una sola persona carga con la mayoría.
 - **Toda la familia, incluso sin cuenta.** Niños, abuelos y mascotas son perfiles de la agenda aunque no usen la app. Los adultos invitados pueden reclamar su perfil al unirse.
-- **Mi agenda.** Cada cuenta tiene un espacio personal (creado automáticamente) y una vista que junta lo propio con lo que le toca en cada familia.
-- **Personal y familiar.** Cada actividad es *Familia*, *Solo yo* o *Ocupado* (la familia ve el bloque sin detalles).
-- **Hoy en familia.** La pantalla principal muestra lo de hoy, quién se encarga, lo que necesita relevo y lo que nadie ha tomado.
+- **Hoy.** La pantalla principal junta lo tuyo con lo que te toca en cada familia, más lo que tu familia necesita (relevos abiertos y actividades sin responsable). Se puede filtrar por *Todo*, *Solo yo* o una familia.
+- **¿Quién lo ve?** Una sola pregunta al agregar o editar: *Solo yo* (va a tu agenda personal), *la familia* (con responsable) u *Ocupado* (la familia ve el bloque sin detalles). Quien creó una actividad puede cambiarla de lugar.
+- **Familia.** Resumen del día de toda la familia, calendario, relevos, balance e integrantes.
 - **Resumen diario por correo.** Cada mañana, "Tu día en Uniluva" con lo que te toca y los relevos abiertos (Vercel Cron + Resend). Se desactiva con un clic.
 - **Tu calendario de siempre.** Enlace de suscripción (ICS) para Google Calendar, Apple Calendar u Outlook, con avisos.
 
@@ -58,14 +58,15 @@ src/lib/time.ts               Fechas en hora de Chile y repeticiones
 src/lib/agenda.ts             Carga de la agenda (repeticiones, relevos, hechos)
 src/lib/family.ts             Contexto de la familia y utilidades de acciones
 src/app/
-  mi/                         Mi agenda: lo personal + lo que me toca en cada familia
+  mi/                         Hoy: lo personal + lo que me toca en cada familia
+  mi/nuevo/                   Agregar (formulario único con "¿Quién lo ve?")
   inicio/, crear/, unirse/    Familias: crear, invitar y unirse
-  f/[id]/                     Hoy
+  f/[id]/                     Resumen de la familia
   f/[id]/semana/              Semana (toda la familia / solo lo mío)
   f/[id]/relevos/             Relevos pendientes e historial
   f/[id]/balance/             Balance del hogar
   f/[id]/familia/             Integrantes, invitación y roles
-  f/[id]/nuevo, e/[eventId]/  Agregar, ver y editar actividades
+  f/[id]/e/[eventId]/         Ver y editar actividades
   api/calendario/[token]/     Suscripción ICS
 ```
 

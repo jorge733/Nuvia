@@ -84,8 +84,8 @@ function ChoiceCard({ name, value, checked, Icon, label, hint }: { name: string;
   );
 }
 
-/** "¿Quién lo ve?" al crear: una sola pregunta que también decide dónde se guarda. */
-function WhoSees({ destinations, defaultDest }: { destinations: Destination[]; defaultDest: string }) {
+/** "¿Quién lo ve?": una sola pregunta que también decide dónde se guarda. */
+function WhoSees({ destinations, defaultDest, moving }: { destinations: Destination[]; defaultDest: string; moving: boolean }) {
   const personal = destinations.find((d) => d.isPersonal);
   const families = destinations.filter((d) => !d.isPersonal);
   if (!families.length) {
@@ -111,6 +111,7 @@ function WhoSees({ destinations, defaultDest }: { destinations: Destination[]; d
           />
         ))}
       </div>
+      {moving && <p className="hint">Si la cambias de lugar, lo marcado como hecho y los relevos anteriores no se trasladan.</p>}
       {/* Muestra los campos de la familia elegida sin JavaScript. */}
       <style>
         {`[data-show]{display:none}` + families.map((f) => `form:has(input[name="dest"][value="${f.id}:familia"]:checked) [data-show="${f.id}"]{display:block}`).join("")}
@@ -137,7 +138,7 @@ export function EventForm({
   members?: Member[];
   me?: Member;
   event?: AgendaEvent;
-  /** Al crear: todos los lugares posibles y cuál viene marcado ("<id>:<visibilidad>"). */
+  /** "¿Quién lo ve?": todos los lugares posibles y cuál viene marcado ("<id>:<visibilidad>"). Al editar, solo para quien la creó. */
   destinations?: Destination[];
   defaultDest?: string;
   defaultDate: string;
@@ -151,9 +152,9 @@ export function EventForm({
   const start = event ? new Date(event.starts_at) : null;
   const end = event?.ends_at ? new Date(event.ends_at) : null;
   const participants = new Set(event?.participant_ids ?? []);
-  const creating = !!destinations;
+  const whoSees = !!destinations;
   const families = (destinations ?? []).filter((d) => !d.isPersonal);
-  const editingFamily = !creating && !personal && !!me;
+  const editingFamily = !whoSees && !personal && !!me;
   const hasExtras = !!(event && (event.recurrence !== "none" || event.location || event.notes || event.participant_ids.length || event.visibility !== "familia"));
 
   return (
@@ -177,10 +178,10 @@ export function EventForm({
           <p className="hint">Si no pones hora, queda para todo el día.</p>
         </div>
 
-        {creating && <WhoSees destinations={destinations} defaultDest={defaultDest} />}
+        {whoSees && <WhoSees destinations={destinations} defaultDest={defaultDest} moving={!!event} />}
         {families.map((f) => (
           <div key={f.id} data-show={f.id}>
-            <ResponsibleChips members={f.members} me={f.me} name={`responsible_${f.id}`} />
+            <ResponsibleChips members={f.members} me={f.me} name={`responsible_${f.id}`} event={event?.family_id === f.id ? event : undefined} />
           </div>
         ))}
         {editingFamily && <ResponsibleChips members={members} me={me} name="responsible" event={event} />}
@@ -225,7 +226,7 @@ export function EventForm({
 
           {families.map((f) => (
             <div key={f.id} data-show={f.id}>
-              <ParticipantChips members={f.members} me={f.me} name={`participants_${f.id}`} selected={new Set()} />
+              <ParticipantChips members={f.members} me={f.me} name={`participants_${f.id}`} selected={event?.family_id === f.id ? participants : new Set()} />
             </div>
           ))}
 
@@ -256,7 +257,7 @@ export function EventForm({
         </div>
       </details>
 
-      {!creating && personal && <input type="hidden" name="visibility" value="privado" />}
+      {!whoSees && personal && <input type="hidden" name="visibility" value="privado" />}
 
       <div className="flex gap-3">
         <SubmitButton className="btn-primary flex-1">{submitLabel}</SubmitButton>

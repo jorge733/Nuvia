@@ -11,13 +11,8 @@ import { OccurrenceRow } from "@/components/occurrence-row";
 import { QuickAdd } from "@/components/quick-add";
 import { takeOccurrence, takeRelief, toggleDone } from "./actions";
 
-function greeting(hour: number) {
-  if (hour < 12) return "Buenos días";
-  if (hour < 20) return "Buenas tardes";
-  return "Buenas noches";
-}
-
-export default async function Hoy({ params, searchParams }: PageProps<"/f/[id]">) {
+// Resumen de la familia: la foto del día de todos. Lo tuyo (de todos lados) está en Hoy (/mi).
+export default async function Resumen({ params, searchParams }: PageProps<"/f/[id]">) {
   const { id } = await params;
   const sp = await searchParams;
   const { supabase, me, byId, members, family } = await getFamily(id);
@@ -28,7 +23,6 @@ export default async function Hoy({ params, searchParams }: PageProps<"/f/[id]">
   const days = groupByDay(list);
   const self = `/f/${id}`;
   const now = nowMs();
-  const hour = Number(new Intl.DateTimeFormat("en-US", { timeZone: "America/Santiago", hour: "numeric", hourCycle: "h23" }).format(now));
 
   const needRelief = list.filter((o) => o.relief?.status === "abierto" && (o.end ?? o.start).getTime() >= now);
   const unassigned = list.filter(
@@ -53,26 +47,22 @@ export default async function Hoy({ params, searchParams }: PageProps<"/f/[id]">
       <div>
         <Flash ok={typeof sp.ok === "string" ? sp.ok : undefined} error={typeof sp.error === "string" ? sp.error : undefined} link={sp.abrir} />
 
-        <header className="rise hero-glow relative overflow-hidden rounded-[2rem] p-6 text-white shadow-soft sm:p-8" style={{ background: "var(--hero)" }}>
-          <div className="float-slow pointer-events-none absolute -top-16 -right-10 size-56 rounded-full bg-white/10" aria-hidden />
-          <div className="pointer-events-none absolute -bottom-20 right-24 size-40 rounded-full bg-white/10" aria-hidden />
-          <p className="text-sm font-semibold text-white/80">{capitalize(formatDay(today))}</p>
-          <h1 className="mt-1 text-4xl font-semibold sm:text-5xl">
-            {greeting(hour)}, {me.name}
-          </h1>
-          <p className="mt-3 max-w-md text-white/85">
+        <header className="rise card">
+          <p className="text-sm font-semibold text-muted">{capitalize(formatDay(today))}</p>
+          <h1 className="mt-1 text-3xl font-semibold sm:text-4xl">Hoy en {family.name}</h1>
+          <p className="mt-2 max-w-md text-muted">
             {todayList.length === 0
               ? "Hoy no hay nada agendado. Un buen día para respirar."
               : mineToday.length > 0
-                ? `Hoy te encargas de ${mineToday.length} ${mineToday.length === 1 ? "cosa" : "cosas"}. Lo demás está repartido.`
+                ? `Te encargas de ${mineToday.length} de ${todayList.length}. Lo demás está repartido.`
                 : "Hoy no tienes nada a tu cargo. Tu familia lo tiene cubierto."}
           </p>
-          <div className="mt-5 flex flex-wrap gap-2 text-sm font-semibold">
-            <span className="rounded-full bg-white/15 px-3 py-1.5 backdrop-blur">
+          <div className="mt-4 flex flex-wrap gap-2 text-sm font-semibold">
+            <span className="rounded-full bg-surface-2 px-3 py-1.5">
               {todayList.length} hoy{todayList.length ? ` · ${doneToday} hechas` : ""}
             </span>
-            {needRelief.length > 0 && <span className="rounded-full bg-white px-3 py-1.5 text-sun">{needRelief.length} {needRelief.length === 1 ? "necesita" : "necesitan"} relevo</span>}
-            {unassigned.length > 0 && <span className="rounded-full bg-white/15 px-3 py-1.5 backdrop-blur">{unassigned.length} sin responsable</span>}
+            {needRelief.length > 0 && <span className="rounded-full bg-sun-soft px-3 py-1.5 text-sun">{needRelief.length} {needRelief.length === 1 ? "necesita" : "necesitan"} relevo</span>}
+            {unassigned.length > 0 && <span className="rounded-full bg-surface-2 px-3 py-1.5">{unassigned.length} sin responsable</span>}
           </div>
         </header>
       </div>
@@ -154,7 +144,7 @@ export default async function Hoy({ params, searchParams }: PageProps<"/f/[id]">
       )}
 
       <section>
-        <SectionHeader title="Hoy" href={`/mi/nuevo?para=${id}`} linkText="＋ Agregar" />
+        <SectionHeader title="Hoy, toda la familia" href={`/mi/nuevo?para=${id}`} linkText="＋ Agregar" />
         {todayList.length ? (
           <div className="stagger card divide-y divide-line p-1">
             {todayList.map((o) => (
