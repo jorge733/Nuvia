@@ -15,7 +15,14 @@ export async function generateMetadata({ params }: PageProps<"/invitacion/[token
   if (!ev) return { title: "Invitación", robots };
   const title = `${ev.inviter ? `${ev.inviter} te invitó` : "Te invitaron"}: ${ev.title}`;
   const description = when(ev.starts_at, ev.ends_at, ev.all_day) + (ev.location ? ` · ${ev.location}` : "");
-  return { title, description, robots, openGraph: { title, description } };
+  // Se repiten los datos del sitio: openGraph reemplaza (no combina) el del layout.
+  return {
+    title,
+    description,
+    robots,
+    openGraph: { title, description, type: "website", siteName: "Uniluva", locale: "es_CL" },
+    twitter: { card: "summary_large_image", title, description },
+  };
 }
 
 function when(startsAt: string, endsAt: string | null, allDay: boolean) {
