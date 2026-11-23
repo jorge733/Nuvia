@@ -9,7 +9,7 @@ import { SubmitButton } from "@/components/submit-button";
 import { DoneButton } from "@/components/done-button";
 import { OccurrenceRow } from "@/components/occurrence-row";
 import { QuickAdd } from "@/components/quick-add";
-import { takeOccurrence, takeRelief, toggleDone } from "./actions";
+import { takeOccurrence, takeRelief, toggleDoneInPlace } from "./actions";
 
 // Resumen de la familia: la foto del día de todos. Lo tuyo (de todos lados) está en Hoy (/mi).
 export default async function Resumen({ params, searchParams }: PageProps<"/f/[id]">) {
@@ -37,9 +37,7 @@ export default async function Resumen({ params, searchParams }: PageProps<"/f/[i
 
   const doneButton = (o: Occurrence) =>
     o.event.masked ? null : (
-      <form action={toggleDone.bind(null, id, o.event.id, o.start.toISOString(), o.done, self)}>
-        <DoneButton done={o.done} />
-      </form>
+      <DoneButton done={o.done} action={toggleDoneInPlace.bind(null, id, o.event.id, o.start.toISOString(), o.done)} />
     );
 
   return (

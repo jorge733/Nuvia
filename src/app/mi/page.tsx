@@ -11,7 +11,7 @@ import { Empty, Flash, SectionHeader } from "@/components/ui";
 import { DoneButton } from "@/components/done-button";
 import { OccurrenceRow } from "@/components/occurrence-row";
 import { QuickAdd } from "@/components/quick-add";
-import { takeOccurrence, takeRelief, toggleDone } from "@/app/f/[id]/actions";
+import { takeOccurrence, takeRelief, toggleDoneInPlace } from "@/app/f/[id]/actions";
 
 function greeting(hour: number) {
   if (hour < 12) return "Buenos días";
@@ -62,9 +62,7 @@ export default async function MiAgenda({ searchParams }: PageProps<"/mi">) {
       action={
         opts.action ??
         (opts.done ? (
-          <form action={toggleDone.bind(null, o.space.id, o.event.id, o.start.toISOString(), o.done, self)}>
-            <DoneButton done={o.done} />
-          </form>
+          <DoneButton done={o.done} action={toggleDoneInPlace.bind(null, o.space.id, o.event.id, o.start.toISOString(), o.done)} />
         ) : undefined)
       }
     />

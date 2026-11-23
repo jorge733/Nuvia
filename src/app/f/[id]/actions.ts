@@ -343,13 +343,25 @@ export async function skipOccurrence(familyId: string, eventId: string, startIso
   back(`/f/${familyId}/semana?d=${day}`, error ? { error: "No se pudo eliminar ese día" } : { ok: "Se quitó solo ese día" });
 }
 
-export async function toggleDone(familyId: string, eventId: string, startIso: string, done: boolean, from: string) {
+async function saveDone(familyId: string, eventId: string, startIso: string, done: boolean) {
   const { supabase, me } = await getFamily(familyId);
   const { error } = done
     ? await supabase.from("event_completions").delete().eq("event_id", eventId).eq("occurrence_start", startIso)
     : await supabase.from("event_completions").insert({ event_id: eventId, occurrence_start: startIso, family_id: familyId, completed_by: me.id });
   revalidatePath(`/f/${familyId}`, "layout");
+  revalidatePath("/mi", "layout");
+  return error;
+}
+
+export async function toggleDone(familyId: string, eventId: string, startIso: string, done: boolean, from: string) {
+  const error = await saveDone(familyId, eventId, startIso, done);
   back(safePath(from, `/f/${familyId}`), error ? { error: "No se pudo actualizar" } : { ok: done ? "Marcado como pendiente" : "¡Hecho! ✓" });
+}
+
+/** Igual que toggleDone, pero sin navegar: la lista se actualiza en su lugar y no salta arriba. */
+export async function toggleDoneInPlace(familyId: string, eventId: string, startIso: string, done: boolean): Promise<string | null> {
+  const error = await saveDone(familyId, eventId, startIso, done);
+  return error ? "No se pudo guardar. Inténtalo de nuevo." : null;
 }
 
 /** Avisa por correo de un relevo (pedido → familia; tomado → quien lo pidió), después de responder. */
