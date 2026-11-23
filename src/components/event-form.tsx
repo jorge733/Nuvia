@@ -259,7 +259,7 @@ export function EventForm({
           </Field>
           <Field
             label="Invitar por correo (opcional)"
-            hint="Separa los correos con comas. No necesitan cuenta: les llega la fecha, hora, lugar y notas, y otro correo si algo cambia o se cancela. Máximo 20."
+            hint="Separa los correos con comas. No necesitan cuenta: les llega la fecha, hora, lugar y notas, y otro correo si algo cambia o se cancela. También puedes invitar con un enlace desde la actividad."
           >
             <textarea
               className="input min-h-20"
@@ -271,6 +271,7 @@ export function EventForm({
               autoCapitalize="none"
               spellCheck={false}
             />
+            <input type="hidden" name="guests_shown" value={guests.join(", ")} />
           </Field>
         </div>
       </details>

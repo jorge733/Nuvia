@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, Check, HandHeart, MapPin, Mail, Pencil, Repeat, Trash2, Lock, EyeOff } from "lucide-react";
+import { ArrowLeft, Check, HandHeart, Link2, MapPin, Mail, Pencil, Repeat, Trash2, Lock, EyeOff } from "lucide-react";
 import { getFamily } from "@/lib/family";
 import { loadOccurrence } from "@/lib/agenda";
 import { siteUrl } from "@/lib/site";
@@ -9,15 +9,17 @@ import { RECURRENCE_LABEL, formatWhen } from "@/lib/time";
 import { Flash } from "@/components/ui";
 import { SubmitButton } from "@/components/submit-button";
 import { MemberAvatar, memberHex } from "@/components/member-avatar";
-import { cancelRelief, deleteEvent, requestRelief, skipOccurrence, takeOccurrence, takeRelief, toggleDone } from "../../actions";
+import { cancelRelief, createShareLink, deleteEvent, disableShareLink, requestRelief, skipOccurrence, takeOccurrence, takeRelief, toggleDone } from "../../actions";
 
 export default async function Detalle({ params, searchParams }: PageProps<"/f/[id]/e/[eventId]">) {
   const { id, eventId } = await params;
   const sp = await searchParams;
   const { supabase, me, byId } = await getFamily(id);
-  const [o, { data: guests }] = await Promise.all([
+  const [o, { data: guests }, { data: share }, site] = await Promise.all([
     loadOccurrence(supabase, id, eventId, typeof sp.o === "string" ? sp.o : null),
     supabase.from("event_guests").select("email, muted").eq("event_id", eventId).order("created_at"),
+    supabase.from("events").select("share_token").eq("id", eventId).maybeSingle(),
+    siteUrl(),
   ]);
   if (!o || o.event.masked) notFound();
 
@@ -34,7 +36,7 @@ export default async function Detalle({ params, searchParams }: PageProps<"/f/[i
   const tint = relief?.status === "abierto" ? "var(--sun)" : (memberHex(responsible) ?? "var(--accent)");
   const shareText =
     relief?.status === "abierto"
-      ? `🙋 ¿Alguien puede encargarse de “${ev.title}”? ${when}.${relief.reason ? ` (${relief.reason})` : ""} Respóndelo en Uniluva: ${await siteUrl()}${self}`
+      ? `🙋 ¿Alguien puede encargarse de “${ev.title}”? ${when}.${relief.reason ? ` (${relief.reason})` : ""} Respóndelo en Uniluva: ${site}${self}`
       : "";
 
   return (
@@ -204,6 +206,42 @@ export default async function Detalle({ params, searchParams }: PageProps<"/f/[i
           )}
         </section>
       )}
+
+      <section className="card">
+        <h2 className="flex items-center gap-2 text-lg font-semibold">
+          <Link2 className="size-5 text-accent" /> Invitar con un enlace
+        </h2>
+        {share?.share_token ? (
+          <div className="mt-3 space-y-3">
+            <p className="text-sm text-muted">Quien tenga el enlace ve la fecha, hora, lugar y notas, y puede dejar su correo para recibir los avisos. No necesita cuenta.</p>
+            <input className="input text-xs" readOnly value={`${site}/invitacion/${share.share_token}`} aria-label="Enlace de invitación" />
+            <div className="flex flex-wrap gap-2">
+              <a
+                href={whatsappShare(`Te invito a “${ev.title}” · ${when}${ev.location ? ` · ${ev.location}` : ""}. Los detalles aquí: ${site}/invitacion/${share.share_token}`)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-wa"
+              >
+                Invitar por WhatsApp
+              </a>
+              <form action={disableShareLink.bind(null, id, eventId, self)}>
+                <SubmitButton className="btn-ghost" confirm="El enlace dejará de funcionar. Quienes ya dejaron su correo siguen invitados. ¿Continuar?" pendingText="…">
+                  Desactivar enlace
+                </SubmitButton>
+              </form>
+            </div>
+          </div>
+        ) : (
+          <>
+            <p className="mt-1 text-sm text-muted">Crea un enlace para compartir por WhatsApp. Quien lo abra verá la actividad sin necesitar cuenta.</p>
+            <form action={createShareLink.bind(null, id, eventId, self)} className="mt-4">
+              <SubmitButton className="btn-secondary" pendingText="…">
+                Crear enlace de invitación
+              </SubmitButton>
+            </form>
+          </>
+        )}
+      </section>
 
       <div className="flex flex-wrap gap-2">
         <Link href={`/f/${id}/e/${eventId}/editar`} className="btn-secondary">

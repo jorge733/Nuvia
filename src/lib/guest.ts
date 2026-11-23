@@ -3,7 +3,8 @@ import { createClient } from "@supabase/supabase-js";
 import { supabaseKey, supabaseUrl } from "@/lib/supabase/env";
 
 export type GuestEvent = {
-  email: string;
+  /** null si se abrió con el enlace compartido (no es un invitado en particular). */
+  email: string | null;
   muted: boolean;
   inviter: string | null;
   family_name: string | null;
@@ -21,12 +22,16 @@ export type GuestEvent = {
   skipped: string[];
 };
 
+/** Enlace personal de un invitado (36) o enlace compartido de la actividad (40). */
 export const isGuestToken = (t: string) => /^[a-f0-9]{36}$/.test(t);
+export const isShareToken = (t: string) => /^[a-f0-9]{40}$/.test(t);
 
-/** La actividad a la que invitaron a alguien, con su enlace personal (sin cuenta). */
+export const anonClient = () => createClient(supabaseUrl(), supabaseKey(), { auth: { persistSession: false } });
+
+/** La actividad de una invitación (sin cuenta): con el enlace personal o con el enlace compartido. */
 export const getGuestEvent = cache(async (token: string) => {
-  if (!isGuestToken(token)) return null;
-  const supabase = createClient(supabaseUrl(), supabaseKey(), { auth: { persistSession: false } });
-  const { data } = await supabase.rpc("guest_event", { p_token: token });
+  const rpc = isGuestToken(token) ? "guest_event" : isShareToken(token) ? "shared_event" : null;
+  if (!rpc) return null;
+  const { data } = await anonClient().rpc(rpc, { p_token: token });
   return ((data as GuestEvent[] | null) ?? [])[0] ?? null;
 });

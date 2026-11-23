@@ -1,5 +1,7 @@
 "use server";
 
+import { randomBytes } from "node:crypto";
+
 import { revalidatePath } from "next/cache";
 import { after } from "next/server";
 import { back, getFamily, safePath, text, type Member } from "@/lib/family";
@@ -67,7 +69,7 @@ function parseEvent(formData: FormData, memberIds: Set<string>, opts: ParseOpts 
   } as const;
 }
 
-const MAX_GUESTS = 20;
+const MAX_GUESTS = 50;
 const EMAIL = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 
 /** "ana@x.cl, pedro@y.com" → correos únicos y válidos. */
@@ -87,11 +89,14 @@ type GuestRow = Guest & { muted: boolean };
  * `previous` son los que tenía; con `copy` (al cambiarla de lugar) se vuelven a crear con su mismo enlace.
  * Devuelve los que se agregaron y los que siguen (y quieren avisos).
  */
-async function syncGuests(supabase: Supabase, eventId: string, userId: string, emails: string[], previous: GuestRow[], copy = false) {
+async function syncGuests(supabase: Supabase, eventId: string, userId: string, emails: string[], previous: GuestRow[], copy = false, shown?: string[]) {
   const wanted = new Set(emails);
+  // Solo se quitan los que estaban en el formulario: quien se sumó con el enlace mientras se editaba, se queda.
+  const visible = shown ? new Set(shown) : null;
   const prev = new Map(previous.map((g) => [g.email.toLowerCase(), g]));
-  const kept = previous.filter((g) => wanted.has(g.email.toLowerCase()));
-  const removed = previous.filter((g) => !wanted.has(g.email.toLowerCase()));
+  const isRemoved = (g: GuestRow) => !wanted.has(g.email.toLowerCase()) && (!visible || visible.has(g.email.toLowerCase()));
+  const kept = previous.filter((g) => !isRemoved(g));
+  const removed = previous.filter(isRemoved);
   const toAdd = emails.filter((e) => !prev.has(e));
 
   if (!copy && removed.length) await supabase.from("event_guests").delete().eq("event_id", eventId).in("token", removed.map((g) => g.token));
@@ -238,7 +243,8 @@ export async function updateEvent(familyId: string, eventId: string, formData: F
     await supabase.from("event_participants").insert(parsed.participants.map((member_id) => ({ event_id: eventId, member_id })));
   }
   const previous = old?.event_guests ?? [];
-  const { added, kept } = await syncGuests(supabase, eventId, user.id, parsed.guests, previous);
+  const shown = parseGuests(text(formData, "guests_shown"));
+  const { added, kept } = await syncGuests(supabase, eventId, user.id, parsed.guests, previous, false, "emails" in shown ? shown.emails : undefined);
   if (old) {
     const event = snapshot(parsed.row, parsed.participants, byId, parsed.guests);
     const before = snapshot(old, old.event_participants.map((p) => p.member_id), byId, previous.map((g) => g.email));
@@ -298,7 +304,8 @@ async function moveEvent(fromId: string, eventId: string, targetId: string, chos
   ]);
   await supabase.from("events").delete().eq("id", eventId).eq("family_id", fromId);
   // Los invitados se copian después de borrar la original, para que conserven su mismo enlace.
-  const { added, kept } = await syncGuests(supabase, created.id, user.id, parsed.guests, original.event_guests, true);
+  const shown = parseGuests(text(formData, "guests_shown"));
+  const { added, kept } = await syncGuests(supabase, created.id, user.id, parsed.guests, original.event_guests, true, "emails" in shown ? shown.emails : undefined);
   const event = snapshot(parsed.row, parsed.participants, target.byId, parsed.guests);
   await announce(targetId, created.id, { kind: "nuevo", event, family: opts.visibility === "familia", newGuests: added });
   await announce(targetId, created.id, { kind: "cambio", event, before: snapshot(original, [], byId), family: false, guests: kept });
@@ -472,4 +479,18 @@ export async function quickAdd(from: string, formData: FormData) {
   const repeat = r.recurrence !== "none" ? ` · ${RECURRENCE_LABEL[r.recurrence].toLowerCase()}` : "";
   const where = family.is_personal ? "" : ` · ${family.name}`;
   back(backTo, { ok: `Agendado: ${r.title} · ${formatWhen(startsAt, r.allDay, endsAt)}${repeat}${where}`, link: `/f/${spaceId}/e/${data.id}` });
+}
+
+/** Enlace para invitar a la actividad (quien lo abre la ve sin cuenta y puede dejar su correo). */
+export async function createShareLink(familyId: string, eventId: string, from: string) {
+  const { supabase } = await getFamily(familyId);
+  const { error } = await supabase.from("events").update({ share_token: randomBytes(20).toString("hex") }).eq("id", eventId).eq("family_id", familyId);
+  back(safePath(from, `/f/${familyId}/e/${eventId}`), error ? { error: "No se pudo crear el enlace" } : { ok: "Enlace creado. Compártelo con quien quieras invitar." });
+}
+
+/** Desactivar el enlace: deja de funcionar (quienes ya se sumaron siguen invitados). */
+export async function disableShareLink(familyId: string, eventId: string, from: string) {
+  const { supabase } = await getFamily(familyId);
+  const { error } = await supabase.from("events").update({ share_token: null }).eq("id", eventId).eq("family_id", familyId);
+  back(safePath(from, `/f/${familyId}/e/${eventId}`), error ? { error: "No se pudo desactivar el enlace" } : { ok: "Enlace desactivado" });
 }
