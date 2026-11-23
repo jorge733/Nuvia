@@ -72,10 +72,11 @@ export function CalendarPage({
         viewHref={(v) => href(v)}
       />
       {view === "mes" && range.weeks ? (
-        <>
+        // En PC, el día elegido va al lado del mes.
+        <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start lg:gap-6">
           <MonthView weeks={range.weeks} month={m} today={today} selected={anchor} byDay={byDay} dayHref={(d) => href("mes", d)} />
-          {selectedDay}
-        </>
+          <div className="lg:sticky lg:top-36 lg:[&>*]:mt-0">{selectedDay}</div>
+        </div>
       ) : (
         <TimeGrid
           days={view === "semana" ? Array.from({ length: 7 }, (_, i) => addDays(range.first, i)) : [anchor]}

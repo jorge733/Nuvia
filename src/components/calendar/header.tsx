@@ -28,13 +28,13 @@ export function CalendarHeader({
   viewHref: (v: CalView | "lista") => string;
 }) {
   return (
-    <div className="mb-5 space-y-4">
-      <div className="flex items-end justify-between gap-3">
+    <div className="mb-5 space-y-4 lg:flex lg:items-end lg:gap-6 lg:space-y-0">
+      <div className="flex items-end justify-between gap-3 lg:contents">
         <div className="min-w-0">
           {eyebrow && <p className="eyebrow">{eyebrow}</p>}
           <h1 className="truncate text-3xl font-semibold sm:text-4xl">{title}</h1>
         </div>
-        <div className="flex shrink-0 items-center gap-1">
+        <div className="flex shrink-0 items-center gap-1 lg:order-3">
           <Link href={prevHref} className="btn-ghost size-11 px-0" aria-label="Anterior">
             <ChevronLeft className="size-5" />
           </Link>
@@ -46,7 +46,7 @@ export function CalendarHeader({
           </Link>
         </div>
       </div>
-      <div className="grid grid-cols-4 rounded-full bg-surface-2 p-1 text-sm font-semibold" role="tablist" aria-label="Vista">
+      <div className="grid grid-cols-4 rounded-full bg-surface-2 p-1 text-sm font-semibold lg:order-2 lg:ml-auto lg:w-[26rem]" role="tablist" aria-label="Vista">
         {VIEWS.map((v) => (
           <Link
             key={v.key}

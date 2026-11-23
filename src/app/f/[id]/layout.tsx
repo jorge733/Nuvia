@@ -16,7 +16,7 @@ export default async function FamilyLayout({ children, params }: LayoutProps<"/f
   const { id } = await params;
   const [{ family, supabase, members, me }, { spaces }] = await Promise.all([getFamily(id), getMySpaces()]);
   const familyHref = familyHubHref(spaces);
-  const main = "mx-auto w-full max-w-3xl px-4 pt-4 pb-32 sm:pt-6 sm:pb-16";
+  const main = "mx-auto w-full max-w-3xl lg:max-w-6xl px-4 pt-4 pb-32 sm:pt-6 sm:pb-16";
 
   // El espacio personal no es "una familia": se ve como parte de Hoy / Calendario.
   if (family.is_personal) {

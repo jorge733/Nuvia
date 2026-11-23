@@ -310,3 +310,44 @@ h2,
     transform: translateY(12px);
   }
 }
+
+/*
+ * Dos columnas en PC: contenido principal y una columna lateral fija.
+ * En el teléfono es una sola columna; el orden lo dan las clases order-* de cada bloque.
+ */
+.split {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+.split-main,
+.split-side {
+  display: contents;
+}
+@media (min-width: 64rem) {
+  .split {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 26rem;
+    align-items: start;
+  }
+  .split-main,
+  .split-side {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    min-width: 0;
+  }
+  .split-side {
+    position: sticky;
+    top: 8.5rem;
+  }
+  .split-main > *,
+  .split-side > * {
+    order: 0;
+  }
+}
+.split-tight,
+.split-tight > .split-main,
+.split-tight > .split-side {
+  gap: 1.25rem;
+}

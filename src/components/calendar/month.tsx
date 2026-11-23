@@ -43,7 +43,7 @@ export function MonthView({
               scroll={false}
               aria-label={`${d}${items.length ? `, ${items.length} actividades` : ""}`}
               aria-current={isSel ? "date" : undefined}
-              className={`group relative flex min-h-16 flex-col gap-1 border-line p-1 transition sm:min-h-28 sm:p-1.5 ${i % 7 ? "border-l" : ""} ${i >= 7 ? "border-t" : ""} ${
+              className={`group relative flex min-h-16 flex-col gap-1 border-line p-1 transition sm:min-h-28 sm:p-1.5 lg:min-h-32 ${i % 7 ? "border-l" : ""} ${i >= 7 ? "border-t" : ""} ${
                 isSel ? "bg-accent-soft" : "hover:bg-surface-2"
               } ${out ? "opacity-45" : ""}`}
             >
@@ -65,7 +65,8 @@ export function MonthView({
                 {items.slice(0, 3).map((it) => (
                   <span
                     key={it.key}
-                    className={`truncate rounded-md px-1.5 py-0.5 text-[11px] leading-4 font-semibold ${it.done ? "line-through opacity-50" : ""}`}
+                    title={it.title}
+                    className={`truncate rounded-md px-1.5 py-0.5 text-[11px] leading-4 font-semibold lg:line-clamp-2 lg:whitespace-normal ${it.done ? "line-through opacity-50" : ""}`}
                     style={{ background: `color-mix(in srgb, ${it.color} 16%, transparent)`, color: "var(--fg)" }}
                   >
                     <span className="mr-0.5 inline-block size-1.5 -translate-y-px rounded-full align-middle" style={{ background: it.color }} />

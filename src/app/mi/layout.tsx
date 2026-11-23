@@ -14,7 +14,7 @@ export default async function MiLayout({ children }: LayoutProps<"/mi">) {
     <>
       <AppHeader userInitial={(profile?.full_name || "Y").charAt(0).toUpperCase()} />
       <MyNav familyHref={familyHref} />
-      <main className="mx-auto w-full max-w-3xl px-4 pt-4 pb-32 sm:pt-6 sm:pb-16"><PageTransition>{children}</PageTransition></main>
+      <main className="mx-auto w-full max-w-3xl lg:max-w-6xl px-4 pt-4 pb-32 sm:pt-6 sm:pb-16"><PageTransition>{children}</PageTransition></main>
     </>
   );
 }

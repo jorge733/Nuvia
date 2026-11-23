@@ -19,7 +19,7 @@ export function MyNav({ familyHref, addHref = "/mi/nuevo" }: { familyHref: strin
   return (
     <>
       <nav className="sticky top-16 z-20 hidden bg-bg/85 backdrop-blur-xl sm:block" aria-label="Secciones">
-        <div className="mx-auto flex w-full max-w-3xl items-center gap-1 px-4 pb-3">
+        <div className="mx-auto flex w-full max-w-3xl lg:max-w-6xl items-center gap-1 px-4 pb-3">
           {items.slice(0, 3).map(({ href, label, Icon, active }) => (
             <Link
               key={label}
