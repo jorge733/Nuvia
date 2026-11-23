@@ -13,7 +13,8 @@ export default function Privacidad() {
       <h2>Qué datos tratamos</h2>
       <p>
         Tu correo electrónico, nombre y teléfono (opcional); los integrantes de tu familia que agregues (nombre, tipo y, si lo indicas, teléfono);
-        y las actividades, relevos y tareas que registres en la agenda.
+        las actividades, relevos y tareas que registres en la agenda; y los correos de las personas que invites a una actividad, que usamos
+        solo para enviarles esa invitación y sus cambios (cada correo trae un enlace para dejar de recibirlos).
       </p>
       <h2>Para qué</h2>
       <p>Solo para que tú y tu familia organicen su agenda. No vendemos tus datos ni los usamos para publicidad.</p>

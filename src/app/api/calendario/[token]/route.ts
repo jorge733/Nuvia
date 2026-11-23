@@ -2,6 +2,7 @@ import { createClient } from "@supabase/supabase-js";
 import { supabaseKey, supabaseUrl } from "@/lib/supabase/env";
 import { expand } from "@/lib/time";
 import { CATEGORIES } from "@/lib/format";
+import { icsDate, icsDay, icsEsc as esc, icsFold as fold } from "@/lib/ics";
 
 type FeedRow = {
   id: string;
@@ -19,26 +20,6 @@ type FeedRow = {
   responsible_name: string | null;
   skipped: string[];
   overrides: Record<string, string>;
-};
-
-const icsDate = (d: Date) => d.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
-const icsDay = (d: Date) => {
-  const p = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Santiago", year: "numeric", month: "2-digit", day: "2-digit" }).format(d);
-  return p.replace(/-/g, "");
-};
-const esc = (s: string) => s.replace(/\\/g, "\\\\").replace(/\r?\n/g, "\\n").replace(/[,;]/g, (m) => "\\" + m);
-// Líneas de máximo 75 octetos (RFC 5545).
-const fold = (line: string) => {
-  const out: string[] = [];
-  let cur = "";
-  for (const ch of line) {
-    if (Buffer.byteLength(cur + ch) > 74) {
-      out.push(cur);
-      cur = " " + ch;
-    } else cur += ch;
-  }
-  out.push(cur);
-  return out.join("\r\n");
 };
 
 // Suscripción de calendario personal (Google Calendar, Apple Calendar, Outlook).

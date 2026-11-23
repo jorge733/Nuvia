@@ -132,6 +132,7 @@ export function EventForm({
   submitLabel,
   cancelHref,
   personal = false,
+  guests = [],
 }: {
   action: (formData: FormData) => Promise<void>;
   /** Al editar: integrantes del espacio del evento. */
@@ -148,6 +149,8 @@ export function EventForm({
   cancelHref: string;
   /** Agenda personal: sin responsable, participantes ni visibilidad. */
   personal?: boolean;
+  /** Correos de los invitados (al editar). */
+  guests?: string[];
 }) {
   const start = event ? new Date(event.starts_at) : null;
   const end = event?.ends_at ? new Date(event.ends_at) : null;
@@ -155,7 +158,7 @@ export function EventForm({
   const whoSees = !!destinations;
   const families = (destinations ?? []).filter((d) => !d.isPersonal);
   const editingFamily = !whoSees && !personal && !!me;
-  const hasExtras = !!(event && (event.recurrence !== "none" || event.location || event.notes || event.participant_ids.length || event.visibility !== "familia"));
+  const hasExtras = !!(event && (event.recurrence !== "none" || event.location || event.notes || event.participant_ids.length || event.visibility !== "familia" || guests.length));
 
   return (
     <form action={action} className="space-y-5">
@@ -190,7 +193,7 @@ export function EventForm({
       <details className="card" open={hasExtras}>
         <summary className="flex cursor-pointer list-none items-center justify-between font-semibold">
           Más opciones
-          <span className="text-sm font-normal text-muted">{families.length || editingFamily ? "tipo, repetir, para quién, lugar…" : "tipo, repetir, lugar, notas…"}</span>
+          <span className="text-sm font-normal text-muted">{families.length || editingFamily ? "tipo, repetir, para quién, invitados…" : "tipo, repetir, lugar, invitados…"}</span>
         </summary>
         <div className="mt-5 space-y-5">
           <fieldset>
@@ -253,6 +256,21 @@ export function EventForm({
           </Field>
           <Field label="Notas">
             <textarea className="input min-h-24" name="notes" maxLength={2000} defaultValue={event?.notes ?? ""} placeholder="Ej: Llevar el carnet y la orden médica" />
+          </Field>
+          <Field
+            label="Invitar por correo (opcional)"
+            hint="Separa los correos con comas. No necesitan cuenta: les llega la fecha, hora, lugar y notas, y otro correo si algo cambia o se cancela. Máximo 20."
+          >
+            <textarea
+              className="input min-h-20"
+              name="guests"
+              maxLength={6000}
+              defaultValue={guests.join(", ")}
+              placeholder="Ej: abuela@gmail.com, tia.carmen@hotmail.com"
+              autoComplete="off"
+              autoCapitalize="none"
+              spellCheck={false}
+            />
           </Field>
         </div>
       </details>

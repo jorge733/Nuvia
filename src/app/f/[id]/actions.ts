@@ -3,8 +3,9 @@
 import { revalidatePath } from "next/cache";
 import { after } from "next/server";
 import { back, getFamily, safePath, text, type Member } from "@/lib/family";
+import type { createClient } from "@/lib/supabase/server";
 import { siteUrl } from "@/lib/site";
-import { notifyEventChange, type EventSnapshot } from "@/lib/email/event-change";
+import { notifyEventChange, type EventSnapshot, type Guest } from "@/lib/email/event-change";
 import { guessCategory, parseQuick } from "@/lib/quick";
 import { CATEGORIES } from "@/lib/format";
 import { dayKey, formatWhen, fromLocal, isDayKey, keyParts, RECURRENCE_LABEL } from "@/lib/time";
@@ -31,6 +32,8 @@ function parseEvent(formData: FormData, memberIds: Set<string>, opts: ParseOpts 
   if (end && !/^\d{2}:\d{2}$/.test(end)) return { error: "Hora de término no válida" } as const;
   if (!allDay && end && end <= start) return { error: "La hora de término debe ser después del inicio" } as const;
   if (until && (!isDayKey(until) || until < date)) return { error: "La fecha de término de la repetición no es válida" } as const;
+  const guests = parseGuests(text(formData, "guests"));
+  if ("error" in guests) return guests;
 
   const { y, m, d } = keyParts(date);
   const [sh, sm] = allDay ? [0, 0] : start.split(":").map(Number);
@@ -58,8 +61,48 @@ function parseEvent(formData: FormData, memberIds: Set<string>, opts: ParseOpts 
       responsible_id: vis === "familia" && memberIds.has(responsible) ? responsible : null,
     },
     participants: formData.getAll(opts.participantsKey ?? "participants").map(String).filter((p) => memberIds.has(p)),
+    guests: guests.emails,
     day: date,
   } as const;
+}
+
+const MAX_GUESTS = 20;
+const EMAIL = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+
+/** "ana@x.cl, pedro@y.com" → correos únicos y válidos. */
+function parseGuests(raw: string): { emails: string[] } | { error: string } {
+  const emails = [...new Set(raw.split(/[\s,;]+/).map((e) => e.trim().toLowerCase()).filter(Boolean))];
+  const bad = emails.filter((e) => e.length > 254 || !EMAIL.test(e));
+  if (bad.length) return { error: `Revisa ${bad.length === 1 ? "este correo" : "estos correos"}: ${bad.slice(0, 3).join(", ")}` };
+  if (emails.length > MAX_GUESTS) return { error: `Puedes invitar hasta ${MAX_GUESTS} personas por actividad` };
+  return { emails };
+}
+
+type Supabase = Awaited<ReturnType<typeof createClient>>;
+type GuestRow = Guest & { muted: boolean };
+
+/**
+ * Deja los invitados de la actividad igual a `emails`.
+ * `previous` son los que tenía; con `copy` (al cambiarla de lugar) se vuelven a crear con su mismo enlace.
+ * Devuelve los que se agregaron y los que siguen (y quieren avisos).
+ */
+async function syncGuests(supabase: Supabase, eventId: string, userId: string, emails: string[], previous: GuestRow[], copy = false) {
+  const wanted = new Set(emails);
+  const prev = new Map(previous.map((g) => [g.email.toLowerCase(), g]));
+  const kept = previous.filter((g) => wanted.has(g.email.toLowerCase()));
+  const removed = previous.filter((g) => !wanted.has(g.email.toLowerCase()));
+  const toAdd = emails.filter((e) => !prev.has(e));
+
+  if (!copy && removed.length) await supabase.from("event_guests").delete().eq("event_id", eventId).in("token", removed.map((g) => g.token));
+  if (copy && kept.length) {
+    await supabase.from("event_guests").insert(kept.map((g) => ({ event_id: eventId, email: g.email, token: g.token, muted: g.muted, invited_by: userId })));
+  }
+  let added: Guest[] = [];
+  if (toAdd.length) {
+    const { data } = await supabase.from("event_guests").insert(toAdd.map((email) => ({ event_id: eventId, email, invited_by: userId }))).select("email, token");
+    added = data ?? [];
+  }
+  return { added, kept: kept.filter((g) => !g.muted).map(({ email, token }) => ({ email, token })) };
 }
 
 type EventRow = {
@@ -74,7 +117,7 @@ type EventRow = {
   responsible_id: string | null;
 };
 
-function snapshot(row: EventRow, participantIds: string[], byId: Record<string, Member>): EventSnapshot {
+function snapshot(row: EventRow, participantIds: string[], byId: Record<string, Member>, guests: string[] = []): EventSnapshot {
   return {
     title: row.title,
     category: row.category,
@@ -86,24 +129,35 @@ function snapshot(row: EventRow, participantIds: string[], byId: Record<string, 
     recurrence: row.recurrence,
     responsible: row.responsible_id ? byId[row.responsible_id]?.name ?? null : null,
     participants: participantIds.map((id) => byId[id]?.name).filter((n): n is string => !!n),
+    guests,
   };
 }
 
 /**
- * Avisa por correo al resto de la familia, después de responder (no hace esperar a quien guardó).
- * Solo para actividades que la familia ve con detalle.
+ * Avisa por correo después de responder (no hace esperar a quien guardó):
+ * a la familia, si la ve con detalle, y a los invitados.
  */
 async function announce(
-  kind: "nuevo" | "cambio",
   familyId: string,
   eventId: string,
-  event: EventSnapshot,
-  before?: EventSnapshot,
+  o: { kind: "nuevo" | "cambio" | "cancelado"; event: EventSnapshot; before?: EventSnapshot; family: boolean; guests?: Guest[]; newGuests?: Guest[] },
 ) {
   const [{ user, me, family }, site] = await Promise.all([getFamily(familyId), siteUrl()]);
-  if (family.is_personal) return;
+  const toFamily = o.family && !family.is_personal;
+  if (!toFamily && !o.guests?.length && !o.newGuests?.length) return;
   after(() =>
-    notifyEventChange({ kind, site, familyId, familyName: family.name, eventId, actorId: user.id, actorName: me.name, event, before }),
+    notifyEventChange({
+      ...o,
+      site,
+      familyId,
+      familyName: family.is_personal ? null : family.name,
+      eventId,
+      actorId: user.id,
+      actorEmail: user.email ?? null,
+      actorName: me.name,
+      family: toFamily,
+      guests: o.guests ?? [],
+    }),
   );
 }
 
@@ -135,10 +189,14 @@ export async function createEvent(formData: FormData) {
   if (parsed.participants.length) {
     await supabase.from("event_participants").insert(parsed.participants.map((member_id) => ({ event_id: data.id, member_id })));
   }
-  if (visibility === "familia") {
-    const { byId } = await getFamily(familyId);
-    await announce("nuevo", familyId, data.id, snapshot(parsed.row, parsed.participants, byId));
-  }
+  const { added } = await syncGuests(supabase, data.id, user.id, parsed.guests, []);
+  const { byId } = await getFamily(familyId);
+  await announce(familyId, data.id, {
+    kind: "nuevo",
+    event: snapshot(parsed.row, parsed.participants, byId, parsed.guests),
+    family: visibility === "familia",
+    newGuests: added,
+  });
   revalidatePath(`/f/${familyId}`, "layout");
   revalidatePath("/mi", "layout");
   const today = dayKey(new Date());
@@ -149,7 +207,7 @@ export async function createEvent(formData: FormData) {
 }
 
 export async function updateEvent(familyId: string, eventId: string, formData: FormData) {
-  const { supabase, members, family, byId } = await getFamily(familyId);
+  const { supabase, user, members, family, byId } = await getFamily(familyId);
   const editPath = `/f/${familyId}/e/${eventId}/editar`;
 
   // Con "¿Quién lo ve?" (solo quien la creó): puede quedarse aquí o cambiar de lugar.
@@ -167,7 +225,7 @@ export async function updateEvent(familyId: string, eventId: string, formData: F
   // Versión anterior, para contarle a la familia qué cambió.
   const { data: old } = await supabase
     .from("events")
-    .select("title, category, starts_at, ends_at, all_day, location, notes, recurrence, visibility, responsible_id, event_participants(member_id)")
+    .select("title, category, starts_at, ends_at, all_day, location, notes, recurrence, visibility, responsible_id, event_participants(member_id), event_guests(email, token, muted)")
     .eq("id", eventId)
     .eq("family_id", familyId)
     .maybeSingle();
@@ -178,11 +236,19 @@ export async function updateEvent(familyId: string, eventId: string, formData: F
   if (parsed.participants.length) {
     await supabase.from("event_participants").insert(parsed.participants.map((member_id) => ({ event_id: eventId, member_id })));
   }
-  if (old && parsed.row.visibility === "familia") {
-    const event = snapshot(parsed.row, parsed.participants, byId);
+  const previous = old?.event_guests ?? [];
+  const { added, kept } = await syncGuests(supabase, eventId, user.id, parsed.guests, previous);
+  if (old) {
+    const event = snapshot(parsed.row, parsed.participants, byId, parsed.guests);
+    const before = snapshot(old, old.event_participants.map((p) => p.member_id), byId, previous.map((g) => g.email));
+    const toFamily = parsed.row.visibility === "familia";
     // Si antes la familia no la veía (privada u "ocupado"), para ellos es nueva.
-    if (old.visibility !== "familia") await announce("nuevo", familyId, eventId, event);
-    else await announce("cambio", familyId, eventId, event, snapshot(old, old.event_participants.map((p) => p.member_id), byId));
+    if (toFamily && old.visibility !== "familia") {
+      await announce(familyId, eventId, { kind: "nuevo", event, family: true, newGuests: added });
+      await announce(familyId, eventId, { kind: "cambio", event, before, family: false, guests: kept });
+    } else {
+      await announce(familyId, eventId, { kind: "cambio", event, before, family: toFamily, guests: kept, newGuests: added });
+    }
   }
   revalidatePath(`/f/${familyId}`, "layout");
   revalidatePath("/mi", "layout");
@@ -204,8 +270,13 @@ function destOpts(familyId: string, chosen: string | undefined): ParseOpts {
  */
 async function moveEvent(fromId: string, eventId: string, targetId: string, chosen: string | undefined, formData: FormData) {
   const editPath = `/f/${fromId}/e/${eventId}/editar`;
-  const [{ supabase, user }, target] = await Promise.all([getFamily(fromId), getFamily(targetId)]);
-  const { data: original } = await supabase.from("events").select("created_by, recur_interval").eq("id", eventId).eq("family_id", fromId).maybeSingle();
+  const [{ supabase, user, byId }, target] = await Promise.all([getFamily(fromId), getFamily(targetId)]);
+  const { data: original } = await supabase
+    .from("events")
+    .select("created_by, recur_interval, title, category, starts_at, ends_at, all_day, location, notes, recurrence, responsible_id, event_guests(email, token, muted)")
+    .eq("id", eventId)
+    .eq("family_id", fromId)
+    .maybeSingle();
   if (!original) back(editPath, { error: "No se encontró la actividad" });
   if (original.created_by !== user.id) back(editPath, { error: "Solo quien la creó puede cambiarla de lugar" });
 
@@ -225,7 +296,11 @@ async function moveEvent(fromId: string, eventId: string, targetId: string, chos
     skips?.length ? supabase.from("event_skips").insert(skips.map((k) => ({ event_id: created.id, occurrence_start: k.occurrence_start }))) : null,
   ]);
   await supabase.from("events").delete().eq("id", eventId).eq("family_id", fromId);
-  if (opts.visibility === "familia") await announce("nuevo", targetId, created.id, snapshot(parsed.row, parsed.participants, target.byId));
+  // Los invitados se copian después de borrar la original, para que conserven su mismo enlace.
+  const { added, kept } = await syncGuests(supabase, created.id, user.id, parsed.guests, original.event_guests, true);
+  const event = snapshot(parsed.row, parsed.participants, target.byId, parsed.guests);
+  await announce(targetId, created.id, { kind: "nuevo", event, family: opts.visibility === "familia", newGuests: added });
+  await announce(targetId, created.id, { kind: "cambio", event, before: snapshot(original, [], byId), family: false, guests: kept });
 
   revalidatePath(`/f/${fromId}`, "layout");
   revalidatePath(`/f/${targetId}`, "layout");
@@ -235,8 +310,19 @@ async function moveEvent(fromId: string, eventId: string, targetId: string, chos
 }
 
 export async function deleteEvent(familyId: string, eventId: string) {
-  const { supabase, family } = await getFamily(familyId);
+  const { supabase, family, byId } = await getFamily(familyId);
+  // Antes de borrar: los invitados reciben un aviso de que se canceló.
+  const { data: old } = await supabase
+    .from("events")
+    .select("title, category, starts_at, ends_at, all_day, location, notes, recurrence, responsible_id, event_guests(email, token, muted)")
+    .eq("id", eventId)
+    .eq("family_id", familyId)
+    .maybeSingle();
   const { error, count } = await supabase.from("events").delete({ count: "exact" }).eq("id", eventId).eq("family_id", familyId);
+  if (!error && count && old) {
+    const guests = old.event_guests.filter((g) => !g.muted).map(({ email, token }) => ({ email, token }));
+    await announce(familyId, eventId, { kind: "cancelado", event: snapshot(old, [], byId), family: false, guests });
+  }
   revalidatePath(`/f/${familyId}`, "layout");
   back(family.is_personal ? "/mi/semana" : `/f/${familyId}/semana`, error || !count ? { error: "No se pudo eliminar" } : { ok: "Eliminado" });
 }
@@ -337,7 +423,7 @@ export async function quickAdd(from: string, formData: FormData) {
   }
   if (!family.is_personal) {
     const { byId } = await getFamily(spaceId);
-    await announce("nuevo", spaceId, data.id, snapshot(row, r.participantIds, byId));
+    await announce(spaceId, data.id, { kind: "nuevo", event: snapshot(row, r.participantIds, byId), family: true });
   }
   revalidatePath(`/f/${spaceId}`, "layout");
   revalidatePath("/mi", "layout");

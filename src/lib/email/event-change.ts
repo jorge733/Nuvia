@@ -1,4 +1,5 @@
-// Aviso por correo a la familia cuando alguien agrega o cambia una actividad.
+// Avisos por correo cuando alguien agrega, cambia o cancela una actividad:
+// a la familia (agregar / cambiar) y a los invitados por correo (invitación / cambio / cancelación).
 import { createClient } from "@supabase/supabase-js";
 import { supabaseKey, supabaseUrl } from "@/lib/supabase/env";
 import { CATEGORIES } from "@/lib/format";
@@ -18,18 +19,33 @@ export type EventSnapshot = {
   recurrence: string;
   responsible: string | null;
   participants: string[];
+  /** Correos de los invitados. */
+  guests: string[];
 };
 
+export type Guest = { email: string; token: string };
+
+type Kind = "nuevo" | "cambio" | "cancelado";
+type Audience = "familia" | "invitado";
+
 export type EventChange = {
-  kind: "nuevo" | "cambio";
+  kind: Kind;
   site: string;
   familyId: string;
-  familyName: string;
+  /** null en la agenda personal ("Solo yo"). */
+  familyName: string | null;
   eventId: string;
   actorId: string;
+  actorEmail: string | null;
   actorName: string;
   event: EventSnapshot;
   before?: EventSnapshot;
+  /** Avisar también a la familia (solo actividades que la familia ve con detalle). */
+  family: boolean;
+  /** Invitados que ya estaban (reciben el cambio o la cancelación). */
+  guests: Guest[];
+  /** Invitados recién agregados (reciben la invitación). */
+  newGuests?: Guest[];
 };
 
 const SANS = "-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif";
@@ -42,33 +58,35 @@ function when(e: EventSnapshot) {
 }
 
 const repeat = (e: EventSnapshot) => (e.recurrence !== "none" ? RECURRENCE_LABEL[e.recurrence] ?? null : null);
-const people = (names: string[]) => (names.length ? [...names].sort().join(", ") : null);
+const list = (items: string[]) => (items.length ? [...items].sort().join(", ") : null);
 
-/** Filas "Cuándo / Dónde / …" de la actividad. */
-function details(e: EventSnapshot): [string, string][] {
-  const rows: [string, string | null][] = [
-    ["Cuándo", when(e)],
-    ["Se repite", repeat(e)],
-    ["Dónde", e.location],
-    ["Se encarga", e.responsible],
-    ["Para", people(e.participants)],
-  ];
-  return rows.filter((r): r is [string, string] => !!r[1]);
+// Campos que ve cada público. Los invitados no ven la organización interna de la familia.
+type Field = [label: string, get: (e: EventSnapshot) => string | null, empty: string, audiences: Audience[]];
+const FIELDS: Field[] = [
+  ["Qué", (e) => e.title, "", ["familia", "invitado"]],
+  ["Cuándo", when, "", ["familia", "invitado"]],
+  ["Se repite", repeat, "No se repite", ["familia", "invitado"]],
+  ["Dónde", (e) => e.location, "Sin lugar", ["familia", "invitado"]],
+  ["Se encarga", (e) => e.responsible, "Nadie todavía", ["familia"]],
+  ["Para", (e) => list(e.participants), "Nadie en particular", ["familia"]],
+  ["Invitados", (e) => list(e.guests), "Nadie", ["familia"]],
+  ["Notas", (e) => e.notes, "Sin notas", ["familia", "invitado"]],
+];
+
+/** Filas "Cuándo / Dónde / …" de una actividad nueva. */
+function details(e: EventSnapshot, audience: Audience): [string, string][] {
+  // En la invitación también van las notas (el formulario avisa que les llegan); a la familia, solo lo principal.
+  const skip = audience === "familia" ? ["Qué", "Notas"] : ["Qué"];
+  return FIELDS.filter(([label, , , aud]) => aud.includes(audience) && !skip.includes(label))
+    .map(([label, get]) => [label, get(e)] as [string, string | null])
+    .filter((r): r is [string, string] => !!r[1]);
 }
 
-/** Qué cambió entre dos versiones: [campo, antes, ahora]. */
-export function diff(a: EventSnapshot, b: EventSnapshot): [string, string, string][] {
-  const fields: [string, (e: EventSnapshot) => string | null, string][] = [
-    ["Qué", (e) => e.title, ""],
-    ["Cuándo", when, ""],
-    ["Se repite", (e) => repeat(e), "No se repite"],
-    ["Dónde", (e) => e.location, "Sin lugar"],
-    ["Se encarga", (e) => e.responsible, "Nadie todavía"],
-    ["Para", (e) => people(e.participants), "Nadie en particular"],
-    ["Notas", (e) => e.notes, "Sin notas"],
-  ];
+/** Qué cambió entre dos versiones, para ese público: [campo, antes, ahora]. */
+export function diff(a: EventSnapshot, b: EventSnapshot, audience: Audience = "familia"): [string, string, string][] {
   const out: [string, string, string][] = [];
-  for (const [label, get, empty] of fields) {
+  for (const [label, get, empty, aud] of FIELDS) {
+    if (!aud.includes(audience)) continue;
     const x = get(a) ?? "";
     const y = get(b) ?? "";
     if (x !== y) out.push([label, x || empty, y || empty]);
@@ -78,70 +96,110 @@ export function diff(a: EventSnapshot, b: EventSnapshot): [string, string, strin
 
 const cell = (label: string, value: string) =>
   `<tr><td valign="top" style="padding:6px 12px 6px 0;width:92px;font-family:${SANS};font-size:13px;color:#8a8278;">${esc(label)}</td>
-   <td valign="top" style="padding:6px 0;font-family:${SANS};font-size:14px;color:#1f1b16;">${value}</td></tr>`;
+   <td valign="top" style="padding:6px 0;font-family:${SANS};font-size:14px;color:#1f1b16;white-space:pre-line;">${value}</td></tr>`;
 
-export function renderEventChange(c: EventChange, recipient: { name: string; token: string }) {
+export function renderEventChange(c: EventChange, kind: Kind, to: { audience: Audience; name: string; token: string }) {
   const e = c.event;
+  const guest = to.audience === "invitado";
   const emoji = CATEGORIES[e.category]?.emoji ?? "📌";
-  const changes = c.kind === "cambio" && c.before ? diff(c.before, e) : [];
-  const link = `${c.site}/f/${c.familyId}/e/${c.eventId}`;
-  const unsubscribe = `${c.site}/api/correo/baja?t=${recipient.token}&tipo=avisos`;
+  const changes = kind === "cambio" && c.before ? diff(c.before, e, to.audience) : [];
+  const link = guest ? `${c.site}/invitacion/${to.token}` : `${c.site}/f/${c.familyId}/e/${c.eventId}`;
+  const unsubscribe = `${c.site}/api/correo/baja?t=${to.token}&tipo=${guest ? "invitado" : "avisos"}`;
 
-  const rows =
-    c.kind === "nuevo"
-      ? details(e).map(([k, v]) => cell(k, esc(v)))
-      : changes.map(([k, before, after]) =>
-          cell(k, `<span style="color:#8a8278;text-decoration:line-through;">${esc(before)}</span><br><strong>${esc(after)}</strong>`),
-        );
-  // En un cambio, siempre se muestra cuándo es (aunque no haya cambiado).
-  if (c.kind === "cambio" && !changes.some(([k]) => k === "Cuándo")) rows.push(cell("Cuándo", esc(when(e))));
+  let rows: [string, string, string?][];
+  if (kind === "cambio") {
+    rows = changes.map(([k, before, after]) => [k, after, before]);
+    // Siempre se muestra cuándo es (aunque no haya cambiado).
+    if (!changes.some(([k]) => k === "Cuándo")) rows.push(["Cuándo", when(e)]);
+  } else if (kind === "cancelado") {
+    rows = [["Era", when(e)]];
+  } else {
+    rows = details(e, to.audience);
+  }
 
-  const bodyHtml = `<div style="margin:0 0 24px;padding:18px 20px;background:#faf6f0;border-left:3px solid #f2763a;border-radius:16px;">
-      <div style="font-family:${SANS};font-size:17px;font-weight:bold;color:#1f1b16;">${emoji} ${esc(e.title)}</div>
-      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:10px;">${rows.join("")}</table>
+  const html = rows
+    .map(([k, now, before]) =>
+      cell(k, before !== undefined ? `<span style="color:#8a8278;text-decoration:line-through;">${esc(before)}</span><br><strong>${esc(now)}</strong>` : esc(now)),
+    )
+    .join("");
+  const cancelled = kind === "cancelado";
+  const bodyHtml = `<div style="margin:0 0 24px;padding:18px 20px;background:#faf6f0;border-left:3px solid ${cancelled ? "#8a8278" : "#f2763a"};border-radius:16px;">
+      <div style="font-family:${SANS};font-size:17px;font-weight:bold;color:#1f1b16;${cancelled ? "text-decoration:line-through;" : ""}">${emoji} ${esc(e.title)}</div>
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:10px;">${html}</table>
     </div>`;
+  const textRows = rows.map(([k, now, before]) => `${k}: ${now}${before !== undefined ? ` (antes: ${before})` : ""}`);
 
-  const verb = c.kind === "nuevo" ? "agregó" : "cambió";
-  const textLines =
-    c.kind === "nuevo"
-      ? details(e).map(([k, v]) => `${k}: ${v}`)
-      : [...changes.map(([k, before, after]) => `${k}: ${after} (antes: ${before})`), ...(changes.some(([k]) => k === "Cuándo") ? [] : [`Cuándo: ${when(e)}`])];
+  const hello = to.name ? `Hola, ${to.name}. ` : "Hola. ";
+  const where = c.familyName ? ` en ${c.familyName}` : "";
+  const verb = { nuevo: guest ? "te invitó a" : "agregó", cambio: "cambió", cancelado: "canceló" }[kind];
+  const heading = guest
+    ? { nuevo: "Te invitaron a una actividad", cambio: "Cambió una actividad", cancelado: "Se canceló una actividad" }[kind]
+    : { nuevo: "Nueva actividad en la familia", cambio: "Cambió una actividad", cancelado: "Se canceló una actividad" }[kind];
 
   const content = {
-    preheader: `${when(e)} · ${c.familyName}`,
-    heading: c.kind === "nuevo" ? "Nueva actividad en la familia" : "Cambió una actividad",
-    intro: `${recipient.name ? `Hola, ${recipient.name}. ` : ""}${c.actorName} ${verb} “${e.title}” en ${c.familyName}.`,
+    preheader: `${when(e)}${c.familyName ? ` · ${c.familyName}` : ""}`,
+    heading,
+    intro: `${hello}${c.actorName} ${verb} “${e.title}”${guest ? "" : where}.`,
     bodyHtml,
-    button: { label: "Ver en Uniluva", url: link },
-    footer: `Recibes este aviso porque eres parte de ${c.familyName} en Uniluva.`,
-    footerLink: { label: "No recibir estos avisos", url: unsubscribe },
+    button: cancelled ? undefined : { label: guest ? "Ver la invitación" : "Ver en Uniluva", url: link },
+    note: guest && kind === "nuevo" ? "Desde la invitación puedes agregarla a tu calendario. No necesitas cuenta." : undefined,
+    footer: guest
+      ? `Recibes este correo porque ${c.actorName} te invitó a esta actividad en Uniluva.`
+      : `Recibes este aviso porque eres parte de ${c.familyName} en Uniluva.`,
+    footerLink: { label: guest ? "No recibir más avisos de esta actividad" : "No recibir estos avisos", url: unsubscribe },
     fallback: false,
   };
-  const text = renderText({ ...content, intro: `${content.intro}\n\n${e.title}\n${textLines.join("\n")}` });
-  return { subject: `${c.actorName} ${verb}: ${e.title}`.slice(0, 120), html: renderEmail(content), text, unsubscribe };
+  const text = renderText({ ...content, intro: `${content.intro}\n\n${e.title}\n${textRows.join("\n")}` });
+  const subject = guest && kind === "nuevo" ? `${c.actorName} te invitó: ${e.title}` : `${c.actorName} ${verb}: ${e.title}`;
+  return { subject: subject.slice(0, 120), html: renderEmail(content), text, unsubscribe };
 }
 
-/** Envía el aviso a la familia (menos a quien hizo el cambio). No lanza errores: solo los registra. */
+type Recipient = { email: string; full_name: string; email_token: string };
+
+async function familyRecipients(c: EventChange): Promise<Recipient[]> {
+  const secret = process.env.CRON_SECRET;
+  if (!secret) return [];
+  const supabase = createClient(supabaseUrl(), supabaseKey(), { auth: { persistSession: false } });
+  const { data, error } = await supabase.rpc("event_notify_recipients", { p_secret: secret, p_event_id: c.eventId, p_actor: c.actorId });
+  if (error) throw new Error(`event_notify_recipients: ${error.message}`);
+  return (data ?? []) as Recipient[];
+}
+
+/** Envía los avisos que correspondan. No lanza errores: solo los registra. */
 export async function notifyEventChange(c: EventChange) {
   try {
-    if (c.kind === "cambio" && c.before && !diff(c.before, c.event).length) return;
-    const secret = process.env.CRON_SECRET;
-    if (!secret || !process.env.RESEND_API_KEY) return;
+    if (!process.env.RESEND_API_KEY) return;
+    const msgs: { to: string; kind: Kind; audience: Audience; name: string; token: string }[] = [];
 
-    const supabase = createClient(supabaseUrl(), supabaseKey(), { auth: { persistSession: false } });
-    const { data, error } = await supabase.rpc("event_notify_recipients", { p_secret: secret, p_event_id: c.eventId, p_actor: c.actorId });
-    if (error) throw new Error(`event_notify_recipients: ${error.message}`);
-    const recipients = (data ?? []) as { email: string; full_name: string; email_token: string }[];
+    const familyChanged = c.kind !== "cambio" || !c.before || diff(c.before, c.event, "familia").length > 0;
+    if (c.family && c.kind !== "cancelado" && familyChanged) {
+      for (const r of await familyRecipients(c)) {
+        msgs.push({ to: r.email, kind: c.kind, audience: "familia", name: (r.full_name || "").split(" ")[0] || "", token: r.email_token });
+      }
+    }
+
+    // Un invitado que ya recibe el aviso de la familia (o quien hizo el cambio) no recibe otro.
+    const skip = new Set([...msgs.map((m) => m.to.toLowerCase()), (c.actorEmail ?? "").toLowerCase()]);
+    const guestChanged = c.kind !== "cambio" || !c.before || diff(c.before, c.event, "invitado").length > 0;
+    const guests: [Guest, Kind][] = [
+      ...(guestChanged ? c.guests.map((g) => [g, c.kind] as [Guest, Kind]) : []),
+      ...(c.newGuests ?? []).map((g) => [g, "nuevo"] as [Guest, Kind]),
+    ];
+    for (const [g, kind] of guests) {
+      if (skip.has(g.email.toLowerCase())) continue;
+      skip.add(g.email.toLowerCase());
+      msgs.push({ to: g.email, kind, audience: "invitado", name: "", token: g.token });
+    }
 
     await sendBatch(
-      recipients.map((r) => {
-        const m = renderEventChange(c, { name: (r.full_name || "").split(" ")[0] || "", token: r.email_token });
+      msgs.map((m) => {
+        const r = renderEventChange(c, m.kind, { audience: m.audience, name: m.name, token: m.token });
         return {
-          to: r.email,
-          subject: m.subject,
-          html: m.html,
-          text: m.text,
-          headers: { "List-Unsubscribe": `<${m.unsubscribe}>`, "List-Unsubscribe-Post": "List-Unsubscribe=One-Click" },
+          to: m.to,
+          subject: r.subject,
+          html: r.html,
+          text: r.text,
+          headers: { "List-Unsubscribe": `<${r.unsubscribe}>`, "List-Unsubscribe-Post": "List-Unsubscribe=One-Click" },
         };
       }),
     );

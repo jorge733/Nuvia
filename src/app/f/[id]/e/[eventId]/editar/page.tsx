@@ -14,9 +14,10 @@ export default async function Editar({ params, searchParams }: PageProps<"/f/[id
   const sp = await searchParams;
   const [{ supabase, members, me, family, user }, { spaces, personalId }] = await Promise.all([getFamily(id), getMySpaces()]);
 
-  const [{ data: ev }, { data: parts }] = await Promise.all([
+  const [{ data: ev }, { data: parts }, { data: guests }] = await Promise.all([
     supabase.from("events").select("*").eq("id", eventId).eq("family_id", id).maybeSingle(),
     supabase.from("event_participants").select("member_id").eq("event_id", eventId),
+    supabase.from("event_guests").select("email").eq("event_id", eventId).order("created_at"),
   ]);
   if (!ev) notFound();
   const event = { ...ev, participant_ids: (parts ?? []).map((p) => p.member_id), masked: false } as AgendaEvent;
@@ -46,6 +47,7 @@ export default async function Editar({ params, searchParams }: PageProps<"/f/[id
         me={me}
         personal={family.is_personal}
         event={event}
+        guests={(guests ?? []).map((g) => g.email)}
         destinations={destinations}
         defaultDest={defaultDest}
         defaultDate={todayKey()}

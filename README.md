@@ -14,6 +14,7 @@ Uniluva es una agenda donde cada actividad tiene **quién se encargue**, nadie c
 - **Familia.** Resumen del día de toda la familia, calendario, relevos, balance e integrantes.
 - **Resumen diario por correo.** Cada mañana, "Tu día en Uniluva" con lo que te toca y los relevos abiertos (Vercel Cron + Resend). Se desactiva con un clic.
 - **Avisos de cambios por correo.** Cuando alguien agrega o cambia una actividad familiar, el resto de la familia recibe un correo con lo nuevo (o con qué cambió). Nunca lo privado ni lo "ocupado". Se desactiva desde Mi perfil o con un clic en el correo.
+- **Invitados por correo.** A cualquier actividad se puede invitar por correo a personas de fuera (sin cuenta). Reciben la invitación con un enlace para verla y agregarla a su calendario, y un aviso si cambia o se cancela.
 - **Tu calendario de siempre.** Enlace de suscripción (ICS) para Google Calendar, Apple Calendar u Outlook, con avisos.
 
 ## Tecnología
@@ -26,7 +27,7 @@ Uniluva es una agenda donde cada actividad tiene **quién se encargue**, nadie c
 
 1. En Supabase → **SQL Editor**, ejecuta en orden los archivos de `supabase/migrations/`:
    `20261123000000_agenda.sql`, `20261124000000_mi_agenda.sql`, `20261125000000_resumen_diario.sql`
-   (muestra el valor para la variable `CRON_SECRET`) y `20261126000000_avisos_eventos.sql`.
+   (muestra el valor para la variable `CRON_SECRET`) `20261126000000_avisos_eventos.sql` y `20261127000000_invitados.sql`.
    (Si el proyecto tenía la versión anterior de comunidades, el primero la elimina.)
 2. En **Authentication → URL Configuration**, agrega como Redirect URLs `https://www.uniluva.com/auth/confirm`,
    `https://*.vercel.app/auth/confirm` y `http://localhost:3000/auth/confirm`.

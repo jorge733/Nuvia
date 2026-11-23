@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, Check, HandHeart, MapPin, Pencil, Repeat, Trash2, Lock, EyeOff } from "lucide-react";
+import { ArrowLeft, Check, HandHeart, MapPin, Mail, Pencil, Repeat, Trash2, Lock, EyeOff } from "lucide-react";
 import { getFamily } from "@/lib/family";
 import { loadOccurrence } from "@/lib/agenda";
 import { siteUrl } from "@/lib/site";
@@ -15,7 +15,10 @@ export default async function Detalle({ params, searchParams }: PageProps<"/f/[i
   const { id, eventId } = await params;
   const sp = await searchParams;
   const { supabase, me, byId } = await getFamily(id);
-  const o = await loadOccurrence(supabase, id, eventId, typeof sp.o === "string" ? sp.o : null);
+  const [o, { data: guests }] = await Promise.all([
+    loadOccurrence(supabase, id, eventId, typeof sp.o === "string" ? sp.o : null),
+    supabase.from("event_guests").select("email, muted").eq("event_id", eventId).order("created_at"),
+  ]);
   if (!o || o.event.masked) notFound();
 
   const ev = o.event;
@@ -101,6 +104,23 @@ export default async function Detalle({ params, searchParams }: PageProps<"/f/[i
                 </div>
               </div>
             )}
+          </div>
+        )}
+
+        {!!guests?.length && (
+          <div className="mt-4 flex items-start gap-2 text-sm">
+            <Mail className="mt-0.5 size-4 shrink-0 text-muted" />
+            <div className="min-w-0">
+              <p className="text-xs font-semibold text-muted">Invitados por correo</p>
+              <ul className="mt-1 space-y-0.5">
+                {guests.map((g) => (
+                  <li key={g.email} className="break-all">
+                    {g.email}
+                    {g.muted && <span className="text-xs text-muted"> · no quiere avisos</span>}
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
         )}
 
