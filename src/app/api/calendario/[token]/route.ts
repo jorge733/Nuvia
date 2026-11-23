@@ -17,6 +17,7 @@ type FeedRow = {
   recurrence: string;
   recur_interval: number;
   recur_until: string | null;
+  recur_days?: number[] | null;
   responsible_name: string | null;
   skipped: string[];
   overrides: Record<string, string>;

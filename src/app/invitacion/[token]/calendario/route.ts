@@ -17,6 +17,7 @@ export async function GET(_req: Request, ctx: RouteContext<"/invitacion/[token]/
     recurrence: ev.recurrence,
     recur_interval: ev.recur_interval,
     recur_until: ev.recur_until,
+    recur_days: ev.recur_days,
     skipped: ev.skipped,
   });
   return new Response(ics, {

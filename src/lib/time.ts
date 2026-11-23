@@ -127,6 +127,8 @@ export type Recurring = {
   recurrence: string;
   recur_interval: number;
   recur_until: string | null;
+  /** Días de la semana (0 = domingo … 6 = sábado) en repeticiones semanales personalizadas. */
+  recur_days?: number[] | null;
 };
 
 const MAX_STEPS = 1500;
@@ -157,7 +159,22 @@ export function expand(ev: Recurring, from: Date, to: Date): { start: Date; end:
     if (overlaps(o)) out.push(o);
   };
 
-  if (ev.recurrence === "diaria" || ev.recurrence === "semanal" || ev.recurrence === "dias_habiles") {
+  const days = ev.recurrence === "semanal" ? weekDays(ev.recur_days) : [];
+  if (days.length) {
+    // Cada `interval` semanas (contadas desde la semana del inicio), en los días elegidos.
+    const week0 = startOfWeek(baseKey);
+    const span = 7 * interval;
+    let w = Math.max(0, Math.floor(diffDays(fromKey, week0) / span));
+    for (let n = 0; n < MAX_STEPS; n++, w++) {
+      const ws = addDays(week0, w * span);
+      if (ws > toKey || (until && ws > until)) break;
+      for (const d of days) {
+        const key = addDays(ws, (d + 6) % 7);
+        if (key < baseKey || key > toKey || (until && key > until)) continue;
+        push(key);
+      }
+    }
+  } else if (ev.recurrence === "diaria" || ev.recurrence === "semanal" || ev.recurrence === "dias_habiles") {
     const step = ev.recurrence === "semanal" ? 7 * interval : ev.recurrence === "diaria" ? interval : 1;
     let i = Math.max(0, Math.floor(diffDays(fromKey, baseKey) / step));
     for (let n = 0; n < MAX_STEPS; n++, i++) {
@@ -193,6 +210,38 @@ export const RECURRENCE_LABEL: Record<string, string> = {
   mensual: "Cada mes",
   anual: "Cada año",
 };
+
+/** Días válidos y ordenados de lunes a domingo. */
+export function weekDays(days: number[] | null | undefined) {
+  return [...new Set((days ?? []).filter((d) => Number.isInteger(d) && d >= 0 && d <= 6))].sort((a, b) => ((a + 6) % 7) - ((b + 6) % 7));
+}
+
+export const WEEKDAY_SHORT = ["dom", "lun", "mar", "mié", "jue", "vie", "sáb"];
+export const WEEKDAY_LETTER = ["D", "L", "M", "M", "J", "V", "S"];
+
+const UNIT: Record<string, [string, string]> = {
+  diaria: ["día", "días"],
+  semanal: ["semana", "semanas"],
+  mensual: ["mes", "meses"],
+  anual: ["año", "años"],
+};
+
+type RecurrenceRule = { recurrence: string; recur_interval?: number | null; recur_days?: number[] | null };
+
+/** ¿Es una repetición que solo se puede armar con "Personalizado"? */
+export function isCustomRecurrence(ev: RecurrenceRule) {
+  return ev.recurrence in UNIT && ((ev.recur_interval ?? 1) > 1 || (ev.recurrence === "semanal" && weekDays(ev.recur_days).length > 0));
+}
+
+/** "Cada semana", "Cada 2 semanas: lun, mié", "Cada 3 días"… */
+export function describeRecurrence(ev: RecurrenceRule) {
+  if (!isCustomRecurrence(ev)) return RECURRENCE_LABEL[ev.recurrence] ?? RECURRENCE_LABEL.none;
+  const n = Math.max(1, ev.recur_interval ?? 1);
+  const [one, many] = UNIT[ev.recurrence];
+  const every = n === 1 ? `Cada ${one}` : `Cada ${n} ${many}`;
+  const days = ev.recurrence === "semanal" ? weekDays(ev.recur_days) : [];
+  return days.length ? `${every}: ${days.map((d) => WEEKDAY_SHORT[d]).join(", ")}` : every;
+}
 
 /** Instante actual (función aparte para usarla en Server Components). */
 export function nowMs() {

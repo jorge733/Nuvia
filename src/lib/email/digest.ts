@@ -22,6 +22,7 @@ export type DigestRow = {
   recurrence: string;
   recur_interval: number;
   recur_until: string | null;
+  recur_days?: number[] | null;
   created_by: string | null;
   responsible_id: string | null;
   participant_ids: string[];

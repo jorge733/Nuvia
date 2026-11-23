@@ -5,6 +5,7 @@ import { back, text } from "@/lib/family";
 import { siteUrl } from "@/lib/site";
 import { anonClient, getGuestEvent, isShareToken } from "@/lib/guest";
 import { renderEventChange } from "@/lib/email/event-change";
+import { describeRecurrence } from "@/lib/time";
 import { sendBatch } from "@/lib/email/resend";
 
 const EMAIL = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
@@ -43,7 +44,7 @@ export async function joinSharedEvent(token: string, formData: FormData) {
               all_day: ev.all_day,
               location: ev.location,
               notes: ev.notes,
-              recurrence: ev.recurrence,
+              recurrence: ev.recurrence === "none" ? "none" : describeRecurrence(ev),
               responsible: null,
               participants: [],
               guests: [],

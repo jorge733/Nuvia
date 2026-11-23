@@ -5,7 +5,7 @@ import { getFamily } from "@/lib/family";
 import { loadOccurrence } from "@/lib/agenda";
 import { siteUrl } from "@/lib/site";
 import { CATEGORIES, whatsappShare } from "@/lib/format";
-import { RECURRENCE_LABEL, formatWhen } from "@/lib/time";
+import { describeRecurrence, formatWhen } from "@/lib/time";
 import { Flash } from "@/components/ui";
 import { SubmitButton } from "@/components/submit-button";
 import { MemberAvatar, memberHex } from "@/components/member-avatar";
@@ -80,7 +80,7 @@ export default async function Detalle({ params, searchParams }: PageProps<"/f/[i
               {recurring && (
                 <div className="flex items-center gap-2 text-muted">
                   <Repeat className="size-4" />
-                  {RECURRENCE_LABEL[ev.recurrence]}
+                  {describeRecurrence(ev)}
                   {ev.recur_until ? ` hasta el ${ev.recur_until.split("-").reverse().join("-")}` : ""}
                 </div>
               )}

@@ -1,5 +1,7 @@
 // Utilidades para archivos de calendario (.ics, RFC 5545).
-import { fromLocal, keyParts, localParts, TZ } from "./time";
+import { fromLocal, keyParts, localParts, TZ, weekDays } from "./time";
+
+const BYDAY = ["SU", "MO", "TU", "WE", "TH", "FR", "SA"];
 
 export const icsDate = (d: Date) => d.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
 
@@ -50,6 +52,7 @@ export type IcsEvent = {
   recurrence: string;
   recur_interval?: number;
   recur_until?: string | null;
+  recur_days?: number[] | null;
   skipped?: string[];
 };
 
@@ -70,7 +73,9 @@ export function singleEventIcs(ev: IcsEvent) {
     // Hasta el final de ese día en Chile (UNTIL va en UTC).
     const u = ev.recur_until ? keyParts(ev.recur_until) : null;
     const until = u ? `;UNTIL=${icsDate(fromLocal(u.y, u.m, u.d, 23, 59))}` : "";
-    lines.push(`RRULE:${freq}${interval}${until}`);
+    const days = ev.recurrence === "semanal" ? weekDays(ev.recur_days) : [];
+    const byDay = days.length ? `;BYDAY=${days.map((d) => BYDAY[d]).join(",")}` : "";
+    lines.push(`RRULE:${freq}${interval}${byDay}${until}`);
     for (const s of ev.skipped ?? []) {
       const d = new Date(s);
       lines.push(ev.all_day ? `EXDATE;VALUE=DATE:${icsDay(d)}` : `EXDATE;TZID=${TZ}:${icsLocal(d)}`);

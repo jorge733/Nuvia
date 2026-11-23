@@ -3,11 +3,12 @@ import { Clock, Lock, Users } from "lucide-react";
 import type { AgendaEvent } from "@/lib/agenda";
 import type { Member } from "@/lib/family";
 import { CATEGORIES, VISIBILITY_LABEL } from "@/lib/format";
-import { RECURRENCE_LABEL, addDays, capitalize, dayKey, formatDay, timeOf, todayKey } from "@/lib/time";
+import { addDays, capitalize, dayKey, formatDay, timeOf, todayKey } from "@/lib/time";
 import { Field } from "./ui";
 import { SubmitButton } from "./submit-button";
 import { MemberAvatar } from "./member-avatar";
 import { DateField } from "./date-field";
+import { RepeatField } from "./repeat-field";
 
 function dateChips() {
   const today = todayKey();
@@ -212,20 +213,7 @@ export function EventForm({
             {!event && <p className="hint">“Automático” elige el tipo según lo que escribas (dentista → Salud, comprar → Compras…).</p>}
           </fieldset>
 
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Se repite">
-              <select className="input" name="recurrence" defaultValue={event?.recurrence ?? "none"}>
-                {Object.entries(RECURRENCE_LABEL).map(([k, v]) => (
-                  <option key={k} value={k}>
-                    {v}
-                  </option>
-                ))}
-              </select>
-            </Field>
-            <Field label="Hasta el (opcional)" hint="Vacío: se repite siempre.">
-              <input className="input" type="date" name="recur_until" defaultValue={event?.recur_until ?? ""} />
-            </Field>
-          </div>
+          <RepeatField initial={event} />
 
           {families.map((f) => (
             <div key={f.id} data-show={f.id}>

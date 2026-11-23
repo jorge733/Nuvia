@@ -19,6 +19,7 @@ export type GuestEvent = {
   recurrence: string;
   recur_interval: number;
   recur_until: string | null;
+  recur_days?: number[] | null;
   skipped: string[];
 };
 

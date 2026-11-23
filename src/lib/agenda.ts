@@ -16,6 +16,7 @@ export type AgendaEvent = {
   recurrence: string;
   recur_interval: number;
   recur_until: string | null;
+  recur_days?: number[] | null;
   responsible_id: string | null;
   participant_ids: string[];
   masked: boolean;

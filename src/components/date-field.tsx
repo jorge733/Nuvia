@@ -1,10 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import { DatePicker } from "./date-picker";
 
 type Chip = { key: string; label: string };
 
-/** Fecha con botones rápidos (Hoy, Mañana, próximos días) y selector completo. */
+/** Fecha con botones rápidos (Hoy, Mañana, próximos días) y el calendario de Uniluva. */
 export function DateField({ defaultValue, chips }: { defaultValue: string; chips: Chip[] }) {
   const [value, setValue] = useState(defaultValue);
   return (
@@ -24,7 +25,7 @@ export function DateField({ defaultValue, chips }: { defaultValue: string; chips
           </button>
         ))}
       </div>
-      <input className="input" type="date" name="date" required value={value} onChange={(e) => setValue(e.target.value)} aria-label="Fecha" />
+      <DatePicker name="date" value={value} onChange={(d) => d && setValue(d)} label="Fecha" />
     </div>
   );
 }

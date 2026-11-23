@@ -28,7 +28,7 @@ Uniluva es una agenda donde cada actividad tiene **quién se encargue**, nadie c
 
 1. En Supabase → **SQL Editor**, ejecuta en orden los archivos de `supabase/migrations/`:
    `20261123000000_agenda.sql`, `20261124000000_mi_agenda.sql`, `20261125000000_resumen_diario.sql`
-   (muestra el valor para la variable `CRON_SECRET`), `20261126000000_avisos_eventos.sql`, `20261127000000_invitados.sql`, `20261128000000_avisos_relevos.sql` y `20261129000000_enlace_invitacion.sql`.
+   (muestra el valor para la variable `CRON_SECRET`), `20261126000000_avisos_eventos.sql`, `20261127000000_invitados.sql`, `20261128000000_avisos_relevos.sql`, `20261129000000_enlace_invitacion.sql` y `20261130000000_repeticion_personalizada.sql`.
    (Si el proyecto tenía la versión anterior de comunidades, el primero la elimina.)
 2. En **Authentication → URL Configuration**, agrega como Redirect URLs `https://www.uniluva.com/auth/confirm`,
    `https://*.vercel.app/auth/confirm` y `http://localhost:3000/auth/confirm`.

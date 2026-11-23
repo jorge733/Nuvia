@@ -11,7 +11,7 @@ import { notifyEventChange, type EventSnapshot, type Guest } from "@/lib/email/e
 import { notifyRelief, type ReliefNotice } from "@/lib/email/relief";
 import { guessCategory, parseQuick } from "@/lib/quick";
 import { CATEGORIES } from "@/lib/format";
-import { dayKey, formatWhen, fromLocal, isDayKey, keyParts, RECURRENCE_LABEL } from "@/lib/time";
+import { dayKey, describeRecurrence, formatWhen, fromLocal, isDayKey, keyParts, RECURRENCE_LABEL } from "@/lib/time";
 
 const VISIBILITIES = ["familia", "privado", "ocupado"];
 
@@ -24,7 +24,7 @@ function parseEvent(formData: FormData, memberIds: Set<string>, opts: ParseOpts 
   const allDay = formData.get("all_day") === "on" || !start;
   const end = text(formData, "end");
   const category = text(formData, "category");
-  const recurrence = text(formData, "recurrence");
+  const repeat = parseRepeat(formData);
   const until = text(formData, "recur_until");
   const visibility = opts.visibility ?? text(formData, "visibility");
   const responsible = text(formData, opts.responsibleKey ?? "responsible");
@@ -58,8 +58,11 @@ function parseEvent(formData: FormData, memberIds: Set<string>, opts: ParseOpts 
       ends_at: endsAt?.toISOString() ?? null,
       all_day: allDay,
       visibility: vis,
-      recurrence: recurrence in RECURRENCE_LABEL ? recurrence : "none",
-      recur_until: recurrence !== "none" && until ? until : null,
+      recurrence: repeat.recurrence,
+      recur_interval: repeat.interval,
+      recur_until: repeat.recurrence !== "none" && until ? until : null,
+      // Solo se envía si hay días elegidos (así sigue funcionando aunque falte la migración de recur_days).
+      ...(repeat.days.length ? { recur_days: repeat.days } : {}),
       // Los eventos privados no tienen responsable familiar.
       responsible_id: vis === "familia" && memberIds.has(responsible) ? responsible : null,
     },
@@ -67,6 +70,22 @@ function parseEvent(formData: FormData, memberIds: Set<string>, opts: ParseOpts 
     guests: guests.emails,
     day: date,
   } as const;
+}
+
+const CUSTOM_UNITS = ["diaria", "semanal", "mensual", "anual"];
+
+/** "Se repite": una opción rápida o "Personalizado" (cada N días/semanas/meses/años, y qué días). */
+function parseRepeat(formData: FormData) {
+  const choice = text(formData, "recurrence");
+  if (choice !== "custom") return { recurrence: choice in RECURRENCE_LABEL ? choice : "none", interval: 1, days: [] as number[] };
+  const unit = text(formData, "recur_unit");
+  const recurrence = CUSTOM_UNITS.includes(unit) ? unit : "semanal";
+  const interval = Math.min(52, Math.max(1, Math.round(Number(text(formData, "recur_interval"))) || 1));
+  const days =
+    recurrence === "semanal"
+      ? [...new Set(formData.getAll("recur_days").map(Number))].filter((d) => Number.isInteger(d) && d >= 0 && d <= 6).sort()
+      : [];
+  return { recurrence, interval, days };
 }
 
 const MAX_GUESTS = 50;
@@ -120,7 +139,16 @@ type EventRow = {
   location: string | null;
   notes?: string | null;
   recurrence: string;
+  recur_interval?: number | null;
+  recur_days?: number[] | null;
   responsible_id: string | null;
+};
+
+type StoredEvent = EventRow & {
+  created_by: string | null;
+  visibility: string;
+  event_participants?: { member_id: string }[];
+  event_guests: GuestRow[];
 };
 
 function snapshot(row: EventRow, participantIds: string[], byId: Record<string, Member>, guests: string[] = []): EventSnapshot {
@@ -132,7 +160,7 @@ function snapshot(row: EventRow, participantIds: string[], byId: Record<string, 
     all_day: row.all_day,
     location: row.location,
     notes: row.notes ?? null,
-    recurrence: row.recurrence,
+    recurrence: row.recurrence === "none" ? "none" : describeRecurrence(row),
     responsible: row.responsible_id ? byId[row.responsible_id]?.name ?? null : null,
     participants: participantIds.map((id) => byId[id]?.name).filter((n): n is string => !!n),
     guests,
@@ -231,12 +259,14 @@ export async function updateEvent(familyId: string, eventId: string, formData: F
   // Versión anterior, para contarle a la familia qué cambió.
   const { data: old } = await supabase
     .from("events")
-    .select("title, category, starts_at, ends_at, all_day, location, notes, recurrence, visibility, responsible_id, event_participants(member_id), event_guests(email, token, muted)")
+    .select("*, event_participants(member_id), event_guests(email, token, muted)")
     .eq("id", eventId)
     .eq("family_id", familyId)
-    .maybeSingle();
+    .maybeSingle<StoredEvent>();
 
-  const { error } = await supabase.from("events").update(parsed.row).eq("id", eventId).eq("family_id", familyId);
+  // Si deja de ser personalizada, se borran los días (solo si la columna existe).
+  const row = old && "recur_days" in old && !("recur_days" in parsed.row) ? { ...parsed.row, recur_days: null } : parsed.row;
+  const { error } = await supabase.from("events").update(row).eq("id", eventId).eq("family_id", familyId);
   if (error) back(editPath, { error: "No se pudo guardar" });
   await supabase.from("event_participants").delete().eq("event_id", eventId);
   if (parsed.participants.length) {
@@ -247,7 +277,7 @@ export async function updateEvent(familyId: string, eventId: string, formData: F
   const { added, kept } = await syncGuests(supabase, eventId, user.id, parsed.guests, previous, false, "emails" in shown ? shown.emails : undefined);
   if (old) {
     const event = snapshot(parsed.row, parsed.participants, byId, parsed.guests);
-    const before = snapshot(old, old.event_participants.map((p) => p.member_id), byId, previous.map((g) => g.email));
+    const before = snapshot(old, (old.event_participants ?? []).map((p) => p.member_id), byId, previous.map((g) => g.email));
     const toFamily = parsed.row.visibility === "familia";
     // Si antes la familia no la veía (privada u "ocupado"), para ellos es nueva.
     if (toFamily && old.visibility !== "familia") {
@@ -280,10 +310,10 @@ async function moveEvent(fromId: string, eventId: string, targetId: string, chos
   const [{ supabase, user, byId }, target] = await Promise.all([getFamily(fromId), getFamily(targetId)]);
   const { data: original } = await supabase
     .from("events")
-    .select("created_by, recur_interval, title, category, starts_at, ends_at, all_day, location, notes, recurrence, responsible_id, event_guests(email, token, muted)")
+    .select("*, event_guests(email, token, muted)")
     .eq("id", eventId)
     .eq("family_id", fromId)
-    .maybeSingle();
+    .maybeSingle<StoredEvent>();
   if (!original) back(editPath, { error: "No se encontró la actividad" });
   if (original.created_by !== user.id) back(editPath, { error: "Solo quien la creó puede cambiarla de lugar" });
 
@@ -293,7 +323,7 @@ async function moveEvent(fromId: string, eventId: string, targetId: string, chos
 
   const { data: created, error } = await supabase
     .from("events")
-    .insert({ ...parsed.row, recur_interval: original.recur_interval ?? 1, family_id: targetId, created_by: user.id })
+    .insert({ ...parsed.row, family_id: targetId, created_by: user.id })
     .select("id")
     .single();
   if (error || !created) back(editPath, { error: "No se pudo cambiar de lugar" });
@@ -322,10 +352,10 @@ export async function deleteEvent(familyId: string, eventId: string) {
   // Antes de borrar: los invitados reciben un aviso de que se canceló.
   const { data: old } = await supabase
     .from("events")
-    .select("title, category, starts_at, ends_at, all_day, location, notes, recurrence, responsible_id, event_guests(email, token, muted)")
+    .select("*, event_guests(email, token, muted)")
     .eq("id", eventId)
     .eq("family_id", familyId)
-    .maybeSingle();
+    .maybeSingle<StoredEvent>();
   const { error, count } = await supabase.from("events").delete({ count: "exact" }).eq("id", eventId).eq("family_id", familyId);
   if (!error && count && old) {
     const guests = old.event_guests.filter((g) => !g.muted).map(({ email, token }) => ({ email, token }));
@@ -488,7 +518,7 @@ export async function quickAdd(from: string, formData: FormData) {
   }
   revalidatePath(`/f/${spaceId}`, "layout");
   revalidatePath("/mi", "layout");
-  const repeat = r.recurrence !== "none" ? ` · ${RECURRENCE_LABEL[r.recurrence].toLowerCase()}` : "";
+  const repeat = r.recurrence !== "none" ? ` · ${describeRecurrence({ ...r, recur_interval: 1 }).toLowerCase()}` : "";
   const where = family.is_personal ? "" : ` · ${family.name}`;
   back(backTo, { ok: `Agendado: ${r.title} · ${formatWhen(startsAt, r.allDay, endsAt)}${repeat}${where}`, link: `/f/${spaceId}/e/${data.id}` });
 }

@@ -55,7 +55,7 @@ export function when(e: EventSnapshot) {
   return `${day} · ${timeOf(start)}${e.ends_at ? `–${timeOf(new Date(e.ends_at))}` : ""}`;
 }
 
-const repeat = (e: EventSnapshot) => (e.recurrence !== "none" ? RECURRENCE_LABEL[e.recurrence] ?? null : null);
+const repeat = (e: EventSnapshot) => (e.recurrence !== "none" ? RECURRENCE_LABEL[e.recurrence] ?? e.recurrence : null);
 const list = (items: string[]) => (items.length ? [...items].sort().join(", ") : null);
 
 // Campos que ve cada público. Los invitados no ven la organización interna de la familia.

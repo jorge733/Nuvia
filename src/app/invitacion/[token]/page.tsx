@@ -2,7 +2,7 @@ import Link from "next/link";
 import { CalendarPlus, MapPin, Repeat } from "lucide-react";
 import { getGuestEvent } from "@/lib/guest";
 import { CATEGORIES } from "@/lib/format";
-import { RECURRENCE_LABEL, capitalize, dayKey, formatDay, timeOf } from "@/lib/time";
+import { capitalize, describeRecurrence, dayKey, formatDay, timeOf } from "@/lib/time";
 import { Logo } from "@/components/logo";
 import { Field, Flash } from "@/components/ui";
 import { SubmitButton } from "@/components/submit-button";
@@ -79,7 +79,7 @@ export default async function Invitacion({ params, searchParams }: PageProps<"/i
           {recurring && (
             <div className="flex items-center gap-2 text-muted">
               <Repeat className="size-4" />
-              {RECURRENCE_LABEL[ev.recurrence]}
+              {describeRecurrence(ev)}
               {ev.recur_until ? ` hasta el ${ev.recur_until.split("-").reverse().join("-")}` : ""}
             </div>
           )}
