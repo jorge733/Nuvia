@@ -37,7 +37,7 @@ export async function setChangeEmail(on: boolean) {
   const user = await requireUser();
   const supabase = await createClient();
   const { error } = await supabase.from("profiles").update({ change_email: on }).eq("id", user.id);
-  redirect(`/perfil?${error ? `error=${encodeURIComponent("No se pudo guardar")}` : `ok=${encodeURIComponent(on ? "Avisos de cambios activados" : "Avisos de cambios desactivados")}`}`);
+  redirect(`/perfil?${error ? `error=${encodeURIComponent("No se pudo guardar")}` : `ok=${encodeURIComponent(on ? "Avisos de la familia activados" : "Avisos de la familia desactivados")}`}`);
 }
 
 export async function setDailyEmail(on: boolean) {

@@ -62,13 +62,13 @@ export default async function Perfil({ searchParams }: PageProps<"/perfil">) {
 
         {!welcome && (
           <section className="card mt-6">
-            <h2 className="text-xl font-semibold">Avisos de cambios por correo</h2>
+            <h2 className="text-xl font-semibold">Avisos de la familia por correo</h2>
             <p className="mt-1 text-sm text-muted">
-              Cuando alguien de tu familia agrega una actividad o le cambia algo (la hora, el lugar, quién se encarga…). No incluye lo privado ni lo que haces tú.
+              Cuando alguien de tu familia agrega o cambia una actividad, pide relevo o toma el que pediste tú. No incluye lo privado ni lo que haces tú.
             </p>
             <form action={setChangeEmail.bind(null, !profile?.change_email)} className="mt-4">
               <SubmitButton className={profile?.change_email ? "btn-secondary w-full" : "btn-primary w-full"} pendingText="…">
-                {profile?.change_email ? "Activados · Desactivar" : "Activar avisos de cambios"}
+                {profile?.change_email ? "Activados · Desactivar" : "Activar avisos de la familia"}
               </SubmitButton>
             </form>
           </section>

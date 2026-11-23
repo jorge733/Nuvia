@@ -4,7 +4,7 @@ import { createClient } from "@supabase/supabase-js";
 import { supabaseKey, supabaseUrl } from "@/lib/supabase/env";
 import { CATEGORIES } from "@/lib/format";
 import { capitalize, dayKey, formatDay, RECURRENCE_LABEL, timeOf } from "@/lib/time";
-import { esc, renderEmail, renderText } from "./layout";
+import { eventCard, renderEmail, renderText } from "./layout";
 import { sendBatch } from "./resend";
 
 /** Lo que se muestra de una actividad (con nombres ya resueltos). */
@@ -48,9 +48,7 @@ export type EventChange = {
   newGuests?: Guest[];
 };
 
-const SANS = "-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif";
-
-function when(e: EventSnapshot) {
+export function when(e: EventSnapshot) {
   const start = new Date(e.starts_at);
   const day = capitalize(formatDay(dayKey(start)));
   if (e.all_day) return `${day} · todo el día`;
@@ -94,10 +92,6 @@ export function diff(a: EventSnapshot, b: EventSnapshot, audience: Audience = "f
   return out;
 }
 
-const cell = (label: string, value: string) =>
-  `<tr><td valign="top" style="padding:6px 12px 6px 0;width:92px;font-family:${SANS};font-size:13px;color:#8a8278;">${esc(label)}</td>
-   <td valign="top" style="padding:6px 0;font-family:${SANS};font-size:14px;color:#1f1b16;white-space:pre-line;">${value}</td></tr>`;
-
 export function renderEventChange(c: EventChange, kind: Kind, to: { audience: Audience; name: string; token: string }) {
   const e = c.event;
   const guest = to.audience === "invitado";
@@ -117,16 +111,8 @@ export function renderEventChange(c: EventChange, kind: Kind, to: { audience: Au
     rows = details(e, to.audience);
   }
 
-  const html = rows
-    .map(([k, now, before]) =>
-      cell(k, before !== undefined ? `<span style="color:#8a8278;text-decoration:line-through;">${esc(before)}</span><br><strong>${esc(now)}</strong>` : esc(now)),
-    )
-    .join("");
   const cancelled = kind === "cancelado";
-  const bodyHtml = `<div style="margin:0 0 24px;padding:18px 20px;background:#faf6f0;border-left:3px solid ${cancelled ? "#8a8278" : "#f2763a"};border-radius:16px;">
-      <div style="font-family:${SANS};font-size:17px;font-weight:bold;color:#1f1b16;${cancelled ? "text-decoration:line-through;" : ""}">${emoji} ${esc(e.title)}</div>
-      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:10px;">${html}</table>
-    </div>`;
+  const bodyHtml = eventCard({ emoji, title: e.title, crossed: cancelled, rows: rows.map(([label, value, before]) => ({ label, value, before })) });
   const textRows = rows.map(([k, now, before]) => `${k}: ${now}${before !== undefined ? ` (antes: ${before})` : ""}`);
 
   const hello = to.name ? `Hola, ${to.name}. ` : "Hola. ";

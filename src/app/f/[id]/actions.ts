@@ -6,6 +6,7 @@ import { back, getFamily, safePath, text, type Member } from "@/lib/family";
 import type { createClient } from "@/lib/supabase/server";
 import { siteUrl } from "@/lib/site";
 import { notifyEventChange, type EventSnapshot, type Guest } from "@/lib/email/event-change";
+import { notifyRelief, type ReliefNotice } from "@/lib/email/relief";
 import { guessCategory, parseQuick } from "@/lib/quick";
 import { CATEGORIES } from "@/lib/format";
 import { dayKey, formatWhen, fromLocal, isDayKey, keyParts, RECURRENCE_LABEL } from "@/lib/time";
@@ -344,23 +345,64 @@ export async function toggleDone(familyId: string, eventId: string, startIso: st
   back(safePath(from, `/f/${familyId}`), error ? { error: "No se pudo actualizar" } : { ok: done ? "Marcado como pendiente" : "¡Hecho! ✓" });
 }
 
+/** Avisa por correo de un relevo (pedido → familia; tomado → quien lo pidió), después de responder. */
+async function announceRelief(
+  familyId: string,
+  eventId: string,
+  occurrence: string,
+  o: { kind: ReliefNotice["kind"]; reason?: string | null; requesterMemberId?: string },
+) {
+  const [{ supabase, user, me, family }, site] = await Promise.all([getFamily(familyId), siteUrl()]);
+  const { data: ev } = await supabase.from("events").select("title, category, location, all_day, starts_at, ends_at").eq("id", eventId).maybeSingle();
+  if (!ev || family.is_personal) return;
+  const minutes = ev.ends_at ? Math.round((new Date(ev.ends_at).getTime() - new Date(ev.starts_at).getTime()) / 60000) : null;
+  after(() =>
+    notifyRelief({
+      kind: o.kind,
+      site,
+      familyId,
+      familyName: family.name,
+      eventId,
+      occurrence: new Date(occurrence).toISOString(),
+      title: ev.title,
+      category: ev.category,
+      location: ev.location,
+      allDay: ev.all_day,
+      minutes,
+      reason: o.reason ?? null,
+      actorId: user.id,
+      actorName: me.name,
+      requesterMemberId: o.requesterMemberId,
+    }),
+  );
+}
+
 export async function requestRelief(familyId: string, eventId: string, startIso: string, formData: FormData) {
   const { supabase, me } = await getFamily(familyId);
   const path = `/f/${familyId}/e/${eventId}?o=${encodeURIComponent(startIso)}`;
+  const reason = text(formData, "reason").slice(0, 300) || null;
   const { error } = await supabase.from("relief_requests").insert({
     event_id: eventId,
     family_id: familyId,
     occurrence_start: startIso,
     requested_by: me.id,
-    reason: text(formData, "reason").slice(0, 300) || null,
+    reason,
   });
+  if (!error) await announceRelief(familyId, eventId, startIso, { kind: "pedido", reason });
   revalidatePath(`/f/${familyId}`, "layout");
-  back(path, error ? { error: error.code === "23505" ? "Ya hay un relevo pedido para este día" : "No se pudo pedir el relevo" } : { ok: "Relevo pedido. Avísale a tu familia 👇" });
+  back(path, error ? { error: error.code === "23505" ? "Ya hay un relevo pedido para este día" : "No se pudo pedir el relevo" } : { ok: "Relevo pedido. Le avisamos a tu familia por correo; también puedes escribirles 👇" });
 }
 
 export async function takeRelief(familyId: string, reliefId: string, from: string) {
-  const { supabase } = await getFamily(familyId);
+  const { supabase, me } = await getFamily(familyId);
   const { error } = await supabase.rpc("take_relief", { p_relief_id: reliefId });
+  if (!error) {
+    const { data: r } = await supabase.from("relief_requests").select("event_id, occurrence_start, requested_by").eq("id", reliefId).maybeSingle();
+    // Solo a quien lo pidió (y no si se lo toma uno mismo).
+    if (r?.requested_by && r.requested_by !== me.id) {
+      await announceRelief(familyId, r.event_id, r.occurrence_start, { kind: "tomado", requesterMemberId: r.requested_by });
+    }
+  }
   revalidatePath(`/f/${familyId}`, "layout");
   back(safePath(from, `/f/${familyId}`), error ? { error: error.message.includes("ya fue") ? "Alguien ya tomó este relevo" : "No se pudo tomar el relevo" } : { ok: "¡Gracias! Ahora te encargas tú 💜" });
 }

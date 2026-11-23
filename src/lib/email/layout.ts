@@ -77,4 +77,22 @@ export function renderText(c: EmailContent) {
   ].join("\n");
 }
 
+/**
+ * Recuadro de una actividad: título y filas "Cuándo / Dónde / …".
+ * Una fila con `before` muestra el valor anterior tachado.
+ */
+export function eventCard(c: { emoji: string; title: string; rows: { label: string; value: string; before?: string }[]; crossed?: boolean; tone?: string }) {
+  const rows = c.rows
+    .map((r) => {
+      const value = r.before !== undefined ? `<span style="color:#8a8278;text-decoration:line-through;">${esc(r.before)}</span><br><strong>${esc(r.value)}</strong>` : esc(r.value);
+      return `<tr><td valign="top" style="padding:6px 12px 6px 0;width:92px;font-family:${SANS};font-size:13px;color:#8a8278;">${esc(r.label)}</td>
+   <td valign="top" style="padding:6px 0;font-family:${SANS};font-size:14px;color:#1f1b16;white-space:pre-line;">${value}</td></tr>`;
+    })
+    .join("");
+  return `<div style="margin:0 0 24px;padding:18px 20px;background:#faf6f0;border-left:3px solid ${c.tone ?? (c.crossed ? "#8a8278" : "#f2763a")};border-radius:16px;">
+      <div style="font-family:${SANS};font-size:17px;font-weight:bold;color:#1f1b16;${c.crossed ? "text-decoration:line-through;" : ""}">${c.emoji} ${esc(c.title)}</div>
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:10px;">${rows}</table>
+    </div>`;
+}
+
 export { esc };

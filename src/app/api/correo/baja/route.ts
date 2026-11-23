@@ -16,7 +16,7 @@ async function unsubscribe(token: string | null, kind: Kind) {
 
 const DONE: Record<Kind, string> = {
   resumen: "Ya no recibirás el resumen diario.",
-  avisos: "Ya no recibirás avisos cuando tu familia agregue o cambie actividades.",
+  avisos: "Ya no recibirás avisos cuando tu familia agregue o cambie actividades, ni avisos de relevo.",
   invitado: "Ya no recibirás avisos de esta actividad.",
 };
 
