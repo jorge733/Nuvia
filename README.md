@@ -13,6 +13,7 @@ Uniluva es una agenda donde cada actividad tiene **quién se encargue**, nadie c
 - **¿Quién lo ve?** Una sola pregunta al agregar o editar: *Solo yo* (va a tu agenda personal), *la familia* (con responsable) u *Ocupado* (la familia ve el bloque sin detalles). Quien creó una actividad puede cambiarla de lugar.
 - **Familia.** Resumen del día de toda la familia, calendario, relevos, balance e integrantes.
 - **Resumen diario por correo.** Cada mañana, "Tu día en Uniluva" con lo que te toca y los relevos abiertos (Vercel Cron + Resend). Se desactiva con un clic.
+- **Avisos de cambios por correo.** Cuando alguien agrega o cambia una actividad familiar, el resto de la familia recibe un correo con lo nuevo (o con qué cambió). Nunca lo privado ni lo "ocupado". Se desactiva desde Mi perfil o con un clic en el correo.
 - **Tu calendario de siempre.** Enlace de suscripción (ICS) para Google Calendar, Apple Calendar u Outlook, con avisos.
 
 ## Tecnología
@@ -24,8 +25,8 @@ Uniluva es una agenda donde cada actividad tiene **quién se encargue**, nadie c
 ## Puesta en marcha
 
 1. En Supabase → **SQL Editor**, ejecuta en orden los archivos de `supabase/migrations/`:
-   `20261123000000_agenda.sql`, `20261124000000_mi_agenda.sql` y `20261125000000_resumen_diario.sql`
-   (este último muestra el valor para la variable `CRON_SECRET`).
+   `20261123000000_agenda.sql`, `20261124000000_mi_agenda.sql`, `20261125000000_resumen_diario.sql`
+   (muestra el valor para la variable `CRON_SECRET`) y `20261126000000_avisos_eventos.sql`.
    (Si el proyecto tenía la versión anterior de comunidades, el primero la elimina.)
 2. En **Authentication → URL Configuration**, agrega como Redirect URLs `https://www.uniluva.com/auth/confirm`,
    `https://*.vercel.app/auth/confirm` y `http://localhost:3000/auth/confirm`.
@@ -48,7 +49,7 @@ Variables secretas en Vercel (nunca en el repositorio):
 |---|---|
 | `RESEND_API_KEY` | Enviar correos con Resend |
 | `SEND_EMAIL_HOOK_SECRET` | Verificar el Send Email Hook de Supabase (correos de ingreso) |
-| `CRON_SECRET` | Autorizar el resumen diario (`/api/cron/resumen`) |
+| `CRON_SECRET` | Autorizar el resumen diario (`/api/cron/resumen`) y los avisos de cambios |
 
 ## Estructura
 

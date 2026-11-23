@@ -4,7 +4,7 @@ import { siteUrl } from "@/lib/site";
 import { AppHeader } from "@/components/app-header";
 import { Field, Flash } from "@/components/ui";
 import { SubmitButton } from "@/components/submit-button";
-import { createCalendarLink, renewCalendarLink, saveProfile, setDailyEmail } from "./actions";
+import { createCalendarLink, renewCalendarLink, saveProfile, setChangeEmail, setDailyEmail } from "./actions";
 
 export const metadata = { title: "Mi perfil" };
 
@@ -13,7 +13,7 @@ export default async function Perfil({ searchParams }: PageProps<"/perfil">) {
   const sp = await searchParams;
   const supabase = await createClient();
   const [{ data: profile }, { data: tokenRow }] = await Promise.all([
-    supabase.from("profiles").select("full_name, phone, daily_email").eq("id", user.id).maybeSingle(),
+    supabase.from("profiles").select("full_name, phone, daily_email, change_email").eq("id", user.id).maybeSingle(),
     supabase.from("calendar_tokens").select("token").eq("user_id", user.id).maybeSingle(),
   ]);
   const welcome = sp.bienvenida === "1";
@@ -55,6 +55,20 @@ export default async function Perfil({ searchParams }: PageProps<"/perfil">) {
             <form action={setDailyEmail.bind(null, !profile?.daily_email)} className="mt-4">
               <SubmitButton className={profile?.daily_email ? "btn-secondary w-full" : "btn-primary w-full"} pendingText="…">
                 {profile?.daily_email ? "Activado · Desactivar" : "Activar resumen diario"}
+              </SubmitButton>
+            </form>
+          </section>
+        )}
+
+        {!welcome && (
+          <section className="card mt-6">
+            <h2 className="text-xl font-semibold">Avisos de cambios por correo</h2>
+            <p className="mt-1 text-sm text-muted">
+              Cuando alguien de tu familia agrega una actividad o le cambia algo (la hora, el lugar, quién se encarga…). No incluye lo privado ni lo que haces tú.
+            </p>
+            <form action={setChangeEmail.bind(null, !profile?.change_email)} className="mt-4">
+              <SubmitButton className={profile?.change_email ? "btn-secondary w-full" : "btn-primary w-full"} pendingText="…">
+                {profile?.change_email ? "Activados · Desactivar" : "Activar avisos de cambios"}
               </SubmitButton>
             </form>
           </section>

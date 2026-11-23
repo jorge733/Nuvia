@@ -1,7 +1,10 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { back, getFamily, safePath, text } from "@/lib/family";
+import { after } from "next/server";
+import { back, getFamily, safePath, text, type Member } from "@/lib/family";
+import { siteUrl } from "@/lib/site";
+import { notifyEventChange, type EventSnapshot } from "@/lib/email/event-change";
 import { guessCategory, parseQuick } from "@/lib/quick";
 import { CATEGORIES } from "@/lib/format";
 import { dayKey, formatWhen, fromLocal, isDayKey, keyParts, RECURRENCE_LABEL } from "@/lib/time";
@@ -59,6 +62,51 @@ function parseEvent(formData: FormData, memberIds: Set<string>, opts: ParseOpts 
   } as const;
 }
 
+type EventRow = {
+  title: string;
+  category: string;
+  starts_at: string;
+  ends_at: string | null;
+  all_day: boolean;
+  location: string | null;
+  notes?: string | null;
+  recurrence: string;
+  responsible_id: string | null;
+};
+
+function snapshot(row: EventRow, participantIds: string[], byId: Record<string, Member>): EventSnapshot {
+  return {
+    title: row.title,
+    category: row.category,
+    starts_at: row.starts_at,
+    ends_at: row.ends_at,
+    all_day: row.all_day,
+    location: row.location,
+    notes: row.notes ?? null,
+    recurrence: row.recurrence,
+    responsible: row.responsible_id ? byId[row.responsible_id]?.name ?? null : null,
+    participants: participantIds.map((id) => byId[id]?.name).filter((n): n is string => !!n),
+  };
+}
+
+/**
+ * Avisa por correo al resto de la familia, después de responder (no hace esperar a quien guardó).
+ * Solo para actividades que la familia ve con detalle.
+ */
+async function announce(
+  kind: "nuevo" | "cambio",
+  familyId: string,
+  eventId: string,
+  event: EventSnapshot,
+  before?: EventSnapshot,
+) {
+  const [{ user, me, family }, site] = await Promise.all([getFamily(familyId), siteUrl()]);
+  if (family.is_personal) return;
+  after(() =>
+    notifyEventChange({ kind, site, familyId, familyName: family.name, eventId, actorId: user.id, actorName: me.name, event, before }),
+  );
+}
+
 /**
  * Crear desde el formulario único. "¿Quién lo ve?" decide dónde se guarda:
  * `dest` = "<espacio>:<visibilidad>" (Solo yo → agenda personal; Familia / Ocupado → esa familia).
@@ -87,6 +135,10 @@ export async function createEvent(formData: FormData) {
   if (parsed.participants.length) {
     await supabase.from("event_participants").insert(parsed.participants.map((member_id) => ({ event_id: data.id, member_id })));
   }
+  if (visibility === "familia") {
+    const { byId } = await getFamily(familyId);
+    await announce("nuevo", familyId, data.id, snapshot(parsed.row, parsed.participants, byId));
+  }
   revalidatePath(`/f/${familyId}`, "layout");
   revalidatePath("/mi", "layout");
   const today = dayKey(new Date());
@@ -97,7 +149,7 @@ export async function createEvent(formData: FormData) {
 }
 
 export async function updateEvent(familyId: string, eventId: string, formData: FormData) {
-  const { supabase, members, family } = await getFamily(familyId);
+  const { supabase, members, family, byId } = await getFamily(familyId);
   const editPath = `/f/${familyId}/e/${eventId}/editar`;
 
   // Con "¿Quién lo ve?" (solo quien la creó): puede quedarse aquí o cambiar de lugar.
@@ -112,11 +164,25 @@ export async function updateEvent(familyId: string, eventId: string, formData: F
   const parsed = parseEvent(formData, new Set(members.map((m) => m.id)), opts);
   if ("error" in parsed) back(editPath, { error: parsed.error! });
 
+  // Versión anterior, para contarle a la familia qué cambió.
+  const { data: old } = await supabase
+    .from("events")
+    .select("title, category, starts_at, ends_at, all_day, location, notes, recurrence, visibility, responsible_id, event_participants(member_id)")
+    .eq("id", eventId)
+    .eq("family_id", familyId)
+    .maybeSingle();
+
   const { error } = await supabase.from("events").update(parsed.row).eq("id", eventId).eq("family_id", familyId);
   if (error) back(editPath, { error: "No se pudo guardar" });
   await supabase.from("event_participants").delete().eq("event_id", eventId);
   if (parsed.participants.length) {
     await supabase.from("event_participants").insert(parsed.participants.map((member_id) => ({ event_id: eventId, member_id })));
+  }
+  if (old && parsed.row.visibility === "familia") {
+    const event = snapshot(parsed.row, parsed.participants, byId);
+    // Si antes la familia no la veía (privada u "ocupado"), para ellos es nueva.
+    if (old.visibility !== "familia") await announce("nuevo", familyId, eventId, event);
+    else await announce("cambio", familyId, eventId, event, snapshot(old, old.event_participants.map((p) => p.member_id), byId));
   }
   revalidatePath(`/f/${familyId}`, "layout");
   revalidatePath("/mi", "layout");
@@ -159,6 +225,7 @@ async function moveEvent(fromId: string, eventId: string, targetId: string, chos
     skips?.length ? supabase.from("event_skips").insert(skips.map((k) => ({ event_id: created.id, occurrence_start: k.occurrence_start }))) : null,
   ]);
   await supabase.from("events").delete().eq("id", eventId).eq("family_id", fromId);
+  if (opts.visibility === "familia") await announce("nuevo", targetId, created.id, snapshot(parsed.row, parsed.participants, target.byId));
 
   revalidatePath(`/f/${fromId}`, "layout");
   revalidatePath(`/f/${targetId}`, "layout");
@@ -249,25 +316,28 @@ export async function quickAdd(from: string, formData: FormData) {
     endsAt = fromLocal(y, m, d, eh, em);
   }
 
+  const row = {
+    title: r.title,
+    category: r.category,
+    starts_at: startsAt.toISOString(),
+    ends_at: endsAt?.toISOString() ?? null,
+    all_day: r.allDay,
+    recurrence: r.recurrence,
+    location: null,
+    responsible_id: family.is_personal ? null : me.id,
+  };
   const { data, error } = await supabase
     .from("events")
-    .insert({
-      family_id: spaceId,
-      created_by: user.id,
-      title: r.title,
-      category: r.category,
-      starts_at: startsAt.toISOString(),
-      ends_at: endsAt?.toISOString() ?? null,
-      all_day: r.allDay,
-      visibility: family.is_personal ? "privado" : "familia",
-      recurrence: r.recurrence,
-      responsible_id: family.is_personal ? null : me.id,
-    })
+    .insert({ ...row, family_id: spaceId, created_by: user.id, visibility: family.is_personal ? "privado" : "familia" })
     .select("id")
     .single();
   if (error || !data) back(backTo, { error: "No se pudo agendar. Inténtalo de nuevo." });
   if (r.participantIds.length) {
     await supabase.from("event_participants").insert(r.participantIds.map((member_id) => ({ event_id: data.id, member_id })));
+  }
+  if (!family.is_personal) {
+    const { byId } = await getFamily(spaceId);
+    await announce("nuevo", spaceId, data.id, snapshot(row, r.participantIds, byId));
   }
   revalidatePath(`/f/${spaceId}`, "layout");
   revalidatePath("/mi", "layout");
